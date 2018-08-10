@@ -1375,3 +1375,31 @@ bool ServerPlayer::CompareByActionOrder(ServerPlayer *a, ServerPlayer *b)
     Room *room = a->getRoom();
     return room->getFront(a, b) == a;
 }
+
+void ServerPlayer::changeLesbianSkill(const QString &skill, bool hidden)
+{
+    ServerPlayer *player = this;
+    if (player && player->hasSkill(skill))
+    {
+        //player->gainMark("@clock_time");
+        if (skill == "noslijian")
+        {
+            room->detachSkillFromPlayer(player, "noslijian");
+            room->acquireSkill(player, "noslesbian_lijian");
+        }
+        else
+            if (hidden)
+            {
+                QString realskill = skill.mid(2);
+                //player->addSkill(QString("#lesbian_")+realskill);
+                room->acquireSkill(player, QString("#lesbian_")+realskill);
+            }
+            else
+            {
+                //player->loseSkill(skill);
+                //player->addSkill(QString("lesbian_")+skill);
+                room->detachSkillFromPlayer(player, skill);
+                room->acquireSkill(player, QString("lesbian_")+skill);
+            }
+    }
+}

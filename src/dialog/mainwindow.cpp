@@ -456,8 +456,8 @@ void MainWindow::on_actionAbout_triggered()
     content.append(QString("<p align='right'><i>%1</i></p>").arg(poem));
 
     // Cao Cao's signature
-    QString signature = tr("\"A Short Song\" by Cao Cao");
-    content.append(QString("<p align='right'><i>%1</i></p>").arg(signature));
+    //QString signature = tr("\"A Short Song\" by Cao Cao");
+    //content.append(QString("<p align='right'><i>%1</i></p>").arg(signature));
 
     QString email = "moligaloo@gmail.com";
     content.append(tr("This is the open source clone of the popular <b>Sanguosha</b> game,"
@@ -929,6 +929,84 @@ void MainWindow::on_actionAbout_GPLv3_triggered()
         scene && scene->inherits("RoomScene") ? scene->height() : 0);
 
     window->appear();
+}
+
+void MainWindow::on_actionAbout_New_Button_triggered()
+{
+    QString ContentLine = tr("The new buttons is similar to Sanguosha Online's button. But for some reasons, you should set the location of buttons yourself.");
+    ContentLine = QString("%1<br/><br/>").arg(ContentLine);
+
+    QString File = "<br/>skins/fulldefaultSkin.layout.json<br/>";
+    QString openfile = tr("You should open file %1 and change these three values ").arg(File);
+    openfile.append(tr("confirmButtonArea, cancelButtonArea and discardButtonArea"));
+    ContentLine.append(tr("%1<br/><br/>").arg(openfile));
+
+    QString changeway = tr("You just need to change the first value inside the whole value. When this number becomes big, the location of the button will be move to left.");
+    ContentLine.append(tr("%1<br/><br/>").arg(changeway));
+
+    QString changeback = tr("If you want to change the button to original version, there are some problems for skills like \"huangtian\", \"zhiba\" and \"wengua\".");
+    ContentLine.append(tr("%1<br/><br/>").arg(changeback));
+
+    QString referencedata = tr("These are the reference data of these value for diffierent display.");
+    ContentLine.append(tr("%1").arg(referencedata));
+
+    QString content;
+
+    QStringList headers;
+    headers << tr("Display") << tr("Comfirm") << tr("Cancel") << tr("Discard");
+    foreach(QString header, headers)
+        content += QString("<th>%1</th>").arg(header);
+
+    content = QString("<tr>%1</tr>").arg(content);
+
+    QStringList rows;
+    rows << "3840× -2135 -1935 -1760" << "2880× -1575 -1375 -1200" << "2560× -1388 -1188 -1013" << "2048× -1088 -888 -713"
+         << "1920× -1013 -813 -638" << "1680× -873 -673 -498" << "1600× -827 -627 -452" << "1440× -733 -533 -358" << "1400× -710 -510 -335"
+         << "1366× -690 -490 -315" << "1280× -640 -440 -265" << "1152× -565 -365 -190" << "1024× -490 -290 -115" << "800× -360 -160 15";
+
+    QString tip = tr("Tip: Reference data of 1024 and 800 is just a computered value. Because this kind display is too small so QSanguosha may be run with problems.");
+    foreach (QString row, rows) {
+        QStringList cells = row.split(" ");
+
+        QString header = cells.takeFirst();
+        /*
+        if (header.endsWith("d")) {
+            header.chop(1);
+            header += tr(" (double renegade)");
+        }
+        if (header.endsWith("z")) {
+            header.chop(1);
+            header += tr(" (no renegade)");
+        }
+        if (header.endsWith("o")) {
+            header.chop(1);
+            header += tr(" (single renegade)");
+        }
+        */
+
+        QString row_content;
+        row_content = QString("<td>%1</td>").arg(header);
+        foreach(QString cell, cells)
+            row_content += QString("<td>%1</td>").arg(cell);
+
+        content += QString("<tr>%1</tr>").arg(row_content);
+    }
+
+    content = QString("<table border='1'>%1</table").arg(content);
+
+    Window *window = new Window(tr("Button Location Setting"), QSize(350, 700));
+    scene->addItem(window);
+
+    ContentLine.append(tr("%1<br/>%2").arg(content).arg(tip));
+    ContentLine.append("<br/><br/>Changer Shifwu Jang");
+    window->addContent(ContentLine);
+    window->addCloseButton(tr("OK"));
+    window->shift(scene && scene->inherits("RoomScene") ? scene->width() : 0,
+        scene && scene->inherits("RoomScene") ? scene->height() : 0);
+    window->setZValue(32766);
+
+    window->appear();
+
 }
 
 void MainWindow::deleteClient()

@@ -3456,7 +3456,7 @@ public:
 
                     CardMoveReason reason(CardMoveReason::S_REASON_GIVE, target->objectName(), player->objectName(), objectName(), QString());
                     reason.m_playerId = player->objectName();
-                    room->moveCardTo(card, target, player, Player::PlaceHand, reason);
+                    room->moveCardTo(card, target, player, Player::PlaceHand, reason, true);
 
 
                     const Card *record_card = Sanguosha->getCard(card->getEffectiveId());

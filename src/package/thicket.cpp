@@ -37,8 +37,22 @@ public:
         if (player->isNude() || caopi == player)
             return false;
         if (caopi->isAlive() && room->askForSkillInvoke(caopi, objectName(), data)) {
-            caopi->broadcastSkillInvoke(objectName());
-
+            if (player->getGeneralName().contains("zhenji") ||
+                    player->getGeneral2Name().contains("zhenji") ||
+                    player->getGeneralName().contains("caocao") ||
+                    player->getGeneral2Name().contains("caocao") ||
+                    player->getGeneralName().contains("caozhi") ||
+                    player->getGeneral2Name().contains("caozhi"))
+            {
+                caopi->broadcastSkillInvoke(objectName(), 3);
+                room->doSuperLightbox("caopi", "xingshang");
+            }
+            else
+            {
+                QList<int> types;
+                types << 1 << 2;
+                room->broadcastSkillInvoke(objectName(), caopi, types);
+            }
             DummyCard *dummy = new DummyCard(player->handCards());
             QList <const Card *> equips = player->getEquips();
             foreach(const Card *card, equips)

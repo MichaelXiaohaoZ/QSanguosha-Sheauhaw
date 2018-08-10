@@ -1,6 +1,6 @@
 #include "lua-wrapper.h"
 #include "util.h"
-#include "wind.h"
+#include "windms.h"
 
 LuaTriggerSkill::LuaTriggerSkill(const char *name, Frequency frequency, const char *limit_mark)
     : TriggerSkill(name), on_trigger(0), can_trigger(0), dynamic_frequency(0)
@@ -23,7 +23,15 @@ QString LuaTriggerSkill::getSelectBox() const
 {
     return guhuo_type;
 }
-
+/*
+QDialog *LuaTriggerSkill::getDialog() const
+{
+    if (guhuo_type == "")
+        return NULL;
+    GuhuoDialog *guhuo = GuhuoDialog::getInstance(this->objectName(), guhuo_type.contains("l"), guhuo_type.contains("r"), !guhuo_type.startsWith("!"), guhuo_type.contains("s"), guhuo_type.contains("d"));
+    return guhuo;
+}
+*/
 LuaProhibitSkill::LuaProhibitSkill(const char *name)
     : ProhibitSkill(name), is_prohibited(0)
 {
@@ -43,7 +51,15 @@ QString LuaViewAsSkill::getSelectBox() const
 {
     return guhuo_type;
 }
-
+/*
+QDialog *LuaViewAsSkill::getDialog() const
+{
+    if (guhuo_type == "")
+        return NULL;
+    GuhuoDialog *guhuo = GuhuoDialog::getInstance(this->objectName(), guhuo_type.contains("l"), guhuo_type.contains("r"), !guhuo_type.startsWith("!"), guhuo_type.contains("s"), guhuo_type.contains("d"));
+    return guhuo;
+}
+*/
 LuaFilterSkill::LuaFilterSkill(const char *name)
     : FilterSkill(name), view_filter(0), view_as(0)
 {

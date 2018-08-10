@@ -4,6 +4,7 @@
 #include "skill.h"
 #include "standard.h"
 
+struct lua_State;
 typedef int LuaFunction;
 
 class LuaTriggerSkill : public TriggerSkill
@@ -37,6 +38,7 @@ public:
     virtual bool triggerable(const ServerPlayer *target, Room *room) const;
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const;
     virtual QString getSelectBox() const;
+    //QDialog *getDialog() const;
     virtual Frequency getFrequency(const Player *target) const;
 
     LuaFunction on_trigger;
@@ -93,6 +95,7 @@ public:
     virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const;
     virtual bool isEnabledAtNullification(const ServerPlayer *player) const;
     virtual QString getSelectBox() const;
+    //QDialog *getDialog() const;
 private:
     QString guhuo_type;
 };

@@ -3007,6 +3007,116 @@ void Room::assignGeneralsForPlayersOfJianGeDefenseMode(const QList<ServerPlayer 
     }
 }
 
+void Room::assignGeneralsForPlayersOfHongyanRace(const QList<ServerPlayer *> &to_assign)
+{
+    QSet<QString> existed;
+    foreach (ServerPlayer *player, m_players) {
+        if (player->getGeneral()) {
+            QString m_name = Sanguosha->getMainGeneral(player->getGeneralName());
+            existed << m_name;
+            foreach (QString _sp, Sanguosha->getConvertGenerals(m_name)) {
+                existed << _sp;
+            }
+        }
+        if (player->getGeneral2()) {
+            QString m_name = Sanguosha->getMainGeneral(player->getGeneral2Name());
+            existed << m_name;
+            foreach (QString _sp, Sanguosha->getConvertGenerals(m_name)) {
+                existed << _sp;
+            }
+        }
+    }
+    if (Config.Enable2ndGeneral) {
+        foreach(QString name, BanPair::getAllBanSet())
+            existed << name;
+        if (to_assign.first()->getGeneral()) {
+            foreach(QString name, BanPair::getSecondBanSet())
+                existed << name;
+        }
+    }
+
+    const int max_choice = (Config.EnableHegemony && Config.Enable2ndGeneral) ?
+        Config.value("HegemonyMaxChoice", 7).toInt() :
+        Config.value("MaxChoice", 5).toInt();
+
+    QStringList all_choices = Sanguosha->getRandomFemaleGenerals(0, existed);
+    QStringList choices = Sanguosha->getMainGenerals(all_choices);
+
+    if (Config.EnableHegemony) {
+        if (to_assign.first()->getGeneral()) {
+            foreach (ServerPlayer *sp, m_players) {
+                QStringList old_list = sp->getSelected();
+                sp->clearSelected();
+                QString choice;
+
+                //keep legal generals
+                foreach (QString name, old_list) {
+                    if (Sanguosha->getGeneral(name)->getKingdom() != sp->getGeneral()->getKingdom()) {
+                        sp->addToSelected(name);
+                        old_list.removeOne(name);
+                    }
+                }
+
+                //drop the rest and add new generals
+                while (old_list.length()) {
+                    choice = sp->findReasonable(choices);
+                    sp->addToSelected(choice);
+                    old_list.pop_front();
+                    choices.removeOne(choice);
+                }
+            }
+            return;
+        }
+    }
+
+    foreach (ServerPlayer *player, to_assign) {
+        player->clearSelected();
+
+        int extra = 0;
+        if (isNormalGameMode(mode) || mode == "08_zdyj") {
+            if (player->getRole() == "renegade") {
+                extra = Config.value("RenegadeExtra_Choice", 0).toInt();
+            } else if (player->getRole() == "loyalist") {
+                extra = Config.value("LoyalistExtra_Choice", 0).toInt();
+            }
+        }
+
+        int choice_count = max_choice + extra;
+
+        for (int i = 0; i < choice_count; i++) {
+            qShuffle(choices);
+            QStringList ai_ban = QStringList();
+            if (player->getState() == "robot")
+                ai_ban = Config.value("Banlist/AI", "").toStringList();
+            QString choice;
+            foreach (QString name, choices) {
+                QStringList all_name = Sanguosha->getConvertGenerals(name);
+                all_name << name;
+                QStringList temp = all_name;
+                foreach (QString name1, temp) {
+                    if (ai_ban.contains(name1))
+                        all_name.removeOne(name1);
+                }
+                QString _name = player->findReasonable(all_name, true);
+                if (!_name.isEmpty()) {
+                    choice = name;
+                    break;
+                }
+            }
+
+            if (choice.isEmpty()) break;
+            if (all_choices.contains(choice) && !ai_ban.contains(choice))
+                player->addToSelected(choice);
+            foreach (QString sp, Sanguosha->getConvertGenerals(choice)) {
+                if (all_choices.contains(sp) && !ai_ban.contains(sp))
+                    player->addToSelected(sp);
+            }
+
+            choices.removeOne(choice);
+        }
+    }
+}
+
 void Room::chooseGenerals(QList<ServerPlayer *> players)
 {
     if (players.isEmpty()) players = m_players;
@@ -3186,6 +3296,109 @@ void Room::chooseGeneralsOfBestLoyalistMode(QList<ServerPlayer *> players)
     }
 }
 
+void Room::chooseGeneralsOfHongyanRace(QList<ServerPlayer *> players)
+{
+    if (players.isEmpty()) players = m_players;
+    // for lord.
+    int lord_num = Config.value("LordMaxChoice", -1).toInt();
+    int nonlord_num = Config.value("NonLordMaxChoice", 2).toInt();
+    if (lord_num == 0 && nonlord_num == 0)
+        nonlord_num = 1;
+    int nonlord_prob = (lord_num == -1) ? 5 : 55 - qMin(lord_num, 10);
+    ServerPlayer *the_lord = getLord();
+    if (!Config.EnableHegemony && the_lord && players.contains(the_lord)) {
+        QStringList lord_list;
+        if (Config.EnableSame)
+            lord_list = Sanguosha->getRandomFemaleGenerals(Config.value("MaxChoice", 5).toInt());
+        else if (the_lord->getState() == "robot") {
+            QStringList all_maf_lords = Sanguosha->getLords();
+            QStringList all_lords;
+            foreach (QString name, all_maf_lords)
+            {
+                const General *general = Sanguosha->getGeneral(name);
+                if (general && general->isFemale())
+                    all_lords << general->objectName();
+                else if (general && name.contains("luxun"))
+                    all_lords << name;
+            }
+            QStringList ai_ban = Config.value("Banlist/AI").toStringList();
+            foreach (QString lord_name, all_lords) {
+                if (ai_ban.contains(lord_name))
+                    all_lords.removeOne(lord_name);
+            }
+            if (((qrand() % 100 < nonlord_prob || lord_num == 0) && nonlord_num > 0)
+                || all_lords.length() == 0)
+                lord_list = Sanguosha->getRandomFemaleGenerals(1, ai_ban.toSet());
+            else
+                lord_list = all_lords;
+        } else
+            lord_list = Sanguosha->getRandomFemaleLords();
+        QString general = askForGeneral(the_lord, lord_list, true, QString(), true);
+        the_lord->setGeneralName(general);
+        if (!Config.EnableBasara)
+            broadcastProperty(the_lord, "general", general);
+
+        if (Config.EnableSame) {
+            foreach (ServerPlayer *p, players) {
+                if (!p->isLord())
+                    p->setGeneralName(general);
+            }
+
+            Config.Enable2ndGeneral = false;
+            return;
+        }
+    }
+    QList<ServerPlayer *> to_assign = players;
+    if (the_lord && !Config.EnableHegemony) to_assign.removeOne(the_lord);
+
+    assignGeneralsForPlayersOfHongyanRace(to_assign);
+    foreach(ServerPlayer *player, to_assign)
+        _setupChooseGeneralRequestArgs(player, true, true);
+
+    doBroadcastRequest(to_assign, S_COMMAND_CHOOSE_GENERAL);
+    foreach (ServerPlayer *player, to_assign) {
+        if (player->getGeneral() != NULL) continue;
+        QString generalName = player->getClientReply().toString();
+        if (!player->m_isClientResponseReady ||  !_setPlayerGeneral(player, generalName, true))
+            _setPlayerGeneral(player, _chooseDefaultGeneral(player), true);
+    }
+
+    if (Config.Enable2ndGeneral) {
+        QList<ServerPlayer *> to_assign = players;
+        assignGeneralsForPlayersOfHongyanRace(to_assign);
+        foreach(ServerPlayer *player, to_assign)
+            _setupChooseGeneralRequestArgs(player, true, true);
+
+        doBroadcastRequest(to_assign, S_COMMAND_CHOOSE_GENERAL);
+        foreach (ServerPlayer *player, to_assign) {
+            if (player->getGeneral2() != NULL) continue;
+            QString generalName = player->getClientReply().toString();
+            if (!player->m_isClientResponseReady || !_setPlayerGeneral(player, generalName, false))
+                _setPlayerGeneral(player, _chooseDefaultGeneral(player), false);
+        }
+    }
+
+    if (Config.EnableBasara) {
+        foreach (ServerPlayer *player, m_players) {
+            QStringList names;
+            if (player->getGeneral()) {
+                QString name = player->getGeneralName();
+                names.append(name);
+                player->setGeneralName("anjiang");
+                notifyProperty(player, player, "general");
+            }
+            if (player->getGeneral2() && Config.Enable2ndGeneral) {
+                QString name = player->getGeneral2Name();
+                names.append(name);
+                player->setGeneral2Name("anjiang");
+                notifyProperty(player, player, "general2");
+            }
+            player->setProperty("basara_generals", names.join("+"));
+            notifyProperty(player, player, "basara_generals");
+        }
+    }
+}
+
 void Room::run()
 {
     // initialize random seed for later use
@@ -3300,6 +3513,13 @@ void Room::run()
     } else if (mode == "08_zdyj") {
         chooseGeneralsOfBestLoyalistMode();
         startGame();
+    } else if (mode == "08_hongyan"){
+        chooseGeneralsOfHongyanRace();
+        startGame();
+        foreach (ServerPlayer *player, getAllPlayers())
+            if (player && !player->isFemale())
+                player->setGender(General::Female);
+        changeLesbianSkill();
     } else {
         chooseGenerals();
         startGame();
@@ -7283,4 +7503,27 @@ bool Room::isSkillValidForPlayer(const ServerPlayer *player, const Skill *skill)
     }
 
     return true;
+}
+
+void Room::changeLesbianSkill()
+{
+    foreach (ServerPlayer *player, getAllPlayers())
+    {
+        player->changeLesbianSkill("lijian");
+        player->changeLesbianSkill("jieyin");
+        player->changeLesbianSkill("jiaojin");
+        player->changeLesbianSkill("yanyu");
+        player->changeLesbianSkill("fuzhu");
+        player->changeLesbianSkill("lihun");
+        player->changeLesbianSkill("xingwu");
+        player->changeLesbianSkill("fuhan");
+        player->changeLesbianSkill("noslijian");
+        if (player && player->hasSkill("luoyan"))
+            player->acquireSkill("#lesbian_luoyan");
+        player->changeLesbianSkill("lianli");
+        player->changeLesbianSkill("tongxin");
+        player->changeLesbianSkill("#lianli-slash", true);
+        player->changeLesbianSkill("#lianli-jink", true);
+        player->changeLesbianSkill("#lianli-clear", true);
+    }
 }

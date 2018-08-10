@@ -2,73 +2,114 @@
 #include "engine.h"
 #include "standard-skillcards.h"
 #include "clientplayer.h"
+#include "util.h"
+#include "wrapped-card.h"
+#include "room.h"
+#include "roomthread.h"
 
-/*Shit::Shit(Suit suit, int number):BasicCard(suit, number){
+Shit::Shit(Suit suit, int number)
+    :BasicCard(suit, number)
+{
     setObjectName("shit");
 
     target_fixed = true;
-    }
+}
 
-    QString Shit::getSubtype() const{
+QString Shit::getSubtype() const{
     return "disgusting_card";
+}
+
+bool Shit::HasShit(const Card *card) {
+    if (card->isVirtualCard()) {
+        QList<int> card_ids = card->getSubcards();
+        foreach(int card_id, card_ids) {
+            const Card *c = Sanguosha->getCard(card_id);
+            if(c->objectName() == "shit")
+                return true;
+        }
+        return false;
     }
-
-    void Shit::onMove(const CardMoveStruct &move) const{
-    ServerPlayer *from = (ServerPlayer*)move.from;
-    if(from && move.from_place == Player::PlaceHand &&
-    from->getRoom()->getCurrent() == move.from
-    && (move.to_place == Player::DiscardPile
-    || move.to_place == Player::PlaceSpecial
-    || move.to_place == Player::PlaceTable)
-    && move.to == NULL
-    && from->isAlive()){
-
-    LogMessage log;
-    log.card_str = getEffectIdString();
-    log.from = from;
-
-    Room *room = from->getRoom();
-
-    if(getSuit() == Spade){
-    log.type = "$ShitLostHp";
-    room->sendLog(log);
-
-    room->loseHp(from);
-
-    return;
-    }
-
-    DamageStruct damage;
-    damage.from = damage.to = from;
-    damage.card = this;
-
-    switch(getSuit()){
-    case Club: damage.nature = DamageStruct::Thunder; break;
-    case Heart: damage.nature = DamageStruct::Fire; break;
-    default:
-    damage.nature = DamageStruct::Normal;
-    }
-
-    log.type = "$ShitDamage";
-    room->sendLog(log);
-
-    room->damage(damage);
-    }
-    }
-
-    bool Shit::HasShit(const Card *card){
-    if(card->isVirtualCard()){
-    QList<int> card_ids = card->getSubcards();
-    foreach(int card_id, card_ids){
-    const Card *c = Sanguosha->getCard(card_id);
-    if(c->objectName() == "shit")
-    return true;
-    }
-
-    return false;
-    }else
     return card->objectName() == "shit";
-    }*/
+}
+
+class ShitEffect : public TriggerSkill
+{
+public:
+    ShitEffect() : TriggerSkill("shit_effect") {
+        events << CardsMoveOneTime;
+        frequency = Compulsory;
+        global = true;
+    }
+
+    bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const {
+
+        CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+        if (!move.from)
+            return false;
+        if (move.from->objectName() != player->objectName())
+            return false;
+        if (move.to_place == Player::PlaceTable || move.to_place == Player::DiscardPile) {
+
+            QList<Card *> shits;
+            for (int index = 0; index < move.card_ids.length(); index++) {
+                Card *shit = Sanguosha->getCard(move.card_ids.at(index));
+                if (shit->isKindOf("Shit")) {
+                    if (move.from_places.at(index) == Player::PlaceHand)
+                        shits.append(shit);
+                }
+            }
+            if (shits.isEmpty())
+                return false;
+
+            foreach(Card *shit, shits) {
+                LogMessage log;
+                log.card_str = shit->toString();
+                log.from = player;
+
+                switch (shit->getSuit()) {
+
+                case Card::Spade:
+                    log.type = "$ShitLostHp";
+                    room->sendLog(log);
+                    room->loseHp(player);
+                    break;
+
+                case Card::Heart:
+                    log.type = "$ShitDamage";
+                    room->sendLog(log);
+                    room->damage(DamageStruct(shit, player, player, 1, DamageStruct::Fire));
+                    break;
+
+                case Card::Club:
+                    log.type = "$ShitDamage";
+                    room->sendLog(log);
+                    room->damage(DamageStruct(shit, player, player, 1, DamageStruct::Thunder));
+                    break;
+
+                case Card::Diamond:
+                    log.type = "$ShitDamage";
+                    room->sendLog(log);
+                    room->damage(DamageStruct(shit, player, player));
+                    break;
+                }
+
+                if (player->isDead())
+                    break;
+            }
+        }
+        return false;
+    }
+
+    bool triggerable(Player *target) const {
+        if (target)
+            return target->getPhase() != Player::NotActive;
+        return false;
+    }
+
+    int getPriority() const {
+        return 1;
+    }
+};
 
 // -----------  Deluge -----------------
 
@@ -265,12 +306,12 @@ public:
         global = true;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const
+    bool triggerable(const ServerPlayer *target) const
     {
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const
+    bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const
     {
         CardUseStruct use = data.value<CardUseStruct>();
         if (use.card->isKindOf("Peach")) {
@@ -307,7 +348,7 @@ public:
         events << DamageInflicted;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
     {
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.nature == DamageStruct::Fire) {
@@ -352,12 +393,12 @@ public:
         //response_or_use = true;
     }
 
-    virtual bool isResponseOrUse() const
+    bool isResponseOrUse() const
     {
         return Self->getHp() == 4;
     }
 
-    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const
+    bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const
     {
         const Card *armor = Self->getArmor();
         if (armor != NULL) {
@@ -392,7 +433,7 @@ public:
         return false;
     }
 
-    virtual const Card *viewAs(const QList<const Card *> &cards) const
+    const Card *viewAs(const QList<const Card *> &cards) const
     {
         int hp = Self->getHp();
         if (hp <= 0)
@@ -441,7 +482,7 @@ public:
         return NULL;
     }
 
-    virtual bool isEnabledAtPlay(const Player *player) const
+    bool isEnabledAtPlay(const Player *player) const
     {
         int hp = Self->getHp();
         if (hp <= 0)
@@ -480,12 +521,12 @@ public:
         view_as_skill = new FiveLinesVS;
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const
+    bool triggerable(const ServerPlayer *target) const
     {
         return ArmorSkill::triggerable(target) && target->getHp() == 2;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
     {
         CardUseStruct use = data.value<CardUseStruct>();
         const TriggerSkill *jz = Sanguosha->getTriggerSkill("jizhi");
@@ -532,9 +573,9 @@ DisasterPackage::DisasterPackage()
     type = CardPack;
 }
 
-/*JoyPackage::JoyPackage()
+JoyPackage::JoyPackage()
     :Package("joy")
-    {
+{
     QList<Card *> cards;
 
     cards << new Shit(Card::Club, 1)
@@ -546,7 +587,8 @@ DisasterPackage::DisasterPackage()
     card->setParent(this);
 
     type = CardPack;
-    }*/
+    skills << new ShitEffect;
+}
 
 class YxSwordSkill : public WeaponSkill
 {
@@ -556,7 +598,7 @@ public:
         events << DamageCaused;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
     {
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.card && damage.card->isKindOf("Slash")) {
@@ -605,6 +647,6 @@ JoyEquipPackage::JoyEquipPackage()
     skills << new GaleShellSkill << new YxSwordSkill << new GrabPeach << new FiveLinesSkill;
 }
 
-//ADD_PACKAGE(Joy)
+ADD_PACKAGE(Joy)
 ADD_PACKAGE(Disaster)
 ADD_PACKAGE(JoyEquip)

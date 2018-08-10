@@ -633,7 +633,12 @@ void RoomScene::handleGameEvent(const QVariant &args)
         if (player && (player->hasSkill(skill_name, true) || player->hasEquipSkill(skill_name)) && player != Self) {
             PlayerCardContainer *container = (PlayerCardContainer *)_getGenericCardContainer(Player::PlaceHand, player);
             Photo *photo = qobject_cast<Photo *>(container);
-            if (photo) photo->showSkillName(skill_name);
+            if (photo)
+            {
+                photo->showSkillName(skill_name);
+                QString skillEmotion = QString("skill/%1").arg(skill_name);
+                setEmotion(player_name, skillEmotion);
+            }
         }
         break;
     }
@@ -669,7 +674,6 @@ QGraphicsPixmapItem *RoomScene::createDashboardButtons()
 {
     QGraphicsPixmapItem *widget = new QGraphicsPixmapItem(G_ROOM_SKIN.getPixmap(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG)
         .scaled(G_DASHBOARD_LAYOUT.m_buttonSetSize));
-
     ok_button = new QSanButton("platter", "confirm", widget);
     ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonArea);
     cancel_button = new QSanButton("platter", "cancel", widget);

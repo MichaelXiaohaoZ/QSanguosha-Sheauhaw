@@ -428,6 +428,7 @@ public:
     void incTurn();
     inline int getTurn() const { return m_turn; }
     void setPlayerShwonRole(ServerPlayer *player, bool show);
+    void changeLesbianSkill();
 
 protected:
     virtual void run();
@@ -588,9 +589,11 @@ private:
     void prepareForStart();
     void assignGeneralsForPlayers(const QList<ServerPlayer *> &to_assign);
     void assignGeneralsForPlayersOfJianGeDefenseMode(const QList<ServerPlayer *> &to_assign);
+    void assignGeneralsForPlayersOfHongyanRace(const QList<ServerPlayer *> &to_assign);
     void chooseGenerals(QList<ServerPlayer *> players = QList<ServerPlayer *>());
     void chooseGeneralsOfJianGeDefenseMode();
     void chooseGeneralsOfBestLoyalistMode(QList<ServerPlayer *> players = QList<ServerPlayer *>());
+    void chooseGeneralsOfHongyanRace(QList<ServerPlayer *> players = QList<ServerPlayer *>());
     AI *cloneAI(ServerPlayer *player);
     void broadcast(const QByteArray &message, ServerPlayer *except = NULL);
     void initCallbacks();

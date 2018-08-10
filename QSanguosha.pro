@@ -36,7 +36,7 @@ SOURCES += \
     src/dialog/customassigndialog.cpp \
     src/dialog/distanceviewdialog.cpp \
 	src/dialog/generaloverview.cpp \
-    src/dialog/mainwindow.cpp \
+    src/dialog/mainwindow.cpp \ #changed
     src/dialog/packagingeditor.cpp \
     src/dialog/roleassigndialog.cpp \
     src/dialog/scenario-overview.cpp \
@@ -49,12 +49,11 @@ SOURCES += \
     src/package/standard-cards.cpp \
     src/package/standard-generals.cpp \
     src/package/standard-skillcards.cpp \
-    src/package/thicket.cpp \
+    src/package/thicket.cpp \ #changed
     src/package/wind.cpp \
     src/scenario/boss-mode-scenario.cpp \
     src/scenario/couple-scenario.cpp \
     src/scenario/guandu-scenario.cpp \
-    src/scenario/miniscenarios.cpp \
     src/scenario/scenario.cpp \
     src/scenario/scenerule.cpp \
     src/scenario/zombie-scenario.cpp \
@@ -88,9 +87,9 @@ SOURCES += \
 	src/ui/pindianbox.cpp \
     src/ui/pixmapanimation.cpp \
 	src/ui/playercardbox.cpp \
-    src/ui/qsanbutton.cpp \
+    src/ui/qsanbutton.cpp \ #changed
     src/ui/rolecombobox.cpp \
-    src/ui/roomscene.cpp \
+    src/ui/roomscene.cpp \ #changed
     src/ui/selectbox.cpp \
     src/ui/sprite.cpp \
     src/ui/startscene.cpp \
@@ -133,7 +132,21 @@ SOURCES += \
     swig/sanguosha_wrap.cxx \
     src/dialog/banipdialog.cpp \
     src/package/guandu.cpp \
-    src/package/trialofgod.cpp
+    src/package/trialofgod.cpp \
+    src/package/assassins.cpp \
+    src/package/hegemony.cpp \
+    src/package/bgm.cpp \
+    src/package/h-formation.cpp \
+    src/package/h-momentum.cpp \
+    src/package/windms.cpp \
+    src/package/joy.cpp \
+    src/package/jsp.cpp \
+    src/package/ling.cpp \
+    src/package/tw.cpp \
+    src/package/wisdom.cpp \
+    src/package/yitian.cpp \
+    src/package/yjcmnos.cpp \
+    src/scenario/miniscenarios.cpp
 
 HEADERS += \
     src/client/aux-skills.h \
@@ -163,7 +176,7 @@ HEADERS += \
     src/dialog/distanceviewdialog.h \
     src/dialog/generalmodel.h \
     src/dialog/generaloverview.h \
-    src/dialog/mainwindow.h \
+    src/dialog/mainwindow.h \ #changed
     src/dialog/packagingeditor.h \
     src/dialog/roleassigndialog.h \
     src/dialog/scenario-overview.h \
@@ -259,14 +272,27 @@ HEADERS += \
     src/package/wind.h \
     src/dialog/banipdialog.h \
     src/package/guandu.h \
-    src/package/trialofgod.h
+    src/package/trialofgod.h \
+    src/package/assassins.h \
+    src/package/hegemony.h \
+    src/package/bgm.h \
+    src/package/h-formation.h \
+    src/package/h-momentum.h \
+    src/package/windms.h \
+    src/package/joy.h \
+    src/package/jsp.h \
+    src/package/ling.h \
+    src/package/tw.h \
+    src/package/wisdom.h \
+    src/package/yitian.h \
+    src/package/yjcmnos.h
 
 FORMS += \
     src/dialog/cardoverview.ui \
     src/dialog/configdialog.ui \
     src/dialog/connectiondialog.ui \
     src/dialog/generaloverview.ui \
-    src/dialog/mainwindow.ui
+    src/dialog/mainwindow.ui #changed
 
 
 CONFIG(buildbot) {

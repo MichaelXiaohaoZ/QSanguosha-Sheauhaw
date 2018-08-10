@@ -189,6 +189,8 @@ public:
     // static function
     static bool CompareByActionOrder(ServerPlayer *a, ServerPlayer *b);
 
+    void changeLesbianSkill(const QString &skill, bool hidden = false);
+
 protected:
     //Synchronization helpers
     QSemaphore **semas;

@@ -233,7 +233,7 @@ QWidget *ServerDialog::createAdvancedTab()
     sp_convert_checkbox->setChecked(Config.value("EnableSPConvert", true).toBool());
 
     maxchoice_spinbox = new QSpinBox;
-    maxchoice_spinbox->setRange(3, 21);
+    maxchoice_spinbox->setRange(1, 20);
     maxchoice_spinbox->setValue(Config.value("MaxChoice", 5).toInt());
 
     loyalist_extra_choice_spinbox = new QSpinBox;

@@ -64,7 +64,7 @@
 {
     "normalWidth": 157,
     "normalHeight": 181,
-    "mainFrameArea": [0, 0, 157, 181],
+    "mainFrameArea": [-11, -17, 175, 205],
     "canvasArea": [0, 0, 157, 181],
     "handCardNumIconArea": [-7, 93, 30, 18],
     "handCardFont": ["DroidSansFallBack", [12, 12, -1], 20, [255, 255, 255, 255], 1, 30, [0, 0], [20, 20, 20, 200]],
@@ -124,9 +124,9 @@
     "drankMaskColor": [250, 0, 0, 115],
     "duanchangMaskColor": [255, 255, 255, 128],
     "deathEffectColor": [50, 50, 50, 255],
-    "extraSkillArea": [32, 96, 56, 20],
+    "extraSkillArea": [0, 0, 56, 20],
     "extraSkillFont": ["simli", [16, 16, 3], 0, [255, 255, 255, 255], 2, 100, [0, 0], [102, 16, 120, 255]],
-    "extraSkillTextArea": [32, 93, 56, 20]
+    "extraSkillTextArea": [0, 0, 56, 20]
 },
 "dashboard":
 {
@@ -203,9 +203,9 @@
     "drankMaskColor": [250, 0, 0, 115],
     "duanchangMaskColor": [255, 255, 255, 128],
     "buttonSetSize": [106, 168],
-    "confirmButtonArea": [5, 3, 61, 75],
-    "cancelButtonArea": [4, 92, 61, 75],
-    "discardButtonArea": [70, 45, 33, 81],
+    "confirmButtonArea": [-1013, -15, 100, 36],
+    "cancelButtonArea": [-813, -15, 100, 36],
+    "discardButtonArea": [-638, -15, 80, 36],
     "trustButtonArea": [68, 132, 36, 35],
     "trustEffectColor": [38, 26, 66],
     "skillDockLeftMargin": 6,

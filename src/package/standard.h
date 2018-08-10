@@ -213,6 +213,7 @@ public:
     DelayedTrick(Suit suit, int number, bool movable = false);
     virtual void onNullified(ServerPlayer *target) const;
 
+    virtual void onUseYanxiao(Room *room, const CardUseStruct &card_use) const;
     virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
     virtual QString getSubtype() const;
     virtual void onEffect(const CardEffectStruct &effect) const;

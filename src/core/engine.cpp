@@ -331,10 +331,16 @@ Engine::Engine(bool isManualMode)
     modes["08pz"] = tr("8 players (0 renegade)");
     modes["08_defense"] = tr("8 players (JianGe Defense)");
     modes["08_zdyj"] = tr("8 players (Best Loyalist)");
+    modes["08_hongyan"] = tr("8 players (Hongyan Races)");
+    modes["08_dragonboat"] = tr("8 players (Dragon Bost Races)");
     modes["09p"] = tr("9 players");
     modes["10pd"] = tr("10 players");
     modes["10p"] = tr("10 players (1 renegade)");
     modes["10pz"] = tr("10 players (0 renegade)");
+    //modes["11p"] = tr("11 players");
+    //modes["12pd"] = tr("12 players");
+    //modes["12p"] = tr("12 players (1 renegade)");
+    //modes["12pz"] = tr("12 players (0 renegade)");
 
     foreach (const Skill *skill, skills.values()) {
         Skill *mutable_skill = const_cast<Skill *>(skill);
@@ -923,7 +929,7 @@ SkillCard *Engine::cloneSkillCard(const QString &name) const
 #ifndef USE_BUILDBOT
 QString Engine::getVersionNumber() const
 {
-    return "20170306";
+    return "20180817";
 }
 #endif
 
@@ -944,7 +950,7 @@ QString Engine::getVersionName() const
 
 QString Engine::getMODName() const
 {
-    return "xxyheaven";
+    return "ChangerSheauhaw";
 }
 
 QStringList Engine::getExtensions() const
@@ -1113,6 +1119,10 @@ QString Engine::getRoles(const QString &mode) const
         return "FFFFCCCC";
     } else if (mode == "08_zdyj") {
         return "ZCCFFFFN";
+    } else if (mode == "08_hongyan") {
+        return "ZCCFFFFN";
+    } else if (mode == "08_dragonboat") {
+        return "EESSUUQQ";
     }
 
     if (modes.contains(mode) || isNormalGameMode(mode)) { // hidden pz settings?
@@ -1128,7 +1138,9 @@ QString Engine::getRoles(const QString &mode) const
             "ZCCFFFN", // 7
             "ZCCFFFFN", // 8
             "ZCCCFFFFN", // 9
-            "ZCCCFFFFFN" // 10
+            "ZCCCFFFFFN", // 10
+            "ZCCCCFFFFFN", // 11
+            "ZCCCCFFFFFFN", // 12
         };
 
         static const char *table2[] = {
@@ -1143,7 +1155,9 @@ QString Engine::getRoles(const QString &mode) const
             "ZCCFFFN", // 7
             "ZCCFFFNN", // 8
             "ZCCCFFFFN", // 9
-            "ZCCCFFFFNN" // 10
+            "ZCCCFFFFNN", // 10
+            "ZCCCFFFFFNN", // 11
+            "ZCCCCFFFFFNN", // 12
         };
 
         const char **table = mode.endsWith("d") ? table2 : table1;
@@ -1172,19 +1186,21 @@ QString Engine::getRoles(const QString &mode) const
 QStringList Engine::getRoleList(const QString &mode) const
 {
     QString roles = getRoles(mode);
-
     QStringList role_list;
-    for (int i = 0; roles[i] != '\0'; i++) {
-        QString role;
-        switch (roles[i].toLatin1()) {
-        case 'Z': role = "lord"; break;
-        case 'C': role = "loyalist"; break;
-        case 'N': role = "renegade"; break;
-        case 'F': role = "rebel"; break;
+    if (roles == "EESSUUQQ")
+        role_list << "dragon_wei" << "dragon_wei" << "dragon_shu" << "dragon_shu"
+                  << "dragon_wu" << "dragon_wu" << "dragon_qun" << "dragon_qun";
+    else
+        for (int i = 0; roles[i] != '\0'; i++) {
+            QString role;
+            switch (roles[i].toLatin1()) {
+            case 'Z': role = "lord"; break;
+            case 'C': role = "loyalist"; break;
+            case 'N': role = "renegade"; break;
+            case 'F': role = "rebel"; break;
+            }
+            role_list << role;
         }
-        role_list << role;
-    }
-
     return role_list;
 }
 
@@ -1273,6 +1289,73 @@ QStringList Engine::getRandomLords() const
     return lords;
 }
 
+QStringList Engine::getRandomFemaleLords(bool luxun) const
+{
+    QStringList banlist_ban = getExtraGeneralsBan();
+
+    QStringList lords;
+
+    QStringList all_maf_lords = Sanguosha->getLords();
+    QStringList all_lords;
+    foreach (QString name, all_maf_lords)
+    {
+        const General *general = Sanguosha->getGeneral(name);
+        if (general && general->isFemale())
+            all_lords << general->objectName();
+        else if (general && name.contains("luxun") && luxun)
+            all_lords << name;
+    }
+
+    foreach (QString alord, all_lords) {
+        if (banlist_ban.contains(alord)) continue;
+        lords << alord;
+    }
+
+    int lord_num = Config.value("LordMaxChoice", -1).toInt();
+    if (lord_num != -1 && lord_num < lords.length()) {
+        int to_remove = lords.length() - lord_num;
+        for (int i = 0; i < to_remove; i++) {
+            lords.removeAt(qrand() % lords.length());
+        }
+    }
+
+    QStringList nonlord_list, all_nonlord_list;
+    foreach (QString nonlord, generals.keys()) {
+        if (isGeneralHidden(nonlord) || lord_list.contains(nonlord)) continue;
+        const General *general = generals.value(nonlord);
+        if (getBanPackages().contains(general->getPackage()))
+            continue;
+        if (Config.Enable2ndGeneral && BanPair::isBanned(general->objectName()))
+            continue;
+        if (banlist_ban.contains(general->objectName()))
+            continue;
+        //const General *general = Sanguosha->getGeneral(nonlord);
+        if (!general || !(general->isFemale() || (nonlord.contains("luxun") && luxun)))
+            continue;
+        QString main_name = getMainGeneral(nonlord);
+        all_nonlord_list << nonlord;
+        if (!nonlord_list.contains(main_name))
+            nonlord_list << main_name;
+    }
+
+    qShuffle(nonlord_list);
+
+    int extra = Config.value("NonLordMaxChoice", 2).toInt();
+    if (lord_num == 0 && extra == 0)
+        extra = 1;
+    for (int i = 0; i < extra; i++) {
+        QString name = nonlord_list.at(i);
+        if (all_nonlord_list.contains(name))
+            lords << name;
+        foreach (QString sp, getConvertGenerals(name)) {
+            if (all_nonlord_list.contains(sp))
+                lords << sp;
+        }
+        if (i == nonlord_list.length() - 1) break;
+    }
+    return lords;
+}
+
 QStringList Engine::getLimitedGeneralNames(const QString &kingdom) const
 {
     QStringList general_names;
@@ -1301,6 +1384,53 @@ QStringList Engine::getLimitedGeneralNames(const QString &kingdom) const
 QStringList Engine::getRandomGenerals(int count, const QSet<QString> &ban_set, const QString &kingdom) const
 {
     QStringList all_generals = getLimitedGeneralNames(kingdom);
+
+    QSet<QString> general_set = all_generals.toSet();
+
+    QStringList banned_generals = getExtraGeneralsBan();
+    general_set.subtract(banned_generals.toSet());
+
+    all_generals = general_set.subtract(ban_set).toList();
+
+    if (count < 1) {
+        // shuffle them
+        qShuffle(all_generals);
+        return all_generals;
+    }
+
+    QStringList main_generals = getMainGenerals(all_generals);
+
+    Q_ASSERT(main_generals.count() >= count);
+
+    qShuffle(main_generals);
+
+    QStringList main_list = main_generals.mid(0, count);
+    Q_ASSERT(main_list.count() == count);
+
+    QStringList general_list;
+    foreach (QString name, main_list) {
+        if (all_generals.contains(name))
+            general_list << name;
+        foreach (QString sp, getConvertGenerals(name)) {
+            if (all_generals.contains(sp))
+                general_list << sp;
+        }
+    }
+    return general_list;
+}
+
+QStringList Engine::getRandomFemaleGenerals(int count, const QSet<QString> &ban_set, const QString &kingdom, bool luxun) const
+{
+    QStringList all_maf_generals = getLimitedGeneralNames(kingdom);
+    QStringList all_generals;
+    foreach (QString name, all_maf_generals)
+    {
+        const General *general = Sanguosha->getGeneral(name);
+        if (general && general->isFemale())
+            all_generals << general->objectName();
+        else if (general && name.contains("luxun") && luxun)
+            all_generals << name;
+    }
 
     QSet<QString> general_set = all_generals.toSet();
 

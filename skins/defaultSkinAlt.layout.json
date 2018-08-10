@@ -64,7 +64,7 @@
 {
     "normalWidth": 157,
     "normalHeight": 181,
-    "mainFrameArea": [0, 0, 157, 181],
+    "mainFrameArea": [-11, -17, 175, 205],
     "canvasArea": [0, 0, 157, 181],
     "handCardNumIconArea": [3, 94, 21, 22],
     "handCardFont": ["DroidSansFallBack", [12, 12, -1], 20, [255, 255, 255, 255]],
@@ -204,9 +204,9 @@
     "drankMaskColor": [250, 0, 0, 115],
     "duanchangMaskColor": [255, 255, 255, 128],
     "buttonSetSize": [106, 168],
-    "confirmButtonArea": [5, 3, 61, 75],
-    "cancelButtonArea": [4, 92, 61, 75],
-    "discardButtonArea": [70, 45, 33, 81],
+    "confirmButtonArea": [-1013, -15, 100, 36],
+    "cancelButtonArea": [-813, -15, 100, 36],
+    "discardButtonArea": [-638, -15, 80, 36],
     "trustButtonArea": [68, 132, 36, 35],
     "trustEffectColor": [38, 26, 66]
 },
