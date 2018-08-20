@@ -409,44 +409,6 @@ public:
     }
 };
 
-WindmsPackage::WindmsPackage()
-    :Package("Windms")
-{
-
-    General *miansha_caoren = new General(this, "miansha_caoren", "wei"); // WEI 011
-    miansha_caoren->addSkill(new Jiuhshoou);
-    miansha_caoren->addSkill(new Jieewei);
-
-    General *miansha_zhangjiao = new General(this, "miansha_zhangjiao$", "qun", 3); // QUN 010
-    miansha_zhangjiao->addSkill(new Leirji);
-    miansha_zhangjiao->addSkill("guidao");
-    miansha_zhangjiao->addSkill("huangtian");
-
-    General *miansha_xiaoqiao = new General(this, "miansha_xiaoqiao", "wu", 3, false); // WU 011
-    miansha_xiaoqiao->addSkill(new Tianshiang);
-    miansha_xiaoqiao->addSkill(new TianshiangDraw);
-    miansha_xiaoqiao->addSkill("hongyan");
-    related_skills.insertMulti("tianshiang", "#tianshiang");
-
-    General *miansha_huangzhong = new General(this, "miansha_huangzhong", "shu"); // SHU 008
-    miansha_huangzhong->addSkill(new Liehgong);
-
-    General *miansha_xiahouyuan = new General(this, "miansha_xiahouyuan", "wei"); // WEI 008
-    miansha_xiahouyuan->addSkill(new Shernsuh);
-    miansha_xiahouyuan->addSkill(new SlashNoDistanceLimitSkill("shernsuh"));
-    related_skills.insertMulti("shernsuh", "#shernsuh-slash-ndl");
-
-    General *miansha_weiyan = new General(this, "miansha_weiyan", "shu"); // SHU 009
-    miansha_weiyan->addSkill(new Kwangguu);
-    miansha_weiyan->addSkill(new KwangguuRecord);
-    related_skills.insertMulti("kwangguu", "#kwangguu-record");
-
-    addMetaObject<TianshiangCard>();
-    addMetaObject<ShernsuhCard>();
-}
-
-ADD_PACKAGE(Windms)
-
 class Conqueror : public TriggerSkill
 {
 public:
@@ -488,15 +450,6 @@ public:
         return false;
     }
 };
-
-WestMianshaPackage::WestMianshaPackage()
-    :Package("WestMiansha")
-{
-    General *Caesar = new General(this, "caesar", "god", 4); // E.SP 001
-    Caesar->addSkill(new Conqueror);
-}
-
-ADD_PACKAGE(WestMiansha)
 
 class Duannlyang : public OneCardViewAsSkill
 {
@@ -597,22 +550,6 @@ public:
     }
 };
 
-
-NostalThicketPackage::NostalThicketPackage()
-    :Package("NostalThicket")
-{
-    General *nos_xuhuang = new General(this, "nos_xuhuang", "wei"); // WEI 010
-    nos_xuhuang->addSkill(new Duannlyang);
-    nos_xuhuang->addSkill(new DuannlyangTargetMod);
-    related_skills.insertMulti("duannlyang", "#duannlyang-target");
-
-    General *nos_shencaocao = new General(this, "nosms_shencaocao", "god", 3);
-    nos_shencaocao->addSkill(new Gueishin);
-    nos_shencaocao->addSkill("feiying");
-}
-
-ADD_PACKAGE(NostalThicket)
-
 class Mengjin : public TriggerSkill
 {
 public:
@@ -635,16 +572,6 @@ public:
         return false;
     }
 };
-
-NostalFirePackage::NostalFirePackage()
-    :Package("NostalFire")
-{
-    General *pangde = new General(this, "nos_pangde", "qun"); // QUN 008
-    pangde->addSkill("mashu");
-    pangde->addSkill(new Mengjin);
-}
-
-ADD_PACKAGE(NostalFire)
 
 RernderCard::RernderCard()
 {
@@ -851,7 +778,7 @@ bool LesbianLijianCard::targetFilter(const QList<const Player *> &targets, const
 class LesbianLijian : public OneCardViewAsSkill
 {
 public:
-    LesbianLijian() : OneCardViewAsSkill("lesbian_lijian")
+    LesbianLijian() : OneCardViewAsSkill("lesbianlijian")
     {
         filter_pattern = ".!";
     }
@@ -863,9 +790,9 @@ public:
 
     virtual const Card *viewAs(const Card *originalCard) const
     {
-        LesbianLijianCard *lesbian_lijian_card = new LesbianLijianCard;
-        lesbian_lijian_card->addSubcard(originalCard->getId());
-        return lesbian_lijian_card;
+        LesbianLijianCard *lesbianlijian_card = new LesbianLijianCard;
+        lesbianlijian_card->addSubcard(originalCard->getId());
+        return lesbianlijian_card;
     }
 
     virtual int getEffectIndex(const ServerPlayer *, const Card *card) const
@@ -889,7 +816,7 @@ bool LesbianJieyinCard::targetFilter(const QList<const Player *> &targets, const
 class LesbianJieyin : public ViewAsSkill
 {
 public:
-    LesbianJieyin() : ViewAsSkill("lesbian_jieyin")
+    LesbianJieyin() : ViewAsSkill("lesbianjieyin")
     {
     }
 
@@ -911,16 +838,16 @@ public:
         if (cards.length() != 2)
             return NULL;
 
-        LesbianJieyinCard *lesbian_jieyin_card = new LesbianJieyinCard();
-        lesbian_jieyin_card->addSubcards(cards);
-        return lesbian_jieyin_card;
+        LesbianJieyinCard *lesbianjieyin_card = new LesbianJieyinCard();
+        lesbianjieyin_card->addSubcards(cards);
+        return lesbianjieyin_card;
     }
 };
 
 class LesbianJiaojin : public TriggerSkill
 {
 public:
-    LesbianJiaojin() : TriggerSkill("lesbian_jiaojin")
+    LesbianJiaojin() : TriggerSkill("lesbianjiaojin")
     {
         events << DamageInflicted;
         view_as_skill = new dummyVS;
@@ -930,7 +857,7 @@ public:
     {
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.from && player->canDiscard(player, "he")) {
-            if (room->askForCard(player, ".Equip", "@lesbian_jiaojin", data, objectName())) {
+            if (room->askForCard(player, ".Equip", "@lesbianjiaojin", data, objectName())) {
 
                 LogMessage log;
                 log.type = "#LesbianJiaojin";
@@ -951,7 +878,7 @@ public:
 class LesbianYanyuVS : public OneCardViewAsSkill
 {
 public:
-    LesbianYanyuVS() : OneCardViewAsSkill("lesbian_yanyu")
+    LesbianYanyuVS() : OneCardViewAsSkill("lesbianyanyu")
     {
         filter_pattern = "Slash";
     }
@@ -977,7 +904,7 @@ public:
 class LesbianYanyu : public TriggerSkill
 {
 public:
-    LesbianYanyu() : TriggerSkill("lesbian_yanyu")
+    LesbianYanyu() : TriggerSkill("lesbianyanyu")
     {
         view_as_skill = new LesbianYanyuVS;
         events << EventPhaseEnd;
@@ -1001,7 +928,7 @@ public:
         if (femalelist.isEmpty())
             return false;
 
-        ServerPlayer *female = room->askForPlayerChosen(player, femalelist, objectName(), "@lesbian_yanyu-give", true, true);
+        ServerPlayer *female = room->askForPlayerChosen(player, femalelist, objectName(), "@lesbianyanyu-give", true, true);
 
         if (female != NULL){
             player->broadcastSkillInvoke(objectName());
@@ -1015,7 +942,7 @@ public:
 class LesbianFuzhu : public TriggerSkill
 {
 public:
-    LesbianFuzhu() : TriggerSkill("lesbian_fuzhu")
+    LesbianFuzhu() : TriggerSkill("lesbianfuzhu")
     {
         events << EventPhaseStart;
     }
@@ -1073,7 +1000,7 @@ bool LesbianLihunCard::targetFilter(const QList<const Player *> &targets, const 
 class LesbianLihunSelect : public OneCardViewAsSkill
 {
 public:
-    LesbianLihunSelect() : OneCardViewAsSkill("lesbian_lihun")
+    LesbianLihunSelect() : OneCardViewAsSkill("lesbianlihun")
     {
         filter_pattern = ".!";
     }
@@ -1094,7 +1021,7 @@ public:
 class LesbianLihun : public TriggerSkill
 {
 public:
-    LesbianLihun() : TriggerSkill("lesbian_lihun")
+    LesbianLihun() : TriggerSkill("lesbianlihun")
     {
         events << EventPhaseStart << EventPhaseEnd;
         view_as_skill = new LesbianLihunSelect;
@@ -1156,7 +1083,7 @@ public:
 class LesbianXingwu : public TriggerSkill
 {
 public:
-    LesbianXingwu() : TriggerSkill("lesbian_xingwu")
+    LesbianXingwu() : TriggerSkill("lesbianxingwu")
     {
         events << PreCardUsed << CardResponded << EventPhaseStart << CardsMoveOneTime;
         view_as_skill = new dummyVS;
@@ -1190,7 +1117,7 @@ public:
                 QString pattern = ".|.|.|hand";
                 if (red_avail != black_avail)
                     pattern = QString(".|%1|.|hand").arg(red_avail ? "red" : "black");
-                const Card *card = room->askForCard(player, pattern, "@lesbian_xingwu", QVariant(), Card::MethodNone);
+                const Card *card = room->askForCard(player, pattern, "@lesbianxingwu", QVariant(), Card::MethodNone);
                 if (card) {
                     room->notifySkillInvoked(player, objectName());
                     player->broadcastSkillInvoke(objectName());
@@ -1217,7 +1144,7 @@ public:
                 }
                 if (females.isEmpty()) return false;
 
-                ServerPlayer *target = room->askForPlayerChosen(player, females, objectName(), "@lesbian_xingwu-choose");
+                ServerPlayer *target = room->askForPlayerChosen(player, females, objectName(), "@lesbianxingwu-choose");
                 room->damage(DamageStruct(objectName(), player, target, 2));
 
                 if (!player->isAlive()) return false;
@@ -1241,7 +1168,7 @@ public:
 class LesbianLuoyan : public TriggerSkill
 {
 public:
-    LesbianLuoyan() : TriggerSkill("#lesbian_luoyan")
+    LesbianLuoyan() : TriggerSkill("#lesbianluoyan")
     {
         events << CardsMoveOneTime << EventAcquireSkill << EventLoseSkill;
         frequency = Compulsory;
@@ -1257,20 +1184,20 @@ public:
         if (triggerEvent == EventLoseSkill && data.toString() == objectName()) {
             room->handleAcquireDetachSkills(player, "-tianxiang|-liuli", true);
         } else if (triggerEvent == EventAcquireSkill && data.toString() == objectName()) {
-            if (!player->getPile("lesbian_xingwu").isEmpty()) {
+            if (!player->getPile("lesbianxingwu").isEmpty()) {
                 room->notifySkillInvoked(player, objectName());
                 room->handleAcquireDetachSkills(player, "tianxiang|liuli");
             }
         } else if (triggerEvent == CardsMoveOneTime && player->isAlive() && player->hasSkill(this, true)) {
             CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-            if (move.to == player && move.to_place == Player::PlaceSpecial && move.to_pile_name == "lesbian_xingwu") {
-                if (player->getPile("lesbian_xingwu").length() == 1) {
+            if (move.to == player && move.to_place == Player::PlaceSpecial && move.to_pile_name == "lesbianxingwu") {
+                if (player->getPile("lesbianxingwu").length() == 1) {
                     room->notifySkillInvoked(player, objectName());
                     room->handleAcquireDetachSkills(player, "tianxiang|liuli");
                 }
             } else if (move.from == player && move.from_places.contains(Player::PlaceSpecial)
-                && move.from_pile_names.contains("lesbian_xingwu")) {
-                if (player->getPile("lesbian_xingwu").isEmpty())
+                && move.from_pile_names.contains("lesbianxingwu")) {
+                if (player->getPile("lesbianxingwu").isEmpty())
                     room->handleAcquireDetachSkills(player, "-tianxiang|-liuli", true);
             }
         }
@@ -1285,7 +1212,7 @@ NosLesbianLijianCard::NosLesbianLijianCard() : LesbianLijianCard(false)
 class NosLesbianLijian : public OneCardViewAsSkill
 {
 public:
-    NosLesbianLijian() : OneCardViewAsSkill("noslesbian_lijian")
+    NosLesbianLijian() : OneCardViewAsSkill("noslesbianlijian")
     {
         filter_pattern = ".!";
     }
@@ -1327,9 +1254,9 @@ const Card *LesbianLianliSlashCard::validate(CardUseStruct &cardUse) const
     ServerPlayer *zhangfei = cardUse.from;
     Room *room = zhangfei->getRoom();
 
-    ServerPlayer *xiahoujuan = room->findPlayerBySkillName("lesbian_lianli");
+    ServerPlayer *xiahoujuan = room->findPlayerBySkillName("lesbianlianli");
     if (xiahoujuan) {
-        const Card *slash = room->askForCard(xiahoujuan, "slash", "@lesbian_lianli-slash", QVariant(), Card::MethodResponse, NULL, false, QString(), true);
+        const Card *slash = room->askForCard(xiahoujuan, "slash", "@lesbianlianli-slash", QVariant(), Card::MethodResponse, NULL, false, QString(), true);
         if (slash)
             return slash;
     }
@@ -1340,7 +1267,7 @@ const Card *LesbianLianliSlashCard::validate(CardUseStruct &cardUse) const
 class LesbianLianliSlashViewAsSkill :public ZeroCardViewAsSkill
 {
 public:
-    LesbianLianliSlashViewAsSkill() :ZeroCardViewAsSkill("lesbian_lianli-slash")
+    LesbianLianliSlashViewAsSkill() :ZeroCardViewAsSkill("lesbianlianli-slash")
     {
         attached_lord_skill = true;
     }
@@ -1366,14 +1293,14 @@ public:
 class LesbianLianliSlash : public TriggerSkill
 {
 public:
-    LesbianLianliSlash() :TriggerSkill("#lesbian_lianli-slash")
+    LesbianLianliSlash() :TriggerSkill("#lesbianlianli-slash")
     {
         events << CardAsked;
     }
 
     bool triggerable(const ServerPlayer *target) const
     {
-        return target != NULL && target->getMark("@tied") > 0 && !target->hasSkill("lesbian_lianli");
+        return target != NULL && target->getMark("@tied") > 0 && !target->hasSkill("lesbianlianli");
     }
 
     bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const
@@ -1382,12 +1309,12 @@ public:
         if (pattern != "slash")
             return false;
 
-        if (!player->askForSkillInvoke("lesbian_lianli-slash", data))
+        if (!player->askForSkillInvoke("lesbianlianli-slash", data))
             return false;
 
-        ServerPlayer *xiahoujuan = room->findPlayerBySkillName("lesbian_lianli");
+        ServerPlayer *xiahoujuan = room->findPlayerBySkillName("lesbianlianli");
         if (xiahoujuan) {
-            const Card *slash = room->askForCard(xiahoujuan, "slash", "@lesbian_lianli-slash", data, Card::MethodResponse, NULL, false, QString(), true);
+            const Card *slash = room->askForCard(xiahoujuan, "slash", "@lesbianlianli-slash", data, Card::MethodResponse, NULL, false, QString(), true);
             if (slash) {
                 room->provide(slash);
                 return true;
@@ -1401,7 +1328,7 @@ public:
 class LesbianLianliJink : public TriggerSkill
 {
 public:
-    LesbianLianliJink() :TriggerSkill("#lesbian_lianli-jink")
+    LesbianLianliJink() :TriggerSkill("#lesbianlianli-jink")
     {
         events << CardAsked;
     }
@@ -1417,7 +1344,7 @@ public:
         if (pattern != "jink")
             return false;
 
-        if (!xiahoujuan->askForSkillInvoke("lesbian_lianli-jink", data))
+        if (!xiahoujuan->askForSkillInvoke("lesbianlianli-jink", data))
             return false;
 
         QList<ServerPlayer *> players = room->getOtherPlayers(xiahoujuan);
@@ -1425,7 +1352,7 @@ public:
             if (player->getMark("@tied") > 0) {
                 ServerPlayer *zhangfei = player;
 
-                const Card *jink = room->askForCard(zhangfei, "jink", "@lesbian_lianli-jink", data, Card::MethodResponse, NULL, false, QString(), true);
+                const Card *jink = room->askForCard(zhangfei, "jink", "@lesbianlianli-jink", data, Card::MethodResponse, NULL, false, QString(), true);
                 if (jink) {
                     room->provide(jink);
                     return true;
@@ -1442,7 +1369,7 @@ public:
 
 class LesbianLianliViewAsSkill: public ZeroCardViewAsSkill{
 public:
-LesbianLianliViewAsSkill():ZeroCardViewAsSkill("lesbian_lianli"){
+LesbianLianliViewAsSkill():ZeroCardViewAsSkill("lesbianlianli"){
 
 }
 
@@ -1451,7 +1378,7 @@ return false;
 }
 
 bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
-return pattern == "@@lesbian_lianli";
+return pattern == "@@lesbianlianli";
 }
 
 const Card *viewAs() const{
@@ -1463,7 +1390,7 @@ return new LesbianLianliCard;
 class LesbianLianli : public PhaseChangeSkill
 {
 public:
-    LesbianLianli() :PhaseChangeSkill("lesbian_lianli")
+    LesbianLianli() :PhaseChangeSkill("lesbianlianli")
     {
         //view_as_skill = new LesbianLianliViewAsSkill;
     }
@@ -1472,7 +1399,7 @@ public:
     {
         if (target->getPhase() == Player::Start) {
             Room *room = target->getRoom();
-            //bool used = room->askForUseCard(target, "@@lesbian_lianli", "@lesbian_lianli-card");
+            //bool used = room->askForUseCard(target, "@@lesbianlianli", "@lesbianlianli-card");
 
             QList<ServerPlayer *> females;
             foreach (ServerPlayer *p, room->getAlivePlayers()) {
@@ -1481,7 +1408,7 @@ public:
             }
 
             ServerPlayer *zhangfei;
-            if (females.isEmpty() || ((zhangfei = room->askForPlayerChosen(target, females, objectName(), "@lesbian_lianli-card", true, true)) == NULL)) {
+            if (females.isEmpty() || ((zhangfei = room->askForPlayerChosen(target, females, objectName(), "@lesbianlianli-card", true, true)) == NULL)) {
                 if (target->hasSkill("liqian") && target->getKingdom() != "wei")
                     room->setPlayerProperty(target, "kingdom", "wei");
 
@@ -1490,7 +1417,7 @@ public:
                     if (player->getMark("@tied") > 0) {
                         player->loseMark("@tied");
                         if (player)
-                            room->detachSkillFromPlayer(player, "lesbian_lianli-slash", true, true);
+                            room->detachSkillFromPlayer(player, "lesbianlianli-slash", true, true);
                     }
                 }
                 return false;
@@ -1511,13 +1438,13 @@ public:
                 foreach (ServerPlayer *player, players) {
                     if (player->getMark("@tied") > 0) {
                         player->loseMark("@tied");
-                        room->detachSkillFromPlayer(player, "lesbian_lianli-slash", true, true);
+                        room->detachSkillFromPlayer(player, "lesbianlianli-slash", true, true);
                         break;
                     }
                 }
 
                 zhangfei->gainMark("@tied");
-                room->attachSkillToPlayer(zhangfei, "lesbian_lianli-slash");
+                room->attachSkillToPlayer(zhangfei, "lesbianlianli-slash");
             }
 
             if (target->hasSkill("liqian") && target->getKingdom() != zhangfei->getKingdom())
@@ -1530,7 +1457,7 @@ public:
 class LesbianTongxin : public MasochismSkill
 {
 public:
-    LesbianTongxin() :MasochismSkill("lesbian_tongxin")
+    LesbianTongxin() :MasochismSkill("lesbiantongxin")
     {
         frequency = Frequent;
     }
@@ -1572,7 +1499,7 @@ public:
 class LesbianLianliClear : public TriggerSkill
 {
 public:
-    LesbianLianliClear() :TriggerSkill("#lesbian_lianli-clear")
+    LesbianLianliClear() :TriggerSkill("#lesbianlianli-clear")
     {
         events << Death << EventLoseSkill;
     }
@@ -1589,7 +1516,7 @@ public:
             if (death.who != player || !player->hasSkill(this))
                 return false;
         } else if (triggerEvent == EventLoseSkill) {
-            if (data.toString() != "lesbian_lianli")
+            if (data.toString() != "lesbianlianli")
                 return false;
         }
 
@@ -1597,7 +1524,7 @@ public:
             if (player->getMark("@tied") > 0) {
                 player->loseMark("@tied");
                 if (player)
-                    room->detachSkillFromPlayer(player, "lesbian_lianli-slash", true, true);
+                    room->detachSkillFromPlayer(player, "lesbianlianli-slash", true, true);
             }
         }
 
@@ -1608,7 +1535,7 @@ public:
 class LesbianFuhan : public TriggerSkill
 {
 public:
-    LesbianFuhan() : TriggerSkill("lesbian_fuhan")
+    LesbianFuhan() : TriggerSkill("lesbianfuhan")
     {
         events << EventPhaseStart;
         frequency = Limited;
@@ -1693,7 +1620,7 @@ public:
             qShuffle(all_generals);
             if (all_generals.isEmpty()) return false;
             QStringList general_list = all_generals.mid(0, qMin(5, all_generals.length()));
-            QString general_name = room->askForGeneral(player, general_list, true, "lesbian_fuhan");
+            QString general_name = room->askForGeneral(player, general_list, true, "lesbianfuhan");
             const General *general = Sanguosha->getGeneral(general_name);
             foreach (const Skill *skill, general->getVisibleSkillList()) {
                 if (skill->isLordSkill() && !player->isLord())
@@ -1752,3 +1679,75 @@ StandardmsPackage::StandardmsPackage()
 }
 
 ADD_PACKAGE(Standardms)
+
+WindmsPackage::WindmsPackage()
+    :Package("Windms")
+{
+
+    General *miansha_caoren = new General(this, "miansha_caoren", "wei"); // WEI 011
+    miansha_caoren->addSkill(new Jiuhshoou);
+    miansha_caoren->addSkill(new Jieewei);
+
+    General *miansha_zhangjiao = new General(this, "miansha_zhangjiao$", "qun", 3); // QUN 010
+    miansha_zhangjiao->addSkill(new Leirji);
+    miansha_zhangjiao->addSkill("guidao");
+    miansha_zhangjiao->addSkill("huangtian");
+
+    General *miansha_xiaoqiao = new General(this, "miansha_xiaoqiao", "wu", 3, false); // WU 011
+    miansha_xiaoqiao->addSkill(new Tianshiang);
+    miansha_xiaoqiao->addSkill(new TianshiangDraw);
+    miansha_xiaoqiao->addSkill("hongyan");
+    related_skills.insertMulti("tianshiang", "#tianshiang");
+
+    General *miansha_huangzhong = new General(this, "miansha_huangzhong", "shu"); // SHU 008
+    miansha_huangzhong->addSkill(new Liehgong);
+
+    General *miansha_xiahouyuan = new General(this, "miansha_xiahouyuan", "wei"); // WEI 008
+    miansha_xiahouyuan->addSkill(new Shernsuh);
+    miansha_xiahouyuan->addSkill(new SlashNoDistanceLimitSkill("shernsuh"));
+    related_skills.insertMulti("shernsuh", "#shernsuh-slash-ndl");
+
+    General *miansha_weiyan = new General(this, "miansha_weiyan", "shu"); // SHU 009
+    miansha_weiyan->addSkill(new Kwangguu);
+    miansha_weiyan->addSkill(new KwangguuRecord);
+    related_skills.insertMulti("kwangguu", "#kwangguu-record");
+
+    addMetaObject<TianshiangCard>();
+    addMetaObject<ShernsuhCard>();
+}
+
+ADD_PACKAGE(Windms)
+
+NostalFirePackage::NostalFirePackage()
+    :Package("NostalFire")
+{
+    General *pangde = new General(this, "nos_pangde", "qun"); // QUN 008
+    pangde->addSkill("mashu");
+    pangde->addSkill(new Mengjin);
+}
+
+ADD_PACKAGE(NostalFire)
+
+NostalThicketPackage::NostalThicketPackage()
+    :Package("NostalThicket")
+{
+    General *nos_xuhuang = new General(this, "nos_xuhuang", "wei"); // WEI 010
+    nos_xuhuang->addSkill(new Duannlyang);
+    nos_xuhuang->addSkill(new DuannlyangTargetMod);
+    related_skills.insertMulti("duannlyang", "#duannlyang-target");
+
+    General *nos_shencaocao = new General(this, "nosms_shencaocao", "god", 3);
+    nos_shencaocao->addSkill(new Gueishin);
+    nos_shencaocao->addSkill("feiying");
+}
+
+ADD_PACKAGE(NostalThicket)
+
+WestMianshaPackage::WestMianshaPackage()
+    :Package("WestMiansha")
+{
+    General *Caesar = new General(this, "caesar", "god", 4); // E.SP 001
+    Caesar->addSkill(new Conqueror);
+}
+
+ADD_PACKAGE(WestMiansha)

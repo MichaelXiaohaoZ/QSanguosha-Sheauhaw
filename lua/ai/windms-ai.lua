@@ -364,7 +364,7 @@ sgs.ai_skill_use["@@tianshiang"] = function(self, data, method)
 					and (friend:hasSkills("yiji|buqu|nosbuqu|shuangxiong|zaiqi|yinghun|jianxiong|fangzhu")
 						or self:getDamagedEffects(friend, dmg.from or self.room:getCurrent())
 						or self:needToLoseHp(friend)
-						or (friend:getHandcardNum() < 3 and (friend:hasSkill("nosrende") or (friend:hasSkill("rende") and not friend:hasUsed("RendeCard"))))) then
+						or (friend:getHandcardNum() < 3 and (friend:hasSkill("nosrernder") or (friend:hasSkill("rernder") and not friend:hasUsed("RernderCard"))))) then
 				return "@TianshiangCard=" .. card_id .. "->" .. friend:objectName()
 				elseif dmg.card and dmg.card:getTypeId() == sgs.Card_TypeTrick and friend:hasSkill("wuyan") and friend:getLostHp() > 1 then
 					return "@TianshiangCard=" .. card_id .. "->" .. friend:objectName()
@@ -400,7 +400,7 @@ sgs.ai_card_intention.TianshiangCard = function(self, card, from, tos)
 	local intention = 10
 	if hasBuquEffect(to) then intention = 0
 	elseif (to:getHp() >= 2 and to:hasSkills("yiji|shuangxiong|zaiqi|yinghun|jianxiong|fangzhu"))
-		or (to:getHandcardNum() < 3 and (to:hasSkill("nosrende") or (to:hasSkill("rende") and not to:hasUsed("RendeCard")))) then
+		or (to:getHandcardNum() < 3 and (to:hasSkill("nosrernder") or (to:hasSkill("rernder") and not to:hasUsed("RernderCard")))) then
 		intention = 0
 	end
 	sgs.updateIntention(from, to, intention)
@@ -474,6 +474,19 @@ sgs.ai_skill_invoke.conqueror= function(self, data)
 return true
 end
 
+sgs.ai_skill_invoke.mengjin = function(self, data)
+	local effect = data:toSlashEffect()
+	if self:isEnemy(effect.to) then
+		if self:doNotDiscard(effect.to) then
+			return false
+		end
+	end
+	if self:isFriend(effect.to) then
+		return self:needToThrowArmor(effect.to) or self:doNotDiscard(effect.to)
+	end
+	return not self:isFriend(effect.to)
+end
+
 sgs.ai_skill_choice.conqueror = function(self, choices, data)
 	local target = data:toPlayer()
 	if (self:isFriend(target) and not self:needToThrowArmor(target)) or (self:isEnemy(target) and target:getEquips():length() == 0) then
@@ -516,4 +529,223 @@ sgs.ai_skill_cardask["@conqueror"] = function(self, data)
 	else
 		return ".."
 	end
+end
+
+function SmartAI:shouldUseRernder()
+	if (self:hasCrossbowEffect() or self:getCardsNum("Crossbow") > 0) and self:getCardsNum("Slash") > 0 then
+		self:sort(self.enemies, "defense")
+		for _, enemy in ipairs(self.enemies) do
+			local inAttackRange = self.player:distanceTo(enemy) == 1 or self.player:distanceTo(enemy) == 2
+									and self:getCardsNum("OffensiveHorse") > 0 and not self.player:getOffensiveHorse()
+			if inAttackRange and sgs.isGoodTarget(enemy, self.enemies, self) then
+				local slashs = self:getCards("Slash")
+				local slash_count = 0
+				for _, slash in ipairs(slashs) do
+					if not self:slashProhibit(slash, enemy) and self:slashIsEffective(slash, enemy) then
+						slash_count = slash_count + 1
+					end
+				end
+				if slash_count >= enemy:getHp() then return false end
+			end
+		end
+	end
+	for _, enemy in ipairs(self.enemies) do
+		if enemy:canSlash(self.player) and not self:slashProhibit(nil, self.player, enemy) then
+			if enemy:hasWeapon("guding_blade") and self.player:getHandcardNum() == 1 and getCardsNum("Slash", enemy) >= 1 then
+				return
+			elseif self:hasCrossbowEffect(enemy) and getCardsNum("Slash", enemy) > 1 and self:getOverflow() <= 0 then
+				return
+			end
+		end
+	end
+	for _, player in ipairs(self.friends_noself) do
+		if (player:hasSkill("haoshi") and not player:containsTrick("supply_shortage")) or player:hasSkill("jijiu") then
+			return true
+		end
+	end
+	local keepNum = 1
+	if self.player:getMark("rernder") == 0 and self.player:getMark("nosrernder") == 0 then
+		if self.player:getHandcardNum() == 3 then
+			keepNum = 0
+		end
+		if self.player:getHandcardNum() > 3 then
+			keepNum = 3
+		end
+	end
+	if self.player:hasSkill("kongcheng") then
+		keepNum = 0
+	end
+	if self:getOverflow() > 0  then
+		return true
+	end
+	if self.player:getHandcardNum() > keepNum  then
+		return true
+	end
+	if self.player:getMark("rernder") ~= 0 and self.player:getMark("rernder") < 2
+		and (2 - self.player:getMark("rernder")) >=  (self.player:getHandcardNum() - keepNum) then
+		return true
+	end
+	if self.player:getMark("nosrernder") ~= 0 and self.player:getMark("nosrernder") < 2
+		and (2 - self.player:getMark("nosrernder")) >=  (self.player:getHandcardNum() - keepNum) then
+		return true
+	end
+end
+
+local rernder_skill = {}
+rernder_skill.name = "rernder"
+table.insert(sgs.ai_skills, rernder_skill)
+rernder_skill.getTurnUseCard = function(self)
+	if self.player:hasUsed("RernderCard") or self.player:isKongcheng() then return end
+	local mode = string.lower(global_room:getMode())
+	if self.player:getMark("rernder") > 1 and mode:find("04_1v3") then return end
+
+	if self:shouldUseRernder() then
+		return sgs.Card_Parse("@RernderCard=.")
+	end
+end
+
+sgs.ai_skill_use_func.RernderCard = function(card, use, self)
+	local cards = sgs.QList2Table(self.player:getHandcards())
+	self:sortByUseValue(cards, true)
+
+	local notFound
+	for i = 1, #cards do
+		local card, friend = self:getCardNeedPlayer(cards)
+		if card and friend then
+			cards = self:resetCards(cards, card)
+		else
+			notFound = true
+			break
+		end
+
+		if friend:objectName() == self.player:objectName() or not self.player:getHandcards():contains(card) then continue end
+		local canJijiang = self.player:hasLordSkill("jijiang") and friend:getKingdom() == "shu"
+		if card:isAvailable(self.player) and ((card:isKindOf("Slash") and not canJijiang) or card:isKindOf("Duel") or card:isKindOf("Snatch") or card:isKindOf("Dismantlement")) then
+			local dummy_use = { isDummy = true, to = sgs.SPlayerList() }
+			local cardtype = card:getTypeId()
+			self["use" .. sgs.ai_type_name[cardtype + 1] .. "Card"](self, card, dummy_use)
+			if dummy_use.card and dummy_use.to:length() > 0 then
+				if card:isKindOf("Slash") or card:isKindOf("Duel") then
+					local t1 = dummy_use.to:first()
+					if dummy_use.to:length() > 1 then continue
+					elseif t1:getHp() == 1 or sgs.card_lack[t1:objectName()]["Jink"] == 1
+							or t1:isCardLimited(sgs.Sanguosha:cloneCard("jink"), sgs.Card_MethodResponse) then continue
+					end
+				elseif (card:isKindOf("Snatch") or card:isKindOf("Dismantlement")) and self:getEnemyNumBySeat(self.player, friend) > 0 then
+					local hasDelayedTrick
+					for _, p in sgs.qlist(dummy_use.to) do
+						if self:isFriend(p) and (self:willSkipDrawPhase(p) or self:willSkipPlayPhase(p)) then hasDelayedTrick = true break end
+					end
+					if hasDelayedTrick then continue end
+				end
+			end
+		elseif card:isAvailable(self.player) and self:getEnemyNumBySeat(self.player, friend) > 0 and (card:isKindOf("Indulgence") or card:isKindOf("SupplyShortage")) then
+			local dummy_use = { isDummy = true }
+			self:useTrickCard(card, dummy_use)
+			if dummy_use.card then continue end
+		end
+
+		if friend:hasSkill("enyuan") and #cards >= 1 and not (self.room:getMode() == "04_1v3" and self.player:getMark("rernder") == 1) then
+			use.card = sgs.Card_Parse("@RernderCard=" .. card:getId() .. "+" .. cards[1]:getId())
+		else
+			use.card = sgs.Card_Parse("@RernderCard=" .. card:getId())
+		end
+		if use.to then use.to:append(friend) end
+		return
+	end
+
+	if notFound then
+		local pangtong = self.room:findPlayerBySkillName("manjuan")
+		if not pangtong then return end
+		local cards = sgs.QList2Table(self.player:getHandcards())
+		self:sortByUseValue(cards, true)
+		if self.player:isWounded() and self.player:getHandcardNum() > 3 and self.player:getMark("rernder") < 2 then
+			local to_give = {}
+			for _, card in ipairs(cards) do
+				if not isCard("Peach", card, self.player) and not isCard("ExNihilo", card, self.player) then table.insert(to_give, card:getId()) end
+				if #to_give == 2 - self.player:getMark("rernder") then break end
+			end
+			if #to_give > 0 then
+				use.card = sgs.Card_Parse("@RernderCard=" .. table.concat(to_give, "+"))
+				if use.to then use.to:append(pangtong) end
+			end
+		end
+	end
+end
+
+sgs.ai_use_value.RernderCard = 8.5
+sgs.ai_use_priority.RernderCard = 8.8
+
+sgs.ai_card_intention.RernderCard = function(self,card, from, tos)
+	local to = tos[1]
+	local intention = -70
+	if hasManjuanEffect(to) then
+		intention = 0
+	elseif to:hasSkill("kongcheng") and to:isKongcheng() then
+		intention = 30
+	end
+	sgs.updateIntention(from, to, intention)
+end
+
+sgs.dynamic_value.benefit.RernderCard = true
+
+sgs.ai_skill_use["@@rernder"] = function(self, prompt)
+	local cards = {}
+	local rernder_list = self.player:property("rernder"):toString():split("+")
+	for _, id in ipairs(rernder_list) do
+		local num_id = tonumber(id)
+		local hcard = sgs.Sanguosha:getCard(num_id)
+		if hcard then table.insert(cards, hcard) end
+	end
+	if #cards == 0 then return "." end
+	self:sortByUseValue(cards, true)
+
+	for i = 1, #cards do
+		local card, friend = self:getCardNeedPlayer(cards)
+		if card and friend then
+			cards = self:resetCards(cards, card)
+		else return "." end
+
+		if friend:objectName() == self.player:objectName() or not self.player:getHandcards():contains(card) then continue end
+		local canJijiang = self.player:hasLordSkill("jijiang") and friend:getKingdom() == "shu"
+		if card:isAvailable(self.player) and ((card:isKindOf("Slash") and not canJijiang) or card:isKindOf("Duel") or card:isKindOf("Snatch") or card:isKindOf("Dismantlement")) then
+			local dummy_use = { isDummy = true, to = sgs.SPlayerList() }
+			local cardtype = card:getTypeId()
+			self["use" .. sgs.ai_type_name[cardtype + 1] .. "Card"](self, card, dummy_use)
+			if dummy_use.card and dummy_use.to:length() > 0 then
+				if card:isKindOf("Slash") or card:isKindOf("Duel") then
+					local t1 = dummy_use.to:first()
+					if dummy_use.to:length() > 1 then continue
+					elseif t1:getHp() == 1 or sgs.card_lack[t1:objectName()]["Jink"] == 1
+							or t1:isCardLimited(sgs.Sanguosha:cloneCard("jink"), sgs.Card_MethodResponse) then continue
+					end
+				elseif (card:isKindOf("Snatch") or card:isKindOf("Dismantlement")) and self:getEnemyNumBySeat(self.player, friend) > 0 then
+					local hasDelayedTrick
+					for _, p in sgs.qlist(dummy_use.to) do
+						if self:isFriend(p) and (self:willSkipDrawPhase(p) or self:willSkipPlayPhase(p)) then hasDelayedTrick = true break end
+					end
+					if hasDelayedTrick then continue end
+				end
+			end
+		elseif card:isAvailable(self.player) and self:getEnemyNumBySeat(self.player, friend) > 0 and (card:isKindOf("Indulgence") or card:isKindOf("SupplyShortage")) then
+			local dummy_use = { isDummy = true }
+			self:useTrickCard(card, dummy_use)
+			if dummy_use.card then continue end
+		end
+
+		local usecard
+		if friend:hasSkill("enyuan") and #cards >= 1 and not (self.room:getMode() == "04_1v3" and self.player:getMark("nosrernder") == 1) then
+			usecard = "@RernderCard=" .. card:getId() .. "+" .. cards[1]:getId()
+		else
+			usecard = "@RernderCard=" .. card:getId()
+		end
+		if usecard then return usecard .. "->" .. friend:objectName() end
+	end
+
+end
+
+sgs.ai_skill_askforchingjean = function(self, card_ids)
+	local move_skill = self.player:getTag("ChingjeanCurrentMoveSkill"):toString()
+	if move_skill == "rende" or move_skill == "nosrende" then return nil, -1 end
+	return sgs.ai_skill_askforyiji.nosyiji(self, card_ids)
 end

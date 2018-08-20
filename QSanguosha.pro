@@ -146,7 +146,8 @@ SOURCES += \
     src/package/wisdom.cpp \
     src/package/yitian.cpp \
     src/package/yjcmnos.cpp \
-    src/scenario/miniscenarios.cpp
+    src/scenario/miniscenarios.cpp \
+    src/package/dragonboat.cpp
 
 HEADERS += \
     src/client/aux-skills.h \
@@ -285,7 +286,8 @@ HEADERS += \
     src/package/tw.h \
     src/package/wisdom.h \
     src/package/yitian.h \
-    src/package/yjcmnos.h
+    src/package/yjcmnos.h \
+    src/package/dragonboat.h
 
 FORMS += \
     src/dialog/cardoverview.ui \

@@ -29,6 +29,7 @@ config = {
 		"LimitationBroken",
 		"DerivativeCard",
         "BestLoyalistCard",
+		"DragonBoatCard",
 		"New3v3Card",
 		"New3v3_2013Card",
 		"New1v1Card",
@@ -68,6 +69,7 @@ config = {
 		"JSP",
         "BestLoyalist",
 		"JianGeDefense",
+		"DragonBoat",
 		"BossMode",
 		"TrialOfGod",
 		"Special3v3",
@@ -75,6 +77,7 @@ config = {
 		"Special1v1",
 		"Special1v1Ext",
 		
+		"SPCard",
 		"BGM",
 		"WestMiansha",
 		"Hegemony",
@@ -341,7 +344,7 @@ config = {
 		"liubiao->miansha_liubiao",
 		"guanyinping->nos_guanyinping",
 		"zhangbao->nos_zhangbao",
-		"zhangxingcai->nos_xingcai",
+		"xingcai->nos_xingcai",
 		"sunluyu->nos_sunluyu",
 		"maliang->nos_maliang",
 		"liuxie->diy_liuxie",
@@ -363,7 +366,7 @@ config = {
 		"xiahouba->twyj_xiahouba",
 		"zumao->twyj_zumao",
 		"caoang->twyj_caoang",
-		
+		"madai->miansha_madai",
 		"xuchu->neo_xuchu",
 		"caoren->neo_caoren",
 		"guanyu->neo_guanyu",
@@ -371,6 +374,8 @@ config = {
 		--"xuyou->wis_xuyou",
 		"huaxiong->wis_huaxiong",
 		"tianfeng->wis_tianfeng",
+		"jiangwanfeiyi->new_jiangwanfeiyi",
+		"mayunlu->nos_mayunlu",
 	},
 
 	removed_hidden_generals = {
@@ -419,7 +424,11 @@ config = {
     best_loyalist_sets = {
         first = "cuiyan+huangfusong",
         seconds = "dianwei+caoang+xuchu+zhangfei+zhaoyun+jiangwei+huanggai+zumao+zhoutai+chengong+diaochan+jvshou",
-        cards_ban = "snatch+supply_shortage+amazing_grace+ex_nihilo",
+        cards_ban = "snatch+supply_shortage+amazing_grace+ex_nihilo+collateral+nullification+lightning+qinggang_sword+blade+eight_diagram",
+    },
+	
+    dragon_ban_cards = {
+        cards = "peach+analeptic+ex_nihilo+indulgence+supply_shortage+amazing_grace+god_salvation+archery_attack+savage_assault+crossbow+deluge+earthquake+mudslide+typhoon+volcano+lightning",
     },
 
     zdyj_ban = {
@@ -433,5 +442,35 @@ config = {
         "zuoci",
         "yuanshu",
         "huanghao",
-    }
+    },
+	
+	dragon_ban = {
+		"zuoci",
+		"yuanshu",
+		"sp_jiaxu",
+		"buzhi",
+		"lingju",
+		"as_lingju",
+		"huanghao",
+		"xunyou",
+		"guohuanghou",
+		"zhangrang",
+		"yuanshao",
+		"liru",
+		"caopi",
+		"manchong",
+		"caiwenji",
+		"xuhuang",
+		"nos_xuhuang",
+		"daqiao",
+		"nos_daqiao",
+		"zhangchunhua",
+		"miansha_zhangchunhua",
+		"zhugeke",
+		"nos_huanggai",
+		"hanhaoshihuan",
+		"xiahoujuan",
+		"twyj_xiahouba",
+		"liuqi",
+	}
 }

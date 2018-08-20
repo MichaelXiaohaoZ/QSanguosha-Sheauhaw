@@ -265,6 +265,8 @@ void PlayerCardContainer::updateAvatar()
         // for luboyan
         if (name == "luboyan" && m_player->isFemale())
             name = "luboyanf";
+        if (name == "zuoci" && m_player->isFemale())
+            name = "zuocif";
         QPixmap avatarIcon = getHeadAvatarIcon(name);
 
         _paintPixmap(avatarIconTmp, _m_layout->m_avatarArea, avatarIcon, _getAvatarParent());

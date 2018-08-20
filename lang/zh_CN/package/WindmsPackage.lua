@@ -101,8 +101,6 @@ return {
 	["&nosms_shencaocao"] = "神曹操",
 	["gueishin"] = "归心",
 	[":gueishin"] = "当你受到1点伤害后，你可以获得每名其他角色区域里的一张牌，然后翻面。",
-	[":gueishin_down"] = "当你受到1点伤害后，你可以选择一个区，然后获得每名其他角色区域里的此区的一张牌，然后翻面。 ",
-	["$GueishinAnimate"] = "image=image/animate/gueishin.png",
 	
 	
 }

@@ -337,10 +337,10 @@ Engine::Engine(bool isManualMode)
     modes["10pd"] = tr("10 players");
     modes["10p"] = tr("10 players (1 renegade)");
     modes["10pz"] = tr("10 players (0 renegade)");
-    //modes["11p"] = tr("11 players");
-    //modes["12pd"] = tr("12 players");
-    //modes["12p"] = tr("12 players (1 renegade)");
-    //modes["12pz"] = tr("12 players (0 renegade)");
+    modes["11p"] = tr("11 players");
+    modes["12pd"] = tr("12 players");
+    modes["12p"] = tr("12 players (1 renegade)");
+    modes["12pz"] = tr("12 players (0 renegade)");
 
     foreach (const Skill *skill, skills.values()) {
         Skill *mutable_skill = const_cast<Skill *>(skill);
@@ -779,6 +779,8 @@ void Engine::setExtraGeneralsBan()
         ban_list.append(Config.value("Banlist/BossMode", "").toStringList());
     else if (ServerInfo.GameMode == "08_zdyj")
         ban_list.append(Config.value("Banlist/BestLoyalist", "").toStringList());
+    else if (ServerInfo.GameMode == "08_dragonboat")
+        ban_list.append(Config.value("Banlist/DragonBoat", "").toStringList());
     else if (ServerInfo.GameMode == "02_1v1")
         ban_list.append(Config.value("Banlist/1v1", "").toStringList());
     else if (Config.GameMode == "zombie_mode")
@@ -950,7 +952,7 @@ QString Engine::getVersionName() const
 
 QString Engine::getMODName() const
 {
-    return "ChangerSheauhaw";
+    return tr("GoldWind");
 }
 
 QStringList Engine::getExtensions() const
@@ -1122,7 +1124,7 @@ QString Engine::getRoles(const QString &mode) const
     } else if (mode == "08_hongyan") {
         return "ZCCFFFFN";
     } else if (mode == "08_dragonboat") {
-        return "EESSUUQQ";
+        return "WWSSUUQQ";
     }
 
     if (modes.contains(mode) || isNormalGameMode(mode)) { // hidden pz settings?
@@ -1187,20 +1189,22 @@ QStringList Engine::getRoleList(const QString &mode) const
 {
     QString roles = getRoles(mode);
     QStringList role_list;
-    if (roles == "EESSUUQQ")
-        role_list << "dragon_wei" << "dragon_wei" << "dragon_shu" << "dragon_shu"
-                  << "dragon_wu" << "dragon_wu" << "dragon_qun" << "dragon_qun";
-    else
-        for (int i = 0; roles[i] != '\0'; i++) {
-            QString role;
-            switch (roles[i].toLatin1()) {
-            case 'Z': role = "lord"; break;
-            case 'C': role = "loyalist"; break;
-            case 'N': role = "renegade"; break;
-            case 'F': role = "rebel"; break;
-            }
-            role_list << role;
+    QStringList dragon_list;
+    for (int i = 0; roles[i] != '\0'; i++) {
+        QString role;
+        switch (roles[i].toLatin1()) {
+        case 'Z': role = "lord"; break;
+        case 'C': role = "loyalist"; break;
+        case 'N': role = "renegade"; break;
+        case 'F': role = "rebel"; break;
+        default:
+            dragon_list << "dragon_shu" << "dragon_shu" << "dragon_wei" << "dragon_wei"
+                      << "dragon_wu" << "dragon_wu" << "dragon_qun" << "dragon_qun";
+            return dragon_list;
+            break;
         }
+        role_list << role;
+    }
     return role_list;
 }
 
@@ -1468,7 +1472,7 @@ QStringList Engine::getRandomFemaleGenerals(int count, const QSet<QString> &ban_
 
 QList<int> Engine::getRandomCards() const
 {
-    bool exclude_disaters = false, using_2012_3v3 = false, using_2013_3v3 = false, exclude_zdyj = false;
+    bool exclude_disaters = false, using_2012_3v3 = false, using_2013_3v3 = false, exclude_zdyj = false, exclude_dragonboat = false;
     QStringList extra_ban = QStringList();
 
     if (Config.GameMode == "06_3v3") {
@@ -1483,6 +1487,13 @@ QList<int> Engine::getRandomCards() const
     if (Config.GameMode == "08_zdyj") {
         exclude_zdyj = true;
         extra_ban << Config.BestLoyalistSets["cards_ban"];
+    }
+
+    if (Config.GameMode == "08_dragonboat")
+    {
+        exclude_dragonboat = true;
+        exclude_disaters = false;
+        extra_ban << Config.DragonBoatBanC["cards"];
     }
 
     QList<int> list;
@@ -1510,6 +1521,8 @@ QList<int> Engine::getRandomCards() const
         else if (card->getPackage() == "New3v3_2013Card" && using_2013_3v3)
             list << card->getId();
         else if (card->getPackage() == "BestLoyalistCard" && exclude_zdyj)
+            list << card->getId();
+        else if (card->getPackage() == "DragonBoatCard" && exclude_dragonboat)
             list << card->getId();
 
         if (Config.GameMode == "02_1v1" && !Config.value("1v1/UsingCardExtension", false).toBool()) {

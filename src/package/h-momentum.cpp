@@ -182,9 +182,6 @@ bool CunsiCard::targetFilter(const QList<const Player *> &targets, const Player 
 void CunsiCard::onEffect(const CardEffectStruct &effect) const
 {
     Room *room = effect.from->getRoom();
-    //room->doLightbox("$CunsiAnimate", 3000);
-
-    room->doSuperLightbox("mifuren", "cunsi");
 
     room->handleAcquireDetachSkills(effect.from, "-guixiu|-cunsi");
 
@@ -462,10 +459,6 @@ public:
                 if (dongzhuo->getMark("HengzhengUsed") == 0)
                     dongzhuo->setMark("HengzhengUsed", 1);
                 QList<ServerPlayer *> players = room->getOtherPlayers(dongzhuo);
-                /*if (players.length() >= 4)
-                    room->doLightbox("$HengzhengAnimate");*/
-
-                room->doSuperLightbox("heg_dongzhuo", "hengzheng");
 
                 foreach (ServerPlayer *player, players) {
                     if (player->isAlive() && !player->isAllNude()) {
@@ -514,9 +507,6 @@ public:
         room->sendLog(log);
 
         room->broadcastSkillInvoke(objectName());
-        //room->doLightbox("$BaolingAnimate");
-
-        room->doSuperLightbox("heg_dongzhuo", "baoling");
 
         room->setPlayerMark(player, "baoling", 1);
         if (room->changeMaxHpForAwakenSkill(player, 3)) {
@@ -638,6 +628,7 @@ HMomentumPackage::HMomentumPackage()
     heg_dongzhuo->addSkill(new Hengzheng);
     heg_dongzhuo->addSkill(new Baoling);
     heg_dongzhuo->addSkill("baonue");
+    heg_dongzhuo->addRelateSkill("benghuai");
 
     General *zhangren = new General(this, "zhangren", "qun", 4); // QUN 024
     zhangren->addSkill(new Chuanxin);

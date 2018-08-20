@@ -455,6 +455,9 @@ void MainWindow::on_actionAbout_triggered()
         "\"A Short Song\" by Cao Cao");
     content.append(QString("<p align='right'><i>%1</i></p>").arg(poem));
 
+    QString Qixipoem = tr("When Gold Wind meets Yulu together, it beats the whole world. <br/> \"Queqiao Xian\" by Qin Guan");
+    content.append(QString("<p align='right'><i>%1</i></p>").arg(Qixipoem));
+
     // Cao Cao's signature
     //QString signature = tr("\"A Short Song\" by Cao Cao");
     //content.append(QString("<p align='right'><i>%1</i></p>").arg(signature));

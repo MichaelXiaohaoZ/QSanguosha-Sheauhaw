@@ -243,6 +243,8 @@ public:
     bool broadcastResetCard(const QList<ServerPlayer *> &players, int cardId);
 
     bool broadcastProperty(ServerPlayer *player, const char *property_name, const QString &value = QString());
+    bool broadcastProperty(const QList<ServerPlayer *> &players, ServerPlayer *player, const char *property_name, const QString &value = QString());
+    bool broadcastProperty(ServerPlayer *target, ServerPlayer *player, const char *property_name, const QString &value = QString());
     void notifySkillInvoked(ServerPlayer *player, const QString &skill_name);
 	void broadcastSkillInvoke(const QString &skillName, const ServerPlayer *player = NULL, int type = -1);
     bool broadcastSkillInvoke(const QString &skillName, const ServerPlayer *player, const QList<int> &types);
@@ -427,8 +429,13 @@ public:
     void setTurn(int turn);
     void incTurn();
     inline int getTurn() const { return m_turn; }
-    void setPlayerShwonRole(ServerPlayer *player, bool show);
+    void setPlayerShownRole(ServerPlayer *player, bool show);
+
     void changeLesbianSkill();
+    int getBoatTreasure(const QString &kingdom);
+    void speakRanks(bool over = false);
+    int getTreasureRank(const QString &kingdom);
+    QString getRankKingdom(int rank);
 
 protected:
     virtual void run();
@@ -590,10 +597,12 @@ private:
     void assignGeneralsForPlayers(const QList<ServerPlayer *> &to_assign);
     void assignGeneralsForPlayersOfJianGeDefenseMode(const QList<ServerPlayer *> &to_assign);
     void assignGeneralsForPlayersOfHongyanRace(const QList<ServerPlayer *> &to_assign);
+    void assignGeneralsForPlayersOfDragonBoatRace(const QList<ServerPlayer *> &to_assign);
     void chooseGenerals(QList<ServerPlayer *> players = QList<ServerPlayer *>());
     void chooseGeneralsOfJianGeDefenseMode();
     void chooseGeneralsOfBestLoyalistMode(QList<ServerPlayer *> players = QList<ServerPlayer *>());
     void chooseGeneralsOfHongyanRace(QList<ServerPlayer *> players = QList<ServerPlayer *>());
+    void chooseGeneralsOfDragonBoatRace(QList<ServerPlayer *> players = QList<ServerPlayer *>());
     AI *cloneAI(ServerPlayer *player);
     void broadcast(const QByteArray &message, ServerPlayer *except = NULL);
     void initCallbacks();
@@ -615,6 +624,7 @@ private:
 	
 	static bool isSkillValidForPlayer(const ServerPlayer *player, const Skill *skill);
     int m_turn;
+
 
 private slots:
     void endaskfornull();

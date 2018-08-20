@@ -221,6 +221,7 @@ public:
         if (!room->askForSkillInvoke(weiwudi, objectName()))
             return false;
 
+        room->broadcastSkillInvoke(objectName());
         QString choice = room->askForChoice(weiwudi, objectName(), "modify+obtain");
 
         int index = qrand() % 2;
@@ -235,7 +236,6 @@ public:
             QString old_kingdom = to_modify->getKingdom();
             room->setPlayerProperty(to_modify, "kingdom", kingdom);
 
-            room->broadcastSkillInvoke(objectName());
 
             LogMessage log;
             log.type = "#ChangeKingdom";
@@ -245,7 +245,6 @@ public:
             log.arg2 = kingdom;
             room->sendLog(log);
         } else if (choice == "obtain") {
-            room->broadcastSkillInvoke(objectName());
             QStringList lords = Sanguosha->getLords();
             foreach (ServerPlayer *player, room->getAlivePlayers()) {
                 QString name = player->getGeneralName();
@@ -340,8 +339,7 @@ public:
         if (pindian->reason == "jueji") {
             if (pindian->isSuccess()) {
                 player->obtainCard(pindian->to_card);
-            } else
-                room->broadcastSkillInvoke(objectName());
+            }
         }
 
         return false;
@@ -424,8 +422,6 @@ public:
 
         room->broadcastSkillInvoke(objectName());
         room->notifySkillInvoked(lukang, objectName());
-        //room->doLightbox("$KegouAnimate", 4000);
-        room->doSuperLightbox("lukang", "kegou");
         room->setPlayerMark(lukang, objectName(), 1);
 
         if (room->changeMaxHpForAwakenSkill(lukang) && lukang->getMark(objectName()) > 0)
@@ -436,42 +432,6 @@ public:
 };
 
 // ---------- Lianli related skills
-/*
-
-LianliCard::LianliCard(){
-
-}
-
-bool LianliCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-return targets.isEmpty() && to_select->isMale();
-}
-
-void LianliCard::onEffect(const CardEffectStruct &effect) const{
-Room *room = effect.from->getRoom();
-
-LogMessage log;
-log.type = "#LianliConnection";
-log.from = effect.from;
-log.to << effect.to;
-room->sendLog(log);
-
-if(effect.from->getMark("@tied") == 0)
-effect.from->gainMark("@tied");
-
-if(effect.to->getMark("@tied") == 0){
-QList<ServerPlayer *> players = room->getOtherPlayers(effect.from);
-foreach(ServerPlayer *player, players){
-if(player->getMark("@tied") > 0){
-player->loseMark("@tied");
-break;
-}
-}
-
-effect.to->gainMark("@tied");
-}
-}
-*/
-
 LianliSlashCard::LianliSlashCard()
 {
 
@@ -912,7 +872,7 @@ public:
             xuandi->gainMark("@" + choice);
             xuandi->tag["wuling"] = choice;
 
-            room->broadcastSkillInvoke(objectName());
+            room->broadcastSkillInvoke(objectName(), xuandi, effects.indexOf(choice) + 1);
         }
 
         return false;
@@ -1448,9 +1408,6 @@ void XunzhiytCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &
 {
     int index = qrand() % 2 + 1;
     room->broadcastSkillInvoke("xunzhiyt");
-    //room->doLightbox("$XunzhiytAnimate");
-    //room->getThread()->delay(2000);
-    room->doSuperLightbox("jiangboyue", "xunzhi");
     source->drawCards(3);
 
     QList<ServerPlayer *> players = room->getAlivePlayers();
@@ -1711,13 +1668,13 @@ public:
             //dengshizai->gainAnExtraTurn();
             room->setCurrent(dengshizai);
             RoomThread *roomthread = room->getThread();
-            LogMessage log;
-            log.type = "$AppendSeparator";
-            room->sendLog(log);
             roomthread->trigger(TurnStart, room, dengshizai);
 
             dengshizai->turnOver();
             room->setCurrent(player);
+            LogMessage log;
+            log.type = "$AppendSeparator";
+            room->sendLog(log);
         }
 
         return false;
@@ -2161,6 +2118,11 @@ YitianPackage::YitianPackage()
     luboyan->addSkill(new Shenjun);
     luboyan->addSkill(new Shaoying);
     luboyan->addSkill(new Zonghuo);
+
+    General *luboyanf = new General(this, "luboyanf", "wu", 3, false, true);
+    luboyanf->addSkill("shenjun");
+    luboyanf->addSkill("shaoying");
+    luboyanf->addSkill("zonghuo");
 
     General *zhongshiji = new General(this, "zhongshiji", "wei");
     zhongshiji->addSkill(new Gongmou);

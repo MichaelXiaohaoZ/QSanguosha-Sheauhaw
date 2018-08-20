@@ -146,6 +146,15 @@ void Slash::onUse(Room *room, const CardUseStruct &card_use) const
         log.from = use.from;
         log.to << use.to;
         room->sendLog(log);
+    } else if (use.from->hasFlag("MoonspearUse")) {
+        use.from->setFlags("-MoonspearUse");
+        room->setEmotion(player, "weapon/moonspear");
+
+        LogMessage log;
+        log.type = "#InvokeSkill";
+        log.from = use.from;
+        log.arg = "moon_spear";
+        room->sendLog(log);
     } else if (use.to.size() > 1 && player->hasWeapon("halberd") && player->isLastHandCard(this)) {
         room->setEmotion(player, "weapon/halberd");
         room->notifySkillInvoked(player, "halberd");

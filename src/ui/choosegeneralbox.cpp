@@ -125,7 +125,7 @@ ChooseGeneralBox::ChooseGeneralBox()
     confirm->setEnabled(ClientInstance->getReplayer());
     confirm->setParentItem(this);
     connect(confirm, &Button::clicked, this, &ChooseGeneralBox::reply);
-	_m_convert_items = QMap<QString, QList<GeneralCardItem *> >();
+    _m_convert_items = QMap<QString, QList<GeneralCardItem *> >();
 	_m_current_convert_name = QString();
 }
 
@@ -276,7 +276,7 @@ void ChooseGeneralBox::chooseGeneral(const QStringList &_generals, bool view_onl
             all_generals.removeOne(general);
 			general.chop(6);
             lord_name = general;
-		}
+        }
     }
 
     QStringList generals;
@@ -450,7 +450,7 @@ void ChooseGeneralBox::chooseGeneral(const QStringList &_generals, bool view_onl
 		card_item->setExpandType(GeneralCardItem::ExpandNone);
 		if (convert_enabled) {
             createConvertion(card_item, i < first_row, all_generals);
-			if (_m_convert_items.contains(card_item->objectName()))
+            if (_m_convert_items.contains(card_item->objectName()))
 				card_item->setExpandType((i < first_row) ? GeneralCardItem::ExpandUp : GeneralCardItem::ExpandDown);
 		}
         
@@ -609,15 +609,15 @@ void ChooseGeneralBox::showConvertion()
 
 void ChooseGeneralBox::changeConvertion(const QString &general_name, bool show)
 {
-	if (!_m_convert_items.contains(general_name)) return;
+    if (!_m_convert_items.contains(general_name)) return;
     QList<GeneralCardItem *> convert_items = _m_convert_items.value(general_name);
-	foreach(GeneralCardItem *card_item, convert_items)
+    foreach(GeneralCardItem *card_item, convert_items)
 		card_item->setVisible(show);
 }
 
 void ChooseGeneralBox::createConvertion(GeneralCardItem *card_item, bool first_row, QStringList all_generals)
 {
-	QList<GeneralCardItem *> convert_items;
+    QList<GeneralCardItem *> convert_items;
 	QString	general_name = card_item->objectName();
     QStringList convert_names = Sanguosha->getConvertGenerals(general_name);
     int i = 0;
@@ -635,12 +635,12 @@ void ChooseGeneralBox::createConvertion(GeneralCardItem *card_item, bool first_r
         general_item->setHomePos(pos);
 		connect(general_item, SIGNAL(clicked()), this, SLOT(reply()));
         general_item->setVisible(false);
-		convert_items << general_item;
+        convert_items << general_item;
         i++;
 	}
 
-	if (!convert_items.isEmpty())
-		_m_convert_items[general_name] = convert_items;
+    if (!convert_items.isEmpty())
+        _m_convert_items[general_name] = convert_items;
 }
 
 void ChooseGeneralBox::reply()

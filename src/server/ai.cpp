@@ -92,6 +92,27 @@ AI::Relation AI::GetRelation(const ServerPlayer *a, const ServerPlayer *b)
         map_bad = map;
         map_bad.set("renegade", "loyalist", Neutrality, true);
         map_bad.set("renegade", "rebel", Enemy, true);
+
+        map.set("dragon_wei", "dragon_wei", Friend);
+        map.set("dragon_wei", "dragon_shu", Enemy);
+        map.set("dragon_wei", "dragon_wu", Enemy);
+        map.set("dragon_wei", "dragon_qun", Enemy);
+
+        map.set("dragon_shu", "dragon_wei", Enemy);
+        map.set("dragon_shu", "dragon_shu", Friend);
+        map.set("dragon_shu", "dragon_wu", Enemy);
+        map.set("dragon_shu", "dragon_qun", Enemy);
+
+        map.set("dragon_wu", "dragon_wei", Enemy);
+        map.set("dragon_wu", "dragon_shu", Enemy);
+        map.set("dragon_wu", "dragon_wu", Friend);
+        map.set("dragon_wu", "dragon_qun", Enemy);
+
+        map.set("dragon_qun", "dragon_wei", Enemy);
+        map.set("dragon_qun", "dragon_shu", Enemy);
+        map.set("dragon_qun", "dragon_wu", Enemy);
+        map.set("dragon_qun", "dragon_qun", Friend);
+
     }
 
     if (a->aliveCount() == 2) {

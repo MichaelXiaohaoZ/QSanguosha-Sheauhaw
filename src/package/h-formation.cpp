@@ -368,6 +368,25 @@ public:
     }
 };
 
+class NewShengxi : public TriggerSkill
+{
+public:
+    NewShengxi() : TriggerSkill("newshengxi")
+    {
+        events << EventPhaseStart;
+        frequency = Frequent;
+    }
+
+    bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const
+    {
+        if (player->getPhase() == Player::Discard && player->getMark("damage_point_play_phase") == 0 && player->askForSkillInvoke(this)) {
+            room->broadcastSkillInvoke(objectName());
+            player->drawCards(2, objectName());
+        }
+        return false;
+    }
+};
+
 class Shoucheng : public TriggerSkill
 {
 public:
@@ -686,6 +705,10 @@ HFormationPackage::HFormationPackage()
     General *heg_jiangwei = new General(this, "heg_jiangwei", "shu"); // SHU 012 G
     heg_jiangwei->addSkill("tiaoxin");
     heg_jiangwei->addSkill(new Tianfu);
+
+    General *newjiangwanfeiyi = new General(this, "new_jiangwanfeiyi", "shu", 3);
+    newjiangwanfeiyi->addSkill(new NewShengxi);
+    newjiangwanfeiyi->addSkill("shoucheng");
 
     General *jiangwanfeiyi = new General(this, "jiangwanfeiyi", "shu", 3); // SHU 018
     jiangwanfeiyi->addSkill(new Shengxi);

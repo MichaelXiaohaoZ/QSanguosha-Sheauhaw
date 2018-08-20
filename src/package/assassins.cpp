@@ -410,8 +410,6 @@ public:
         player->setFlags("-NosFenxinTarget");
         if (invoke) {
             room->broadcastSkillInvoke(objectName());
-            //room->doLightbox("$FenxinAnimate");
-            room->doSuperLightbox("lingju", "fenxin");
             room->removePlayerMark(killer, "@burnheart");
             QString role1 = killer->getRole();
             killer->setRole(player->getRole());

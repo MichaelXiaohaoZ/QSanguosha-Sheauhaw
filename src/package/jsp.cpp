@@ -104,8 +104,6 @@ public:
         Room *room = target->getRoom();
         if (room->getLord() != NULL && room->getLord()->getGeneral() && (room->getLord()->getGeneralName().contains("caocao") || room->getLord()->getGeneral2Name().contains("caocao")))
         room->broadcastSkillInvoke(objectName());
-        //room->doLightbox("$JspdanjiAnimate");
-        room->doSuperLightbox("jsp_guanyu", "jspdanji");
         room->setPlayerMark(target, objectName(), 1);
         if (room->changeMaxHpForAwakenSkill(target) && target->getMark(objectName()) > 0)
             room->handleAcquireDetachSkills(target, "mashu");
@@ -213,7 +211,6 @@ public:
             return false;
 
         room->broadcastSkillInvoke(objectName());
-        room->doSuperLightbox("jsp_zhaoyun", "suiren");
         room->setPlayerMark(target, "@suiren", 0);
         
         room->handleAcquireDetachSkills(target, "-yicong");
@@ -561,9 +558,6 @@ public:
         room->sendLog(log);
 
         room->broadcastSkillInvoke(objectName());
-        //room->doLightbox("$WuujihAnimate", 4000);
-
-        room->doSuperLightbox("guanyinping", "wuujih");
 
         room->setPlayerMark(player, "wuujih", 1);
         if (room->changeMaxHpForAwakenSkill(player, 1)) {
@@ -963,9 +957,192 @@ public:
     }
 };
 
+class NosFengpoRecord : public TriggerSkill
+{
+public:
+    NosFengpoRecord() : TriggerSkill("#nosfengpo-record")
+    {
+        events << EventPhaseChanging << PreCardUsed << CardResponded;
+        global = true;
+    }
+
+    bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL;
+    }
+
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (triggerEvent == EventPhaseChanging) {
+            if (data.value<PhaseChangeStruct>().to == Player::Play)
+                room->setPlayerFlag(player, "-nosfengporec");
+        } else {
+            if (player->getPhase() != Player::Play || player->hasFlag("nosfengporec"))
+                return false;
+
+            const Card *c = NULL;
+            if (triggerEvent == PreCardUsed)
+                c = data.value<CardUseStruct>().card;
+            else {
+                CardResponseStruct resp = data.value<CardResponseStruct>();
+                if (resp.m_isUse)
+                    c = resp.m_card;
+            }
+
+            room->setPlayerFlag(player, "nosfengporec");
+            if (c && (c->isKindOf("Slash") || c->isKindOf("Duel"))){
+                room->setCardFlag(c, "nosfengporecc");
+            }
+            return false;
+        }
+
+        return false;
+    }
+};
+
+class NosFengpo : public TriggerSkill
+{
+public:
+    NosFengpo() : TriggerSkill("nosfengpo")
+    {
+        events << TargetSpecified << ConfirmDamage << CardFinished;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL;
+    }
+
+    bool trigger(TriggerEvent event, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (event == TargetSpecified) {
+            if (!TriggerSkill::triggerable(player))
+                return false;
+            CardUseStruct use = data.value<CardUseStruct>();
+            if (use.to.length() != 1) return false;
+            ServerPlayer *target = use.to.first();
+            if (use.card == NULL || (!use.card->hasFlag("nosfengporecc"))) return false;
+            int n = 0;
+            foreach (const Card *card, target->getHandcards())
+                if (card->getSuit() == Card::Diamond)
+                    ++n;
+            if (!room->askForSkillInvoke(player, objectName(), QVariant::fromValue(target)))
+                return false;
+            room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), target->objectName());
+            player->broadcastSkillInvoke(objectName());
+            QString choice = room->askForChoice(player, objectName(), "drawCards+addDamage");
+            if (choice == "drawCards"){
+                if (n > 0)
+                    player->drawCards(n);
+            }else if (choice == "addDamage")
+                use.card->setTag("NosFengpoAddDamage", n);
+        } else if (event == ConfirmDamage) {
+            DamageStruct damage = data.value<DamageStruct>();
+            if (damage.card == NULL)
+                return false;
+            int n = damage.card->tag["NosFengpoAddDamage"].toInt();
+            damage.damage = damage.damage+n;
+            data = QVariant::fromValue(damage);
+        } else if (event == CardFinished) {
+            CardUseStruct use = data.value<CardUseStruct>();
+            use.card->setTag("NosFengpoAddDamage", 0);
+        }
+        return false;
+    }
+};
+
+class MoonSpearSkill : public WeaponSkill
+{
+public:
+    MoonSpearSkill() : WeaponSkill("moon_spear")
+    {
+        events << CardUsed << CardResponded;
+    }
+
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (player->getPhase() != Player::NotActive)
+            return false;
+
+        const Card *card = NULL;
+        if (triggerEvent == CardUsed) {
+            CardUseStruct card_use = data.value<CardUseStruct>();
+            card = card_use.card;
+        } else if (triggerEvent == CardResponded) {
+            card = data.value<CardResponseStruct>().m_card;
+        }
+
+        if (card == NULL || !card->isBlack()
+            || (card->getHandlingMethod() != Card::MethodUse && card->getHandlingMethod() != Card::MethodResponse))
+            return false;
+
+        player->setFlags("MoonspearUse");
+        if (!room->askForUseCard(player, "slash", "@moon-spear-slash", -1, Card::MethodUse, false))
+            player->setFlags("-MoonspearUse");
+
+        return false;
+    }
+};
+
+MoonSpear::MoonSpear(Suit suit, int number)
+    : Weapon(suit, number, 3)
+{
+    setObjectName("moon_spear");
+}
+
+class SPMoonSpearSkill : public WeaponSkill
+{
+public:
+    SPMoonSpearSkill() : WeaponSkill("sp_moonspear")
+    {
+        events << CardUsed << CardResponded;
+    }
+
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (player->getPhase() != Player::NotActive)
+            return false;
+
+        const Card *card = NULL;
+        if (triggerEvent == CardUsed) {
+            CardUseStruct card_use = data.value<CardUseStruct>();
+            card = card_use.card;
+        } else if (triggerEvent == CardResponded) {
+            card = data.value<CardResponseStruct>().m_card;
+        }
+
+        if (card == NULL || !card->isBlack()
+            || (card->getHandlingMethod() != Card::MethodUse && card->getHandlingMethod() != Card::MethodResponse))
+            return false;
+
+        QList<ServerPlayer *> targets;
+        foreach (ServerPlayer *tmp, room->getAlivePlayers()) {
+            if (player->inMyAttackRange(tmp))
+                targets << tmp;
+        }
+        if (targets.isEmpty()) return false;
+
+        ServerPlayer *target = room->askForPlayerChosen(player, targets, objectName(), "@sp_moonspear", true, true);
+        if (!target) return false;
+        room->setEmotion(player, "weapon/moonspear");
+        if (!room->askForCard(target, "jink", "@moon-spear-jink", QVariant(), Card::MethodResponse, player))
+            room->damage(DamageStruct(objectName(), player, target));
+        return false;
+    }
+};
+
+SPMoonSpear::SPMoonSpear(Suit suit, int number)
+    : Weapon(suit, number, 3)
+{
+    setObjectName("sp_moonspear");
+}
+
 JSPPackage::JSPPackage()
     : Package("jiexian_sp")
 {
+    General *nos_gongsunzan = new General(this, "nos_gongsunzan", "qun");
+    nos_gongsunzan->addSkill("yicong");
+
     General *nossp_guanyu = new General(this, "nossp_guanyu", "wei"); // JSP 003
     nossp_guanyu->addSkill("wusheng");
     nossp_guanyu->addSkill(new NosDanji);
@@ -1006,6 +1183,11 @@ JSPPackage::JSPPackage()
     jsp_zhaoyun->addSkill(new Suiren);
     jsp_zhaoyun->addSkill("yicong");
 
+    General *new_mayunlu = new General(this, "nos_mayunlu", "shu");
+    new_mayunlu->addSkill("mashu");
+    new_mayunlu->addSkill(new NosFengpo);
+    new_mayunlu->addSkill(new NosFengpoRecord);
+
     addMetaObject<ShiuehjihCard>();
     addMetaObject<JowfuhCard>();
     addMetaObject<XiemuCard>();
@@ -1014,3 +1196,14 @@ JSPPackage::JSPPackage()
 }
 
 ADD_PACKAGE(JSP)
+
+SPCardPackage::SPCardPackage()
+    : Package("SPCard", Package::CardPack)
+{
+    (new MoonSpear)->setParent(this);
+    (new SPMoonSpear)->setParent(this);
+    skills << new MoonSpearSkill << new SPMoonSpearSkill;
+}
+
+ADD_PACKAGE(SPCard)
+

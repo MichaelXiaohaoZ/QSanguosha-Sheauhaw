@@ -1103,6 +1103,7 @@ QString GameRule::getWinner(ServerPlayer *victim) const
             winner = "rebel";
         else if (!alive_roles.contains("rebel"))
             winner = "loyalist";
+    } else if (room->getMode() == "08_dragonboat") {
     } else if (Config.EnableHegemony) {
         bool has_anjiang = false, has_diff_kingdoms = false;
         QString init_kingdom;

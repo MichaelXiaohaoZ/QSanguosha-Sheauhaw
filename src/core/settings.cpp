@@ -142,7 +142,7 @@ void Settings::init()
 
     BubbleChatBoxKeepTime = value("BubbleChatboxKeepTime", 2000).toInt();
 
-    QStringList roles_ban, kof_ban, hulao_ban, xmode_ban, bossmode_ban, basara_ban, hegemony_ban, pairs_ban, zdyj_ban;
+    QStringList roles_ban, kof_ban, hulao_ban, xmode_ban, bossmode_ban, basara_ban, hegemony_ban, pairs_ban, zdyj_ban, dragon_ban;
 
     roles_ban = GetConfigFromLuaState(lua, "roles_ban").toStringList();
     kof_ban = GetConfigFromLuaState(lua, "kof_ban").toStringList();
@@ -214,14 +214,22 @@ void Settings::init()
         setValue("Banlist/BestLoyalist", banlist);
     }
 
-    QStringList forbid_packages = value("ForbidPackages").toStringList();
-    if (forbid_packages.isEmpty()) {
-        forbid_packages << "New3v3Card" << "New3v3_2013Card" << "New1v1Card" << "BossMode" << "JianGeDefense"
-                        << "BestLoyalist" << "test" << "BestLoyalistCard" << "DerivativeCard"
-                        << "Special3v3" << "Special3v3Ext" << "Special1v1" << "Special1v1Ext";
+    dragon_ban = GetConfigFromLuaState(lua, "dragon_ban").toStringList();
+    banlist = value("Banlist/DragonBoat").toStringList();
+    if (banlist.isEmpty()) {
+        foreach(QString ban_general, dragon_ban)
+            banlist << ban_general;
 
-        setValue("ForbidPackages", forbid_packages);
+        setValue("Banlist/DragonBoat", banlist);
     }
+
+    QStringList forbid_packages = value("ForbidPackages").toStringList();
+    forbid_packages << "New3v3Card" << "New3v3_2013Card" << "New1v1Card" << "BossMode" << "JianGeDefense"
+                    << "BestLoyalist" << "test" << "BestLoyalistCard" << "DerivativeCard"
+                    << "Special3v3" << "Special3v3Ext" << "Special1v1" << "Special1v1Ext"
+                    << "DragonBoat" << "DragonBoatCard";
+
+    setValue("ForbidPackages", forbid_packages);
 
     Config.BossGenerals = GetConfigFromLuaState(lua, "bossmode_default_boss").toStringList();
     Config.BossLevel = Config.BossGenerals.length();
@@ -240,4 +248,8 @@ void Settings::init()
     QVariantMap best_loyalist_sets = GetConfigFromLuaState(lua, "best_loyalist_sets").toMap();
     foreach (QString key, best_loyalist_sets.keys())
         Config.BestLoyalistSets[key] = best_loyalist_sets[key].toString().split("+");
+
+    QVariantMap dragon_ban_cards = GetConfigFromLuaState(lua, "dragon_ban_cards").toMap();
+    foreach (QString key, dragon_ban_cards.keys())
+        Config.DragonBoatBanC[key] = dragon_ban_cards[key].toString().split("+");
 }

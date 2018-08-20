@@ -58,7 +58,7 @@ public:
     };
     enum Role
     {
-        Lord, Loyalist, Rebel, Renegade
+        Lord, Loyalist, Rebel, Renegade, DragonShu, DragonQun, DragonWei,  DragonWu,
     };
 
     explicit Player(QObject *parent);

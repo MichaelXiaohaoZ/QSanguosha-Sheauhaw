@@ -1197,10 +1197,11 @@ void Dashboard::expandGuhuoCards(const QString &guhuo_type)
 {
     if (!_m_guhuo_expanded.isEmpty()) return;
     QStringList card_list;
+    QList<int> modecard = Sanguosha->getRandomCards();
     if (guhuo_type.contains("b")) {
         QList<const BasicCard*> basics = Sanguosha->findChildren<const BasicCard*>();
         foreach (const BasicCard *card, basics) {
-            if (!card_list.contains(card->objectName()) && !ServerInfo.Extensions.contains("!" + card->getPackage())
+            if (!card_list.contains(card->objectName()) && modecard.contains(card->getId())
                 && !(guhuo_type.contains("s") && card_list.contains("slash") && card->objectName().contains("slash")))
                 card_list.append(card->objectName());
         }
@@ -1208,16 +1209,14 @@ void Dashboard::expandGuhuoCards(const QString &guhuo_type)
     if (guhuo_type.contains("t")) {
         QList<const TrickCard*> tricks = Sanguosha->findChildren<const TrickCard*>();
         foreach (const TrickCard *card, tricks) {
-            if (!ServerInfo.Extensions.contains("!" + card->getPackage()) && card->isNDTrick()
-                && !card_list.contains(card->objectName()))
+            if (modecard.contains(card->getId()) && card->isNDTrick() && !card_list.contains(card->objectName()))
                     card_list.append(card->objectName());
         }
     }
     if (guhuo_type.contains("d")) {
         QList<const DelayedTrick*> delays = Sanguosha->findChildren<const DelayedTrick*>();
         foreach (const DelayedTrick *card, delays) {
-            if (!card_list.contains(card->objectName())
-                && !ServerInfo.Extensions.contains("!" + card->getPackage()))
+            if (!card_list.contains(card->objectName()) && modecard.contains(card->getId()))
                 card_list.append(card->objectName());
         }
     }

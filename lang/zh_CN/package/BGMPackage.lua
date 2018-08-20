@@ -3,23 +3,6 @@
 return {
 	["BGM"] = "☆SP",
 
-	["#bgm_zhaoyun"] = "白马先锋",
-	["bgm_zhaoyun"] = "☆SP赵云",
-	["&bgm_zhaoyun"] = "赵云",
-	["illustrator:bgm_zhaoyun"] = "Vincent",
-	["designer:bgm_zhaoyun"] = "Danny",
-	["chongzhen"] = "冲阵",
-	[":chongzhen"] = "每当你发动“龙胆”使用或打出一张手牌时，你可以获得对方的一张手牌。",
-
-	["#bgm_diaochan"] = "暗黑的傀儡师",
-	["bgm_diaochan"] = "☆SP貂蝉",
-	["&bgm_diaochan"] = "貂蝉",
-	["illustrator:bgm_diaochan"] = "木美人",
-	["designer:bgm_diaochan"] = "Danny",
-	["lihun"] = "离魂",
-	[":lihun"] = "阶段技。你可以弃置一张牌将武将牌翻面，并选择一名男性角色：若如此做，你获得该角色的所有手牌，且出牌阶段结束时，你交给该角色X张牌。（X为该角色的体力值）",
-	["LihunGoBack"] = "请交给目标角色 %arg 张牌",
-
 	["#bgm_caoren"] = "险不辞难",
 	["bgm_caoren"] = "☆SP曹仁",
 	["&bgm_caoren"] = "曹仁",

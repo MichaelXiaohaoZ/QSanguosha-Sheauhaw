@@ -3,11 +3,6 @@
 return {
 	["assassins"] = "铜雀台",
 
-	["moukui"] = "谋溃",
-	[":moukui"] = "每当你指定【杀】的目标后，你可以选择一项：摸一张牌，或弃置目标角色一张牌：若如此做，此【杀】被目标角色的【闪】抵消后，该角色弃置你的一张牌。",
-	["moukui:draw"] = "摸一张牌",
-	["moukui:discard"] = "弃置目标角色一张牌",
-
 	["#as_lingju"] = "情随梦逝",
 	["as_lingju"] = "灵雎-旧",
 	["&as_lingju"] = "灵雎",
@@ -15,7 +10,7 @@ return {
 	["nosfenxin"] = "焚心",
 	[":nosfenxin"] = "<font color=\"red\"><b>限定技，</b></font>若你不是主公，你杀死一名非主公其他角色检验胜利条件之前，你可以与该角色交换身份牌。",
 	["@burnheart"] = "焚心",
-	["$FenxinAnimate"] = "image=image/animate/fenxin.png",
+	--["$FenxinAnimate"] = "image=image/animate/fenxin.png",
 
 	["#as_jiben"] = "誓死除奸恶",
 	["as_jiben"] = "吉本",

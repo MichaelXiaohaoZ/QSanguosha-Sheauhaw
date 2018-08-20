@@ -189,9 +189,6 @@ public:
     {
         Room *room = player->getRoom();
         room->broadcastSkillInvoke("zuixiang");
-        if (player->getPile("dream").isEmpty())
-            //room->doLightbox("$ZuixiangAnimate", 3000);
-            room->doSuperLightbox("bgm_pangtong", "zuixiang");
 
         QList<Card::CardType> type_list;
         foreach (int card_id, player->getPile("dream")) {
@@ -812,17 +809,10 @@ void ShyhchourCard::onEffect(const CardEffectStruct &effect) const
     Room *room = effect.to->getRoom();
     ServerPlayer *player = effect.from, *victim = effect.to;
 
-    if (!player->isLord() && player->hasSkill("weidi")) {
+    if (!player->isLord() && player->hasSkill("weidi"))
         room->broadcastSkillInvoke("weidi");
-        QString generalName = "yuanshu";
-        if (player->getGeneralName() == "tw_yuanshu" || (player->getGeneral2() != NULL && player->getGeneral2Name() == "tw_yuanshu"))
-            generalName = "tw_yuanshu";
-
-        room->doSuperLightbox(generalName, "shichou");
-    } else {
+    else
         room->broadcastSkillInvoke("shyhchour");
-        room->doSuperLightbox("bgm_liubei", "shichou");
-    }
 
     room->removePlayerMark(player, "@hate");
     room->setPlayerMark(player, "xhate", 1);
@@ -1376,75 +1366,6 @@ public:
         return -2;
     }
 };
-
-BGMPackage::BGMPackage() : Package("BGM")
-{
-
-    General *bgm_caoren = new General(this, "bgm_caoren", "wei"); // *SP 003
-    bgm_caoren->addSkill(new Kuiwei);
-    bgm_caoren->addSkill(new Yanzheng);
-
-    General *bgm_pangtong = new General(this, "bgm_pangtong", "qun", 3); // *SP 004
-    bgm_pangtong->addSkill(new Manjuan);
-    bgm_pangtong->addSkill(new Zuixiang);
-    bgm_pangtong->addSkill(new ZuixiangClear);
-    related_skills.insertMulti("zuixiang", "#zuixiang-clear");
-
-    General *bgm_zhangfei = new General(this, "bgm_zhangfei", "shu"); // *SP 005
-    bgm_zhangfei->addSkill(new Jie);
-    bgm_zhangfei->addSkill(new Dahe);
-    bgm_zhangfei->addSkill(new DahePindian);
-    related_skills.insertMulti("dahe", "#dahe");
-
-    General *bgm_lvmeng = new General(this, "bgm_lvmeng", "wu", 3); // *SP 006
-    bgm_lvmeng->addSkill(new Tanhu);
-    bgm_lvmeng->addSkill(new MouduanStart);
-    bgm_lvmeng->addSkill(new Mouduan);
-    bgm_lvmeng->addSkill(new MouduanClear);
-    related_skills.insertMulti("mouduan", "#mouduan-start");
-    related_skills.insertMulti("mouduan", "#mouduan-clear");
-    bgm_lvmeng->addRelateSkill("qianxun");
-    bgm_lvmeng->addRelateSkill("jiang");
-    bgm_lvmeng->addRelateSkill("yingzi");
-    bgm_lvmeng->addRelateSkill("keji");
-
-    General *bgm_liubei = new General(this, "bgm_liubei$", "shu"); // *SP 007
-    bgm_liubei->addSkill(new Zhaolie);
-    bgm_liubei->addSkill(new ZhaolieAct);
-    bgm_liubei->addSkill(new Shyhchour);
-    bgm_liubei->addSkill(new ShyhchourDraw);
-    related_skills.insertMulti("zhaolie", "#zhaolie");
-    related_skills.insertMulti("shyhchour", "#shyhchour");
-
-    General *bgm_daqiao = new General(this, "bgm_daqiao", "wu", 3, false); // *SP 008
-    bgm_daqiao->addSkill(new Yanxiao);
-    bgm_daqiao->addSkill(new Anxian);
-
-    General *bgm_ganning = new General(this, "bgm_ganning", "qun"); // *SP 009
-    bgm_ganning->addSkill(new Yinling);
-    bgm_ganning->addSkill(new Junwei);
-    bgm_ganning->addSkill(new JunweiGot);
-    related_skills.insertMulti("junwei", "#junwei-got");
-
-    General *bgm_xiahoudun = new General(this, "bgm_xiahoudun", "wei"); // *SP 010
-    bgm_xiahoudun->addSkill(new Fenyong);
-    bgm_xiahoudun->addSkill(new FenyongDetach);
-    bgm_xiahoudun->addSkill(new Xuehen);
-    bgm_xiahoudun->addSkill(new SlashNoDistanceLimitSkill("xuehen"));
-    bgm_xiahoudun->addSkill(new FakeMoveSkill("xuehen"));
-    related_skills.insertMulti("fenyong", "#fenyong-clear");
-    related_skills.insertMulti("xuehen", "#xuehen-slash-ndl");
-    related_skills.insertMulti("xuehen", "#xuehen-fake-move");
-
-    addMetaObject<DaheCard>();
-    addMetaObject<TanhuCard>();
-    addMetaObject<ShyhchourCard>();
-    addMetaObject<YanxiaoCard>();
-    addMetaObject<YinlingCard>();
-    addMetaObject<JunweiCard>();
-}
-
-ADD_PACKAGE(BGM)
 
 // DIY Generals
 ZhaoxinCard::ZhaoxinCard()
@@ -2122,6 +2043,75 @@ public:
             return 0;
     }
 };
+
+BGMPackage::BGMPackage() : Package("BGM")
+{
+
+    General *bgm_caoren = new General(this, "bgm_caoren", "wei"); // *SP 003
+    bgm_caoren->addSkill(new Kuiwei);
+    bgm_caoren->addSkill(new Yanzheng);
+
+    General *bgm_pangtong = new General(this, "bgm_pangtong", "qun", 3); // *SP 004
+    bgm_pangtong->addSkill(new Manjuan);
+    bgm_pangtong->addSkill(new Zuixiang);
+    bgm_pangtong->addSkill(new ZuixiangClear);
+    related_skills.insertMulti("zuixiang", "#zuixiang-clear");
+
+    General *bgm_zhangfei = new General(this, "bgm_zhangfei", "shu"); // *SP 005
+    bgm_zhangfei->addSkill(new Jie);
+    bgm_zhangfei->addSkill(new Dahe);
+    bgm_zhangfei->addSkill(new DahePindian);
+    related_skills.insertMulti("dahe", "#dahe");
+
+    General *bgm_lvmeng = new General(this, "bgm_lvmeng", "wu", 3); // *SP 006
+    bgm_lvmeng->addSkill(new Tanhu);
+    bgm_lvmeng->addSkill(new MouduanStart);
+    bgm_lvmeng->addSkill(new Mouduan);
+    bgm_lvmeng->addSkill(new MouduanClear);
+    related_skills.insertMulti("mouduan", "#mouduan-start");
+    related_skills.insertMulti("mouduan", "#mouduan-clear");
+    bgm_lvmeng->addRelateSkill("qianxun");
+    bgm_lvmeng->addRelateSkill("jiang");
+    bgm_lvmeng->addRelateSkill("yingzi");
+    bgm_lvmeng->addRelateSkill("keji");
+
+    General *bgm_liubei = new General(this, "bgm_liubei$", "shu"); // *SP 007
+    bgm_liubei->addSkill(new Zhaolie);
+    bgm_liubei->addSkill(new ZhaolieAct);
+    bgm_liubei->addSkill(new Shyhchour);
+    bgm_liubei->addSkill(new ShyhchourDraw);
+    related_skills.insertMulti("zhaolie", "#zhaolie");
+    related_skills.insertMulti("shyhchour", "#shyhchour");
+
+    General *bgm_daqiao = new General(this, "bgm_daqiao", "wu", 3, false); // *SP 008
+    bgm_daqiao->addSkill(new Yanxiao);
+    bgm_daqiao->addSkill(new Anxian);
+
+    General *bgm_ganning = new General(this, "bgm_ganning", "qun"); // *SP 009
+    bgm_ganning->addSkill(new Yinling);
+    bgm_ganning->addSkill(new Junwei);
+    bgm_ganning->addSkill(new JunweiGot);
+    related_skills.insertMulti("junwei", "#junwei-got");
+
+    General *bgm_xiahoudun = new General(this, "bgm_xiahoudun", "wei"); // *SP 010
+    bgm_xiahoudun->addSkill(new Fenyong);
+    bgm_xiahoudun->addSkill(new FenyongDetach);
+    bgm_xiahoudun->addSkill(new Xuehen);
+    bgm_xiahoudun->addSkill(new SlashNoDistanceLimitSkill("xuehen"));
+    bgm_xiahoudun->addSkill(new FakeMoveSkill("xuehen"));
+    related_skills.insertMulti("fenyong", "#fenyong-clear");
+    related_skills.insertMulti("xuehen", "#xuehen-slash-ndl");
+    related_skills.insertMulti("xuehen", "#xuehen-fake-move");
+
+    addMetaObject<DaheCard>();
+    addMetaObject<TanhuCard>();
+    addMetaObject<ShyhchourCard>();
+    addMetaObject<YanxiaoCard>();
+    addMetaObject<YinlingCard>();
+    addMetaObject<JunweiCard>();
+}
+
+ADD_PACKAGE(BGM)
 
 BGMDIYPackage::BGMDIYPackage() : Package("BGMDIY")
 {

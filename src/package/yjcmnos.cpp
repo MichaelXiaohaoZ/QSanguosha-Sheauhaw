@@ -545,37 +545,6 @@ public:
     }
 };
 
-NostalYJCM2015Package::NostalYJCM2015Package()
-    : Package("NostalYJCM2015")
-{
-
-    General *caorui = new General(this, "nos_caorui$", "wei", 3);
-    caorui->addSkill("huituo");
-    caorui->addSkill("#huituo");
-    caorui->addSkill(new Myngjiann);
-    caorui->addSkill(new MyngjiannGive);
-    related_skills.insertMulti("myngjiann", "#myngjiann-give");
-    caorui->addSkill("xingshuai");
-
-    General *caoxiu = new General(this, "nos_caoxiu", "wei");
-    caoxiu->addSkill(new Taoxi);
-
-    General *quancong = new General(this, "nos_quancong", "wu");
-    quancong->addSkill(new Zhenshan);
-
-    General *zhuzhi = new General(this, "nos_zhuzhi", "wu");
-    zhuzhi->addSkill(new Angwo);
-
-    General *liuchen = new General(this, "nos_liuchen$", "shu");
-    liuchen->addSkill(new Zhannjyue);
-    liuchen->addSkill("qinwang");
-
-    addMetaObject<AngwoCard>();
-    addMetaObject<ZhenshanCard>();
-
-}
-ADD_PACKAGE(NostalYJCM2015)
-
 TsydyiCard::TsydyiCard()
 {
     target_fixed = true;
@@ -862,29 +831,6 @@ private:
     }
 };
 
-NostalYJCM2014Package::NostalYJCM2014Package()
-    : Package("NostalYJCM2014")
-{
-    General *zhoucang = new General(this, "nos_zhoucang", "shu"); // YJ 310
-    zhoucang->addSkill(new Zhongyoong);
-
-    General *caozhen = new General(this, "nos_caozhen", "wei"); // YJ 302
-    caozhen->addSkill(new Tsydyi);
-    caozhen->addSkill(new TsydyiTargetMod);
-    related_skills.insertMulti("tsydyi", "#tsydyi-target");
-
-    General *zhuhuan = new General(this, "nos_zhuhuan", "wu");
-    zhuhuan->addSkill(new Youdi);
-
-    General *chenqun = new General(this, "nos_chenqun", "wei", 3);
-    chenqun->addSkill(new Dinqpiin);
-    chenqun->addSkill("faen");
-
-    addMetaObject<DinqpiinCard>();
-    addMetaObject<TsydyiCard>();
-}
-ADD_PACKAGE(NostalYJCM2014)
-
 class Mihjih : public TriggerSkill
 {
 public:
@@ -1064,25 +1010,6 @@ public:
         return false;
     }
 };
-
-YJCM2012msPackage::YJCM2012msPackage()
-    : Package("YJCM2012ms")
-{
-    General *liubiao = new General(this, "miansha_liubiao", "qun");
-    liubiao->addSkill(new Tzyhshour);
-    liubiao->addSkill("zongshi");
-
-    General *madai = new General(this, "miansha_madai", "shu", 4); // SHU 019
-    madai->addSkill("mashu");
-    madai->addSkill(new Qianxigz);
-    madai->addSkill(new QianxigzClear);
-
-    General *wangyi = new General(this, "miansha_wangyi", "wei", 3, false);
-    wangyi->addSkill("zhenlie");
-    wangyi->addSkill(new Mihjih);
-}
-
-ADD_PACKAGE(YJCM2012ms)
 
 Shangshyh::Shangshyh() : TriggerSkill("shangshyh")
 {
@@ -1273,3 +1200,76 @@ YJCMmsPackage::YJCMmsPackage()
 }
 
 ADD_PACKAGE(YJCMms)
+
+YJCM2012msPackage::YJCM2012msPackage()
+    : Package("YJCM2012ms")
+{
+    General *liubiao = new General(this, "miansha_liubiao", "qun");
+    liubiao->addSkill(new Tzyhshour);
+    liubiao->addSkill("zongshi");
+
+    General *madai = new General(this, "miansha_madai", "shu", 4); // SHU 019
+    madai->addSkill("mashu");
+    madai->addSkill(new Qianxigz);
+    madai->addSkill(new QianxigzClear);
+
+    General *wangyi = new General(this, "miansha_wangyi", "wei", 3, false);
+    wangyi->addSkill("zhenlie");
+    wangyi->addSkill(new Mihjih);
+}
+
+ADD_PACKAGE(YJCM2012ms)
+
+NostalYJCM2014Package::NostalYJCM2014Package()
+    : Package("NostalYJCM2014")
+{
+    General *zhoucang = new General(this, "nos_zhoucang", "shu"); // YJ 310
+    zhoucang->addSkill(new Zhongyoong);
+
+    General *caozhen = new General(this, "nos_caozhen", "wei"); // YJ 302
+    caozhen->addSkill(new Tsydyi);
+    caozhen->addSkill(new TsydyiTargetMod);
+    related_skills.insertMulti("tsydyi", "#tsydyi-target");
+
+    General *zhuhuan = new General(this, "nos_zhuhuan", "wu");
+    zhuhuan->addSkill(new Youdi);
+
+    General *chenqun = new General(this, "nos_chenqun", "wei", 3);
+    chenqun->addSkill(new Dinqpiin);
+    chenqun->addSkill("faen");
+
+    addMetaObject<DinqpiinCard>();
+    addMetaObject<TsydyiCard>();
+}
+ADD_PACKAGE(NostalYJCM2014)
+
+NostalYJCM2015Package::NostalYJCM2015Package()
+    : Package("NostalYJCM2015")
+{
+
+    General *caorui = new General(this, "nos_caorui$", "wei", 3);
+    caorui->addSkill("huituo");
+    caorui->addSkill("#huituo");
+    caorui->addSkill(new Myngjiann);
+    caorui->addSkill(new MyngjiannGive);
+    related_skills.insertMulti("myngjiann", "#myngjiann-give");
+    caorui->addSkill("xingshuai");
+
+    General *caoxiu = new General(this, "nos_caoxiu", "wei");
+    caoxiu->addSkill(new Taoxi);
+
+    General *quancong = new General(this, "nos_quancong", "wu");
+    quancong->addSkill(new Zhenshan);
+
+    General *zhuzhi = new General(this, "nos_zhuzhi", "wu");
+    zhuzhi->addSkill(new Angwo);
+
+    General *liuchen = new General(this, "nos_liuchen$", "shu");
+    liuchen->addSkill(new Zhannjyue);
+    liuchen->addSkill("qinwang");
+
+    addMetaObject<AngwoCard>();
+    addMetaObject<ZhenshanCard>();
+
+}
+ADD_PACKAGE(NostalYJCM2015)

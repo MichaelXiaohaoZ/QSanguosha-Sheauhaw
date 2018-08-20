@@ -66,6 +66,7 @@ public:
     QMap<QString, QStringList> JianGeDefenseSoul;
 
     QMap<QString, QStringList> BestLoyalistSets;
+    QMap<QString, QStringList> DragonBoatBanC;
     QMap<QString, QStringList> CardsBan;
 
     // client side

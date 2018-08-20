@@ -368,6 +368,10 @@ Player::Role Player::getRoleEnum() const
         role_map.insert("loyalist", Loyalist);
         role_map.insert("rebel", Rebel);
         role_map.insert("renegade", Renegade);
+        role_map.insert("dragon_shu", DragonShu);
+        role_map.insert("dragon_qun", DragonQun);
+        role_map.insert("dragon_wei", DragonWei);
+        role_map.insert("dragon_wu", DragonWu);
     }
 
     return role_map.value(role);

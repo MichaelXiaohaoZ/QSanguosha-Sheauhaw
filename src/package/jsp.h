@@ -50,12 +50,36 @@ public:
     void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
 };
 
+class MoonSpear : public Weapon
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE MoonSpear(Card::Suit suit = Diamond, int number = 12);
+};
+
+class SPMoonSpear : public Weapon
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE SPMoonSpear(Card::Suit suit = Diamond, int number = 12);
+};
+
 class JSPPackage : public Package
 {
     Q_OBJECT
 
 public:
     JSPPackage();
+};
+
+class SPCardPackage : public Package
+{
+    Q_OBJECT
+
+public:
+    SPCardPackage();
 };
 
 #endif

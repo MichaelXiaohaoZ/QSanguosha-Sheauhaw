@@ -1300,6 +1300,11 @@ MountainPackage::MountainPackage()
     zuoci->addSkill(new Xinsheng);
     related_skills.insertMulti("huashen", "#huashen-clear");
 
+    General *zuocif = new General(this, "zuocif", "qun", 3, false, true);
+    zuocif->addSkill("huashen");
+    zuocif->addSkill("#huashen-clear");
+    zuocif->addSkill("xinsheng");
+
     General *caiwenji = new General(this, "caiwenji", "qun", 3, false); // QUN 012
     caiwenji->addSkill(new Beige);
     caiwenji->addSkill(new Duanchang);

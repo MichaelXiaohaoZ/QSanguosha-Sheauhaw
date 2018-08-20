@@ -124,8 +124,7 @@ public:
                         xuyou->obtainCard(pindian->to_card);
                     if (room->getCardPlace(pindian->from_card->getEffectiveId()) == Player::PlaceTable)
                         xuyou->obtainCard(pindian->from_card);
-                } else
-                    xuyou->getRoom()->broadcastSkillInvoke(objectName());
+                }
             }
         }
         return false;
@@ -403,8 +402,7 @@ public:
                     if (sunce->hasFlag("drank"))
                         room->setPlayerFlag(sunce, "-drank");
                     room->askForUseCard(sunce, "@@bawang", "@bawang");
-                } else
-                    room->broadcastSkillInvoke(objectName());
+                }
             }
         }
         return false;
@@ -939,8 +937,6 @@ public:
 
         room->broadcastSkillInvoke(objectName());
         room->notifySkillInvoked(player, objectName());
-        //room->doLightbox("$JiehuoAnimate", 3000);
-        room->doSuperLightbox("wis_shuijing", "jiehuo");
 
         room->setPlayerMark(player, "jiehuo", 1);
 
