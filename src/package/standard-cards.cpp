@@ -1106,7 +1106,9 @@ bool Indulgence::targetFilter(const QList<const Player *> &targets, const Player
 void Indulgence::takeEffect(ServerPlayer *target) const
 {
     target->clearHistory();
-	target->broadcastSkillInvoke("@indulgence");
+    target->broadcastSkillInvoke(QString("@%1").arg(objectName()));
+    Room *room = target->getRoom();
+    room->setEmotion(target, QString("@%1").arg(objectName()));
     target->skip(Player::Play);
 }
 
@@ -1140,7 +1142,9 @@ Lightning::Lightning(Suit suit, int number) :Disaster(suit, number)
 
 void Lightning::takeEffect(ServerPlayer *target) const
 {
-	target->broadcastSkillInvoke("@lightning");
+    target->broadcastSkillInvoke(QString("@%1").arg(objectName()));
+    Room *room = target->getRoom();
+    room->setEmotion(target, QString("@%1").arg(objectName()));
     target->getRoom()->damage(DamageStruct(this, NULL, target, 3, DamageStruct::Thunder));
 }
 

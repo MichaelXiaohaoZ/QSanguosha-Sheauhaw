@@ -78,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    setWindowTitle(tr("Sanguosha"));
+    setWindowTitle(tr("Sanguosha")+Sanguosha->getVersion());
 
     scene = NULL;
 
@@ -455,7 +455,7 @@ void MainWindow::on_actionAbout_triggered()
         "\"A Short Song\" by Cao Cao");
     content.append(QString("<p align='right'><i>%1</i></p>").arg(poem));
 
-    QString Qixipoem = tr("When Gold Wind meets Yulu together, it beats the whole world. <br/> \"Queqiao Xian\" by Qin Guan");
+    QString Qixipoem = tr("I can just see the sun, I can't see Chang'an. <br/> \"Shi Shuo Xin Yu\"");
     content.append(QString("<p align='right'><i>%1</i></p>").arg(Qixipoem));
 
     // Cao Cao's signature

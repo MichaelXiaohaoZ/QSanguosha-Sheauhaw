@@ -125,6 +125,36 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
     // Handle global events
     if (player == NULL) {
         if (triggerEvent == GameStart) {
+            if (room->getMode() == "08_hongyan")
+            {
+                foreach (ServerPlayer *aplayer, room->getAllPlayers())
+                    if (aplayer && !aplayer->isFemale())
+                        aplayer->setGender(General::Female);
+                room->changeLesbianSkill();
+            }
+            if (room->getMode() == "08_dragonboat")
+            {
+                foreach (ServerPlayer *aplayer, room->getAllPlayers())
+                {
+                    room->setPlayerMark(aplayer, "@aiye", 1);
+                    room->acquireSkill(aplayer, "#aiyeneverdie");
+                    room->acquireSkill(aplayer, "#aiyegainmark");
+                }
+            }
+            if (room->getMode() == "08_zdyj" && Config.value("zdyj/Rule", "2017").toString() == "2017")
+            {
+                foreach (ServerPlayer *aplayer, room->getAllPlayers())
+                    if (aplayer->getMark("shown_loyalist"))
+                    {
+                        if (aplayer->getMaxHp() > 4 || aplayer->isFemale())
+                            room->acquireSkill(aplayer, "bl_sheshen");
+                        else
+                        {
+                            room->acquireSkill(aplayer, "bl_dongcha");
+                            room->acquireSkill(aplayer, "#bl_dongcha-see");
+                        }
+                    }
+            }
             if (room->getMode() == "04_boss") {
                 int difficulty = Config.value("BossModeDifficulty", 0).toInt();
                 if ((difficulty & (1 << GameRule::BMDIncMaxHp)) > 0) {
@@ -138,9 +168,79 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                     }
                 }
             }
+            if (room->getMode() == "06_swzs") {
+                ServerPlayer *lord = room->getLord();
+                room->acquireSkill(lord, "#ganluswzs");
+                foreach (ServerPlayer *p, room->getPlayers())
+                    foreach (int id, room->getDrawPile()) {
+                        Card *card = Sanguosha->getCard(id);
+                        if ((card->objectName() == "god_horse" && p->getGeneralName().contains("shencaocao")) ||
+                            (card->objectName() == "god_sword" && p->getGeneralName().contains("shenzhaoyun")) ||
+                            (card->objectName() == "god_hat" && p->getGeneralName().contains("shensimayi")) ||
+                            (card->objectName() == "god_diagram" && p->getGeneralName().contains("shenzhugeliang")
+                                && card->getSuit() == Card::Spade) ||
+                            (card->objectName() == "god_zither" && p->getGeneralName().contains("shenzhouyu")) ||
+                            (card->objectName() == "god_robe" && p->getGeneralName().contains("shenlvmeng")) ||
+                            (card->objectName() == "god_halberd" && p->getGeneralName().contains("shenlvbu")) ||
+                            (card->objectName() == "god_blade" && p->getGeneralName().contains("shenguanyu")))
+                        {
+                            CardMoveReason reason(CardMoveReason::S_REASON_PUT, p->objectName(), "gamerule", QString());
+                            room->moveCardTo(card, NULL, p, Player::PlaceEquip, reason);
+                            break;
+                        }
+                    }
+                bool blade_ = false, diagram_ = false, halberd_ = false, hat_ = false,
+                     horse_ = false, robe_ = false, zither_ = false, sword_ = false;
+                foreach (ServerPlayer *p, room->getAllPlayers(true))
+                {
+                    if (p->getGeneralName().contains("shenguanyu"))
+                        blade_ = true;
+                    else if (p->getGeneralName().contains("shenlvmeng"))
+                        robe_ = true;
+                    else if (p->getGeneralName().contains("shenzhouyu"))
+                        zither_ = true;
+                    else if (p->getGeneralName().contains("shenzhugeliang"))
+                        diagram_ = true;
+                    else if (p->getGeneralName().contains("shencaocao"))
+                        horse_ = true;
+                    else if (p->getGeneralName().contains("shenlvbu"))
+                        halberd_ = true;
+                    else if (p->getGeneralName().contains("shenzhaoyun"))
+                        sword_ = true;
+                    else if (p->getGeneralName().contains("shensimayi"))
+                        hat_ = true;
+                }
+                foreach (int id, room->getDrawPile())
+                {
+                    Card *card = Sanguosha->getCard(id);
+                    if ((card->objectName() == "god_blade" && !blade_) ||
+                        (card->objectName() == "blade" && blade_) ||
+                        (card->objectName() == "god_robe" && !robe_) ||
+                        (card->objectName() == "god_zither" && !zither_) ||
+                        (card->objectName() == "fan" && zither_) ||
+                        (card->objectName() == "god_diagram" && !diagram_) ||
+                        (card->objectName() == "eight_diagram" && diagram_) ||
+                        (card->objectName() == "god_horse" && !horse_) ||
+                        (card->objectName() == "jueying" && horse_) ||
+                        (card->objectName() == "god_halberd" && !halberd_) ||
+                        (card->objectName() == "halberd" && halberd_) ||
+                        (card->objectName() == "god_hat" && !hat_) ||
+                        (card->objectName() == "god_sword" && !sword_) ||
+                        (card->objectName() == "qinggang_sword" && sword_))
+                    {
+                        LogMessage log;
+                        log.type = "#RemoveCard";
+                        log.card_str = card->toString();
+                        room->sendLog(log);
+                        CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, room->getLord()->objectName(), QString(), objectName(), QString());
+                        room->moveCardTo(Sanguosha->getCard(id), NULL, Player::PlaceTable, reason, true);
+                        //room->setCardMapping(card->getEffectiveId(), NULL, Player::PlaceSpecial);
+                    }
+                }
+            }
             foreach (ServerPlayer *player, room->getPlayers()) {
                 if (player->getGeneral()->getKingdom() == "god" && player->getGeneralName() != "anjiang"
-                    && !player->getGeneralName().startsWith("boss_"))
+                    && !player->getGeneralName().startsWith("boss_") && room->getMode() != "06_swzs")
                     room->setPlayerProperty(player, "kingdom", room->askForKingdom(player));
                 foreach (const Skill *skill, player->getVisibleSkillList()) {
                     if (skill->getFrequency() == Skill::Limited && !skill->getLimitMark().isEmpty()
@@ -153,7 +253,15 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
             bool kof_mode = room->getMode() == "02_1v1" && Config.value("1v1/Rule", "2013").toString() != "Classical";
             QList<int> n_list;
             foreach (ServerPlayer *p, room->getPlayers()) {
-                int n = kof_mode ? p->getMaxHp() : 4;
+                int n;
+                if (room->getMode() == "06_swzs" && p->isLord())
+                    n = 8;
+                else if (room->getMode() == "05_zhfd" && p->getRole() == "rebel" && p->getGeneralName() != "sp_sunjian")
+                    n = 5;
+                else if (kof_mode)
+                    n = p->getMaxHp();
+                else
+                    n = 4;
                 QVariant data = n;
                 room->getThread()->trigger(DrawInitialCards, room, p, data);
                 n_list << data.toInt();
@@ -167,6 +275,8 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                 room->getThread()->trigger(AfterDrawInitialCards, room, p, _nlistati);
                 i++;
             }
+            Sanguosha->playSystemAudioEffect("startgame");
+            room->getThread()->delay(1000);
         }
         return false;
     }
@@ -1068,8 +1178,35 @@ void GameRule::rewardAndPunish(ServerPlayer *killer, ServerPlayer *victim) const
             killer->drawCards(2, "kill");
         else
             killer->drawCards(3, "kill");
-    } else {
-        if (victim->getRole() == "rebel" && killer != victim)
+    }
+    else if (room->getMode() == "06_swzs") {
+        if (victim->getRole() == "rebel")
+        {
+            foreach (ServerPlayer *p, room->getAlivePlayers())
+                if (p->getRole() == "rebel")
+                {
+                    room->recover(p, RecoverStruct());
+                    if (p->getKingdom() == "god")
+                        room->drawCards(p, 3);
+                    else
+                        room->drawCards(p, 1);
+                }
+        }
+        else
+        {
+            room->recover(killer, RecoverStruct());
+            killer->drawCards(3, "kill");
+        }
+    }
+    else if (room->getMode() == "05_zhfd")
+    {
+        if (victim->getRole() == "rebel" && victim->getGeneralName() != "sp_sunjian" && killer->getRole() != "rebel")
+            foreach (ServerPlayer *p, room->getAlivePlayers())
+                if (p->getRole() == "rebel")
+                    room->drawCards(p, 3);
+    }
+    else {
+        if (victim->getRole() == "rebel" && victim->getGeneralName() != "sp_sunjian" && killer != victim)
             killer->drawCards(3, "kill");
         else if (victim->getRole() == "loyalist" && killer->isLord())
             killer->throwAllHandCardsAndEquips();

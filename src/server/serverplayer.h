@@ -61,7 +61,7 @@ public:
     bool pindianResult(PindianStruct *pd, int index = 1);
     void pindianFinish(PindianStruct *pd);//pd is deleted at this function
     bool pindian(ServerPlayer *target, const QString &reason, const Card *card1 = NULL);
-    void turnOver();
+    void turnOver(const QString &skill_name = QString());
     void play(QList<Player::Phase> set_phases = QList<Player::Phase>());
     bool changePhase(Player::Phase from, Player::Phase to);
 

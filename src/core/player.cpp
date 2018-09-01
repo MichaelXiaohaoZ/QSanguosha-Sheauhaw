@@ -1354,3 +1354,11 @@ int Player::getDeputySkinId() const
 {
     return deputySkinId;
 }
+
+bool Player::isYourFriend(const Player *fri) const{
+    QString role = isLord() ? "loyalist" : getRole();
+    QString f_role = fri->isLord() ? "loyalist" : fri->getRole();
+    if (f_role == role && f_role != "renegade" && getRole() != "renegade")
+         return true;
+    return false;
+}

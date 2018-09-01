@@ -147,7 +147,9 @@ SOURCES += \
     src/package/yitian.cpp \
     src/package/yjcmnos.cpp \
     src/scenario/miniscenarios.cpp \
-    src/package/dragonboat.cpp
+    src/package/dragonboat.cpp \
+    src/package/godsreturn.cpp \
+    src/package/attackdong.cpp
 
 HEADERS += \
     src/client/aux-skills.h \
@@ -287,7 +289,9 @@ HEADERS += \
     src/package/wisdom.h \
     src/package/yitian.h \
     src/package/yjcmnos.h \
-    src/package/dragonboat.h
+    src/package/dragonboat.h \
+    src/package/godsreturn.h \
+    src/package/attackdong.h
 
 FORMS += \
     src/dialog/cardoverview.ui \

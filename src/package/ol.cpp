@@ -105,7 +105,7 @@ public:
         
 		room->notifyMoveToPile(player, ids, "aocai", Player::PlaceTable, true, true);
         room->setPlayerProperty(player, "aocai", IntList2StringList(enabled).join("+"));
-		const Card *card = room->askForCard(player, "@@aocai_view", "@aocai-view", QVariant(), Card::MethodNone);
+        const Card *card = room->askForCard(player, "@@aocai_view", "@aocai-view", QVariant(), Card::MethodNone);
 		room->notifyMoveToPile(player, ids, "aocai", Player::PlaceTable, false, false);
         if (card == NULL)
 		    room->setPlayerFlag(player, "Global_AocaiFailed");

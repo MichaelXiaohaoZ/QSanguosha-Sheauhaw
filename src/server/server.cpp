@@ -491,7 +491,7 @@ BanlistDialog::BanlistDialog(QWidget *parent, bool view)
     setMinimumWidth(455);
 
     if (ban_list.isEmpty())
-        ban_list << "AI" << "Roles" << "BestLoyalist" << "DragonBoat" << "1v1" << "BossMode" << "Basara" << "Hegemony" << "Pairs" << "Cards";
+        ban_list << "AI" << "Roles" << "BestLoyalist" << "DragonBoat" << "GodsReturn" << "1v1" << "BossMode" << "Basara" << "Hegemony" << "Pairs" << "Cards";
     QVBoxLayout *layout = new QVBoxLayout;
 
     QTabWidget *tab = new QTabWidget;
@@ -803,6 +803,58 @@ QGroupBox *ServerDialog::createXModeBox()
     return box;
 }
 
+QGroupBox *ServerDialog::createBestLoyalistBox()
+{
+    QGroupBox *box = new QGroupBox(tr("Best loyalist options"));
+    box->setEnabled(Config.GameMode == "08_zdyj");
+    box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    QVBoxLayout *vlayout = new QVBoxLayout;
+
+    QComboBox *officialComboBox = new QComboBox;
+    officialComboBox->addItem("2015", "2015");
+    officialComboBox->addItem("2017", "2017");
+
+    official_zdyj_ComboBox = officialComboBox;
+
+    QString rule = Config.value("zdyj/Rule", "2017").toString();
+    if (rule == "2017")
+        officialComboBox->setCurrentIndex(1);
+
+    vlayout->addLayout(HLay(new QLabel(tr("Rule option")), official_zdyj_ComboBox));
+
+    box->setLayout(vlayout);
+
+    return box;
+
+}
+
+QGroupBox *ServerDialog::createAttackDongBox()
+{
+    QGroupBox *box = new QGroupBox(tr("Attack Dong options"));
+    box->setEnabled(Config.GameMode == "05_zdyj");
+    box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    QVBoxLayout *vlayout = new QVBoxLayout;
+
+    QComboBox *officialComboBox = new QComboBox;
+    officialComboBox->addItem(tr("NormalMode"), "NormalMode");
+    officialComboBox->addItem(tr("BossMode"), "BossMode");
+
+    mode_choose_zhfd_ComboBox = officialComboBox;
+
+    QString rule = Config.value("zhfd/Mode", "NormalMode").toString();
+    if (rule == "BossMode")
+        officialComboBox->setCurrentIndex(1);
+
+    vlayout->addLayout(HLay(new QLabel(tr("Mode option")), mode_choose_zhfd_ComboBox));
+
+    box->setLayout(vlayout);
+
+    return box;
+
+}
+
 QGroupBox *ServerDialog::createGameModeBox()
 {
     QGroupBox *mode_box = new QGroupBox(tr("Game mode"));
@@ -840,6 +892,16 @@ QGroupBox *ServerDialog::createGameModeBox()
             boss_mode_button->setChecked(false);
             connect(boss_mode_button, SIGNAL(clicked()), this, SLOT(doBossModeCustomAssign()));
             item_list << HLay(button, boss_mode_button);
+        } else if (itor.key() == "08_zdyj") {
+            QGroupBox *box = createBestLoyalistBox();
+            connect(button, SIGNAL(toggled(bool)), box, SLOT(setEnabled(bool)));
+
+            item_list << button << box;
+        } else if (itor.key() == "05_zhfd") {
+            QGroupBox *box = createAttackDongBox();
+            connect(button, SIGNAL(toggled(bool)), box, SLOT(setEnabled(bool)));
+
+            item_list << button << box;
         } else {
             item_list << button;
         }
@@ -875,6 +937,7 @@ QGroupBox *ServerDialog::createGameModeBox()
     }
 
     //mini scenes
+
     QRadioButton *mini_scenes = new QRadioButton(tr("Mini Scenes"));
     mini_scenes->setObjectName("mini");
     mode_group->addButton(mini_scenes);
@@ -919,7 +982,7 @@ QGroupBox *ServerDialog::createGameModeBox()
     for (int i = 0; i < item_list.length(); i++) {
         QObject *item = item_list.at(i);
 
-        QVBoxLayout *side = i <= 9 ? left : right; // WARNING: Magic Number
+        QVBoxLayout *side = i <= 13 ? left : right; // WARNING: Magic Number
 
         if (item->isWidgetType()) {
             QWidget *widget = qobject_cast<QWidget *>(item);
@@ -1330,6 +1393,14 @@ int ServerDialog::config()
 
     Config.beginGroup("XMode");
     Config.setValue("RoleChooseX", role_choose_xmode_ComboBox->itemData(role_choose_xmode_ComboBox->currentIndex()).toString());
+    Config.endGroup();
+
+    Config.beginGroup("zdyj");
+    Config.setValue("Rule", official_zdyj_ComboBox->itemData(official_zdyj_ComboBox->currentIndex()).toString());
+    Config.endGroup();
+
+    Config.beginGroup("zhfd");
+    Config.setValue("Mode", mode_choose_zhfd_ComboBox->itemData(mode_choose_zhfd_ComboBox->currentIndex()).toString());
     Config.endGroup();
 
     QSet<QString> ban_packages;

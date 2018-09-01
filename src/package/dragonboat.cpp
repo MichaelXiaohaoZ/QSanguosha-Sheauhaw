@@ -486,7 +486,6 @@ public:
                         targets << p;
                 }
                 if (targets.isEmpty()) return false;
-                room->broadcastSkillInvoke(objectName(), player);
                 ServerPlayer *target;
                 if (targets.length() == 1)
                 {
@@ -499,6 +498,7 @@ public:
                     target = temptarget;
                 }
                 if (target) {
+                    room->broadcastSkillInvoke(objectName(), player);
                     const Card *card = room->askForExchange(target, objectName(), 1, 1, true, "@d_wenji-give:" + player->objectName());
 
                     CardMoveReason reason(CardMoveReason::S_REASON_GIVE, target->objectName(), player->objectName(), objectName(), QString());

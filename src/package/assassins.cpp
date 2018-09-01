@@ -395,7 +395,7 @@ public:
 
     bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
     {
-        if (!isNormalGameMode(room->getMode()))
+        if (!(isNormalGameMode(room->getMode()) || room->getMode() == "08_zdyj" || room->getMode() == "08_hongyan"))
             return false;
         DeathStruct death = data.value<DeathStruct>();
         if (death.damage == NULL)

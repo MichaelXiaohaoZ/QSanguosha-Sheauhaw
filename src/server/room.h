@@ -79,7 +79,7 @@ public:
     void handleAcquireDetachSkills(ServerPlayer *player, const QString &skill_names, bool acquire_only = false);
     void setPlayerFlag(ServerPlayer *player, const QString &flag);
     void setPlayerProperty(ServerPlayer *player, const char *property_name, const QVariant &value);
-    void setPlayerMark(ServerPlayer *player, const QString &mark, int value);
+    void setPlayerMark(ServerPlayer *player, const QString &mark, int value, bool trigger = true);
     void addPlayerMark(ServerPlayer *player, const QString &mark, int add_num = 1);
     void removePlayerMark(ServerPlayer *player, const QString &mark, int remove_num = 1);
     void addPlayerTip(ServerPlayer *player, const QString &mark);
@@ -598,11 +598,15 @@ private:
     void assignGeneralsForPlayersOfJianGeDefenseMode(const QList<ServerPlayer *> &to_assign);
     void assignGeneralsForPlayersOfHongyanRace(const QList<ServerPlayer *> &to_assign);
     void assignGeneralsForPlayersOfDragonBoatRace(const QList<ServerPlayer *> &to_assign);
+    void assignGeneralsForPlayerOfGodsReturnMode(ServerPlayer *to_assign, const QStringList &gods = QStringList());
+    void assignGeneralsForPlayersOfAttackDongMode(const QList<ServerPlayer *> &to_assign, const QString &bossname);
     void chooseGenerals(QList<ServerPlayer *> players = QList<ServerPlayer *>());
     void chooseGeneralsOfJianGeDefenseMode();
     void chooseGeneralsOfBestLoyalistMode(QList<ServerPlayer *> players = QList<ServerPlayer *>());
     void chooseGeneralsOfHongyanRace(QList<ServerPlayer *> players = QList<ServerPlayer *>());
     void chooseGeneralsOfDragonBoatRace(QList<ServerPlayer *> players = QList<ServerPlayer *>());
+    void chooseGeneralsOfGodsReturnMode(QList<ServerPlayer *> players = QList<ServerPlayer *>());
+    void chooseGeneralsOfAttackDongMode(QList<ServerPlayer *> players = QList<ServerPlayer *>());
     AI *cloneAI(ServerPlayer *player);
     void broadcast(const QByteArray &message, ServerPlayer *except = NULL);
     void initCallbacks();

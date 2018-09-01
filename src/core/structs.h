@@ -471,6 +471,27 @@ struct CardResponseStruct
     QVariant m_data;
 };
 
+struct MarkStruct
+{
+    MarkStruct();
+    ServerPlayer *who;
+    QString name;
+    int count;
+    int gain;
+};
+
+struct TurnStruct
+{
+    TurnStruct();
+    ServerPlayer *who;
+    QString name;
+};
+
+struct GivedCardsStruct
+{
+    QMap<ServerPlayer *, QList<int> > m_givedCards;
+};
+
 enum TriggerEvent
 {
     NonTrigger,
@@ -546,6 +567,7 @@ enum TriggerEvent
     BeforeCardsMove, // sometimes we need to record cards before the move
     PreCardsMoveOneTime,
     CardsMoveOneTime,
+    AfterGiveCards, // new
 
     PlayCard,
 
@@ -564,6 +586,8 @@ enum TriggerEvent
     TrickCardCanceling,
     TrickEffect,
 
+    MarkChange, // new
+    MarkChanged, // new
     ChoiceMade,
 
     StageChange, // For hulao pass only
@@ -572,6 +596,10 @@ enum TriggerEvent
     Debut, // For 1v1 only
 
     TurnBroken, // For the skill 'DanShou'. Do not use it to trigger events
+
+    Nothing, // For me
+    AskforPindianCard, // For me
+    NullificationCardResponded, // for jiang seven
 
     NumOfEvents
 };
@@ -601,5 +629,7 @@ Q_DECLARE_METATYPE(const Card *)
 Q_DECLARE_METATYPE(ServerPlayer *)
 Q_DECLARE_METATYPE(JudgeStruct *)
 Q_DECLARE_METATYPE(PindianStruct *)
+Q_DECLARE_METATYPE(MarkStruct)
+Q_DECLARE_METATYPE(TurnStruct)
 #endif
 

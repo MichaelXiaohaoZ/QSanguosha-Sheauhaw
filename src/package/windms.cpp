@@ -1548,18 +1548,7 @@ public:
 
         //QSet<QString> all = all_generals.toSet();
         Room *room = zuoci->getRoom();
-        if (isNormalGameMode(room->getMode())
-            || room->getMode().contains("_mini_")
-            || room->getMode() == "custom_scenario")
-            all.subtract(Config.value("Banlist/Roles", "").toStringList().toSet());
-        else if (room->getMode() == "06_XMode") {
-            foreach(ServerPlayer *p, room->getAlivePlayers())
-                all.subtract(p->tag["XModeBackup"].toStringList().toSet());
-        } else if (room->getMode() == "02_1v1") {
-            all.subtract(Config.value("Banlist/1v1", "").toStringList().toSet());
-            foreach(ServerPlayer *p, room->getAlivePlayers())
-                all.subtract(p->tag["1v1Arrange"].toStringList().toSet());
-        }
+        all.subtract(Config.value("Banlist/Roles", "").toStringList().toSet());
         QSet<QString> huashen_set, room_set;
         foreach (ServerPlayer *player, room->getAlivePlayers()) {
             QVariantList huashens = player->tag["Huashens"].toList();

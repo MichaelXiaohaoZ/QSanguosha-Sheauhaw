@@ -73,6 +73,7 @@ public:
     void setMaxHp(int max_hp);
     int getLostHp() const;
     bool isWounded() const;
+    bool isYourFriend(const Player *fri) const;
     General::Gender getGender() const;
     virtual void setGender(General::Gender gender);
     bool isMale() const;

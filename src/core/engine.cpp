@@ -321,10 +321,12 @@ Engine::Engine(bool isManualMode)
     modes["04_1v3"] = tr("4 players (Hulao Pass)");
     modes["04_boss"] = tr("4 players(Boss)");
     modes["05p"] = tr("5 players");
+    modes["05_zhfd"] = tr("5 players (Attack Dongzhuo)");
     modes["06p"] = tr("6 players");
     modes["06pd"] = tr("6 players (2 renegades)");
     modes["06_3v3"] = tr("6 players (3v3)");
     modes["06_XMode"] = tr("6 players (XMode)");
+    modes["06_swzs"] = tr("6 players (Gods Return)");
     modes["07p"] = tr("7 players");
     modes["08p"] = tr("8 players");
     modes["08pd"] = tr("8 players (2 renegades)");
@@ -777,6 +779,10 @@ void Engine::setExtraGeneralsBan()
 
     if (ServerInfo.GameMode == "04_boss")
         ban_list.append(Config.value("Banlist/BossMode", "").toStringList());
+    else if (ServerInfo.GameMode == "05_zhfd")
+        ban_list.append(Config.value("Banlist/AttackDong", "").toStringList());
+    else if (ServerInfo.GameMode == "06_swzs")
+        ban_list.append(Config.value("Banlist/GodsReturn", "").toStringList());
     else if (ServerInfo.GameMode == "08_zdyj")
         ban_list.append(Config.value("Banlist/BestLoyalist", "").toStringList());
     else if (ServerInfo.GameMode == "08_dragonboat")
@@ -931,7 +937,7 @@ SkillCard *Engine::cloneSkillCard(const QString &name) const
 #ifndef USE_BUILDBOT
 QString Engine::getVersionNumber() const
 {
-    return "20180817";
+    return "20180830";
 }
 #endif
 
@@ -952,7 +958,7 @@ QString Engine::getVersionName() const
 
 QString Engine::getMODName() const
 {
-    return tr("GoldWind");
+    return tr("Chang'an");
 }
 
 QStringList Engine::getExtensions() const
@@ -1094,6 +1100,8 @@ QString Engine::getModeName(const QString &mode) const
 
 int Engine::getPlayerCount(const QString &mode) const
 {
+    if (mode == "05_zhfd" && Config.value("zhfd/Mode", "NormalMode").toString() == "BossMode")
+        return 8;
     if (modes.contains(mode) || isNormalGameMode(mode)) { // hidden pz settings?
         QRegExp rx("(\\d+)");
         int index = rx.indexIn(mode);
@@ -1117,6 +1125,12 @@ QString Engine::getRoles(const QString &mode) const
         return "ZN";
     } else if (mode == "04_1v3" || mode == "04_boss") {
         return "ZFFF";
+    } else if (mode == "05_zhfd") {
+        if (Config.value("zhfd/Mode", "NormalMode").toString() == "BossMode")
+            return "ZCFCFCFC";
+        return "CZCFF";
+    } else if (mode == "06_swzs") {
+        return "CZCFFF";
     } else if (mode == "08_defense") {
         return "FFFFCCCC";
     } else if (mode == "08_zdyj") {
@@ -1124,7 +1138,7 @@ QString Engine::getRoles(const QString &mode) const
     } else if (mode == "08_hongyan") {
         return "ZCCFFFFN";
     } else if (mode == "08_dragonboat") {
-        return "WWSSUUQQ";
+        return "EESSUUQQ";
     }
 
     if (modes.contains(mode) || isNormalGameMode(mode)) { // hidden pz settings?
@@ -1472,7 +1486,8 @@ QStringList Engine::getRandomFemaleGenerals(int count, const QSet<QString> &ban_
 
 QList<int> Engine::getRandomCards() const
 {
-    bool exclude_disaters = false, using_2012_3v3 = false, using_2013_3v3 = false, exclude_zdyj = false, exclude_dragonboat = false;
+    bool exclude_disaters = false, using_2012_3v3 = false, using_2013_3v3 = false, exclude_zdyj = false,
+         exclude_dragonboat = false, exclude_swzs = false;
     QStringList extra_ban = QStringList();
 
     if (Config.GameMode == "06_3v3") {
@@ -1487,13 +1502,23 @@ QList<int> Engine::getRandomCards() const
     if (Config.GameMode == "08_zdyj") {
         exclude_zdyj = true;
         extra_ban << Config.BestLoyalistSets["cards_ban"];
+        if (Config.value("zdyj/Rule", "2017").toString() != "2017")
+            extra_ban << Config.BestLoyalistSets["cards_ban_old"];
+        else
+            extra_ban << Config.BestLoyalistSets["cards_ban_new"];
     }
 
     if (Config.GameMode == "08_dragonboat")
     {
         exclude_dragonboat = true;
-        exclude_disaters = false;
+        exclude_disaters = true;
         extra_ban << Config.DragonBoatBanC["cards"];
+    }
+
+    if (Config.GameMode == "06_swzs")
+    {
+        exclude_swzs = true;
+        extra_ban << Config.GodsReturnBanC["cards"];
     }
 
     QList<int> list;
@@ -1523,6 +1548,8 @@ QList<int> Engine::getRandomCards() const
         else if (card->getPackage() == "BestLoyalistCard" && exclude_zdyj)
             list << card->getId();
         else if (card->getPackage() == "DragonBoatCard" && exclude_dragonboat)
+            list << card->getId();
+        else if (card->getPackage() == "GodsReturnCard" && exclude_swzs)
             list << card->getId();
 
         if (Config.GameMode == "02_1v1" && !Config.value("1v1/UsingCardExtension", false).toBool()) {

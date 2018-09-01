@@ -591,6 +591,15 @@ PindianStruct *ServerPlayer::pindianStart(const QList<ServerPlayer *> &targets, 
     log.to = targets;
     room->sendLog(log);
 
+    RoomThread *room_thread = room->getThread();
+
+    QVariant data_ask = 1;
+    if (card1 == NULL)
+        room_thread->trigger(AskforPindianCard, room, this, data_ask);
+    data_ask = 2;
+    foreach (ServerPlayer *target, targets)
+        room_thread->trigger(AskforPindianCard, room, target, data_ask);
+
     room->tryPause();
 
     QList<const Card *> cards = room->askForPindianRace(this, targets, reason, card1);
@@ -760,8 +769,13 @@ bool ServerPlayer::pindian(ServerPlayer *target, const QString &reason, const Ca
     return success;
 }
 
-void ServerPlayer::turnOver()
+void ServerPlayer::turnOver(const QString &skill_name)
 {
+    TurnStruct turnst;
+    turnst.who = this;
+    turnst.name = skill_name;
+    QVariant data = QVariant::fromValue(turnst);
+
     if (hasSkill("bossxiongshou") || hasSkill("bossshenyi")) return;
     setFaceUp(!faceUp());
     room->broadcastProperty(this, "faceup");
@@ -772,7 +786,7 @@ void ServerPlayer::turnOver()
     log.arg = faceUp() ? "face_up" : "face_down";
     room->sendLog(log);
 
-    room->getThread()->trigger(TurnedOver, room, this);
+    room->getThread()->trigger(TurnedOver, room, this, data);
 }
 
 bool ServerPlayer::changePhase(Player::Phase from, Player::Phase to)

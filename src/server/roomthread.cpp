@@ -253,6 +253,18 @@ void CardUseStruct::parse(const QString &str, Room *room)
     }
 }
 
+MarkStruct::MarkStruct()
+    : who(NULL), name(QString()), count(NULL), gain(NULL)
+{
+
+}
+
+TurnStruct::TurnStruct()
+    : who(NULL), name(QString())
+{
+
+}
+
 QString EventTriplet::toString() const
 {
     return QString("event[%1], room[%2], target = %3[%4]\n")

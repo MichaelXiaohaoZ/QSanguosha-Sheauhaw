@@ -30,6 +30,7 @@ config = {
 		"DerivativeCard",
         "BestLoyalistCard",
 		"DragonBoatCard",
+		"GodsReturnCard",
 		"New3v3Card",
 		"New3v3_2013Card",
 		"New1v1Card",
@@ -70,6 +71,7 @@ config = {
         "BestLoyalist",
 		"JianGeDefense",
 		"DragonBoat",
+		"AttackDong",
 		"BossMode",
 		"TrialOfGod",
 		"Special3v3",
@@ -424,12 +426,18 @@ config = {
     best_loyalist_sets = {
         first = "cuiyan+huangfusong",
         seconds = "dianwei+caoang+xuchu+zhangfei+zhaoyun+jiangwei+huanggai+zumao+zhoutai+chengong+diaochan+jvshou",
-        cards_ban = "snatch+supply_shortage+amazing_grace+ex_nihilo+collateral+nullification+lightning+qinggang_sword+blade+eight_diagram",
+        cards_ban = "snatch+supply_shortage+amazing_grace+ex_nihilo",
+		cards_ban_new = "collateral+nullification+lightning+qinggang_sword+blade+eight_diagram",
+		cards_ban_old = "throw_equips+escape+thunder+treasured_sword+steel_spear+silver_armor",
     },
 	
     dragon_ban_cards = {
         cards = "peach+analeptic+ex_nihilo+indulgence+supply_shortage+amazing_grace+god_salvation+archery_attack+savage_assault+crossbow+deluge+earthquake+mudslide+typhoon+volcano+lightning",
     },
+	
+	swzs_ban_cards = {
+		cards = "ex_nihilo+collateral+indulgence+supply_shortage",
+	},
 
     zdyj_ban = {
         "cuiyan",
@@ -445,32 +453,26 @@ config = {
     },
 	
 	dragon_ban = {
-		"zuoci",
-		"yuanshu",
-		"sp_jiaxu",
-		"buzhi",
-		"lingju",
-		"as_lingju",
-		"huanghao",
-		"xunyou",
-		"guohuanghou",
-		"zhangrang",
-		"yuanshao",
-		"liru",
-		"caopi",
-		"manchong",
-		"caiwenji",
-		"xuhuang",
-		"nos_xuhuang",
-		"daqiao",
-		"nos_daqiao",
-		"zhangchunhua",
-		"miansha_zhangchunhua",
-		"zhugeke",
-		"nos_huanggai",
-		"hanhaoshihuan",
-		"xiahoujuan",
-		"twyj_xiahouba",
-		"liuqi",
+		"zuoci", "yuanshu", "sp_jiaxu", "buzhi", "lingju", "as_lingju", "huanghao",
+		"xunyou", "guohuanghou", "zhangrang", "yuanshao", "liru", "caopi", "manchong",
+		"caiwenji", "xuhuang", "nos_xuhuang", "daqiao", "nos_daqiao", "zhangchunhua",
+		"miansha_zhangchunhua", "zhugeke", "nos_huanggai", "hanhaoshihuan", "xiahoujuan",
+		"twyj_xiahouba", "liuqi",
+	},
+	
+	swzs_ban = {
+		"kanze", "sp_diaochan", "caiwenji", "wangyun", "zuoci", "yuji", "daqiao", "nos_daqiao",
+		"xuhuang", "nos_xuhuang", "sp_jiaxu", "sp_guanyu", "lingju", "as_lingju", "yuanshu",
+		"buzhi", "mayunlu", "nos_mayunlu", "huanghao", "chengyu", "guohuanghou", "zhangrang", 
+		"diaochan", "xunyu", "xiaoqiao", "erqiao", "fazheng", "nos_fazheng", "manchong", 
+		"hanhaoshihuan", "nos_madai", "xiahoujuan",
+	},
+	
+	zhfd_ban = {
+		"sp_jiaxu", "sp_buzhi", "lingju", "as_lingju", "sp_guanyu", "yuanshu", "zuoci",
+		"huanghao", "daqiao", "nos_daqiao", "xuhuang", "nos_xuhuang", "hanhaoshihuan",
+		"huatuo", "nos_huatuo", "sunjian", "shenguanyu", "shenlvmeng", "shenzhouyu",
+		"shenzhugeliang", "shencaocao", "shenlvbu", "shenzhaoyun", "shensimayi",
+		"nosms_shencaocao",
 	}
 }
