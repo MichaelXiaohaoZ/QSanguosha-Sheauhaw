@@ -1920,11 +1920,11 @@ void Room::setPlayerMark(ServerPlayer *player, const QString &mark, int value, b
         thread->trigger(MarkChanged, this, player, data);
 }
 
-void Room::addPlayerMark(ServerPlayer *player, const QString &mark, int add_num)
+void Room::addPlayerMark(ServerPlayer *player, const QString &mark, int add_num, bool trigger)
 {
     int value = player->getMark(mark);
     value += add_num;
-    setPlayerMark(player, mark, value);
+    setPlayerMark(player, mark, value, trigger);
 }
 
 void Room::removePlayerMark(ServerPlayer *player, const QString &mark, int remove_num)
