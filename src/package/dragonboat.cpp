@@ -42,6 +42,11 @@ public :
             }
         return false;
     }
+
+    virtual int getPriority(TriggerEvent triggerEvent) const
+    {
+        return 100;
+    }
 };
 
 class AiyeGainMark : public TriggerSkill

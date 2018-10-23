@@ -149,7 +149,8 @@ SOURCES += \
     src/scenario/miniscenarios.cpp \
     src/package/dragonboat.cpp \
     src/package/godsreturn.cpp \
-    src/package/attackdong.cpp
+    src/package/attackdong.cpp \
+    src/package/yearboss.cpp
 
 HEADERS += \
     src/client/aux-skills.h \
@@ -291,7 +292,8 @@ HEADERS += \
     src/package/yjcmnos.h \
     src/package/dragonboat.h \
     src/package/godsreturn.h \
-    src/package/attackdong.h
+    src/package/attackdong.h \
+    src/package/yearboss.h
 
 FORMS += \
     src/dialog/cardoverview.ui \

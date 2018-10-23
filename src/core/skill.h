@@ -140,11 +140,14 @@ public:
     TriggerSkill(const QString &name);
     const ViewAsSkill *getViewAsSkill() const;
     QList<TriggerEvent> getTriggerEvents() const;
+    //QList<Player::Phase> getTriggerablePhase() const;
+    //QList<Player::Phase> getUntriggerablePhase() const;
 
     virtual int getPriority(TriggerEvent triggerEvent) const;
     virtual bool triggerable(const ServerPlayer *target, Room *room) const;
     virtual bool triggerable(const ServerPlayer *target) const;
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const = 0;
+    //virtual bool isAskVisible(TriggerEvent triggerEvent) const;
 
     inline double getDynamicPriority() const
     {
@@ -160,10 +163,19 @@ public:
         return global;
     }
 
+
 protected:
     const ViewAsSkill *view_as_skill;
     QList<TriggerEvent> events;
     bool global;
+/*
+    QList<Player::Phase> triggerable_phase =
+        QList<Player::Phase>() << Player::Start << Player::Judge << Player::Draw
+                               << Player::Play << Player::Discard << Player::Finish
+                               << Player::NotActive;
+    QList<Player::Phase> untriggerable_phase;
+
+    */
 
 private:
     mutable double dynamic_priority;

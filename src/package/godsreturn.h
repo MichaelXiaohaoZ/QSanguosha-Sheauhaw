@@ -85,6 +85,14 @@ public:
     virtual void onEffect(const CardEffectStruct &effect) const;
 };
 
+class GodsReturnPackage : public Package
+{
+    Q_OBJECT
+
+public:
+    GodsReturnPackage();
+};
+
 class GodsReturnCardPackage : public Package
 {
     Q_OBJECT

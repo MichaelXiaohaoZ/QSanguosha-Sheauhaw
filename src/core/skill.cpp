@@ -358,6 +358,23 @@ bool TriggerSkill::triggerable(const ServerPlayer *target) const
     return target != NULL && (global || (target->isAlive() && target->hasSkill(this)));
 }
 
+/*
+bool TriggerSkill::isAskVisible(TriggerEvent triggerEvent) const
+{
+    return true;
+}
+
+QList<Player::Phase> TriggerSkill::getTriggerablePhase() const
+{
+    return triggerable_phase;
+}
+
+QList<Player::Phase> TriggerSkill::getUntriggerablePhase() const
+{
+    return untriggerable_phase;
+}
+*/
+
 ScenarioRule::ScenarioRule(Scenario *scenario)
     :TriggerSkill(scenario->objectName())
 {

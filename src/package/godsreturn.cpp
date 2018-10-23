@@ -9,6 +9,505 @@
 #include "roomscene.h"
 #include "special3v3.h"
 
+class BossXiongshou : public TriggerSkill
+{
+public:
+    BossXiongshou() : TriggerSkill("bossxiongshou")
+    {
+        events << DamageCaused;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *boss, QVariant &data) const
+    {
+        DamageStruct damage = data.value<DamageStruct>();
+        if (boss->getHp() > damage.to->getHp() && damage.card && damage.card->isKindOf("Slash")) {
+            boss->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(boss, objectName());
+            damage.damage++;
+            data = QVariant::fromValue(damage);
+        }
+
+        return false;
+    }
+};
+
+class BossXiongshouDistance : public DistanceSkill
+{
+public:
+    BossXiongshouDistance() : DistanceSkill("#bossxiongshou-distance")
+    {
+    }
+
+    virtual int getCorrect(const Player *from, const Player *) const
+    {
+        if (from->hasSkill(this))
+            return -1;
+        else
+            return 0;
+    }
+};
+
+class BossWake : public TriggerSkill
+{
+public:
+    BossWake() : TriggerSkill("#bosswake")
+    {
+        events << HpChanged << MaxHpChanged;
+        global = true;
+    }
+
+    bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL && target->getHp() <= target->getMaxHp()/2 && target->getGeneralName().startsWith("fierce");
+    }
+
+    bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const
+    {
+        foreach (const QString &skill_name, player->getGeneral()->getRelatedSkillNames()) {
+            const Skill *skill = Sanguosha->getSkill(skill_name);
+            if (skill && !player->hasSkill(skill, true))
+                room->acquireSkill(player, skill_name);
+        }
+        return false;
+    }
+};
+
+class BossWuzang : public DrawCardsSkill
+{
+public:
+    BossWuzang() : DrawCardsSkill("#bosswuzang-draw")
+    {
+        frequency = Compulsory;
+    }
+
+    bool triggerable(const ServerPlayer *target) const
+    {
+        return target && target->isAlive() && target->hasSkill("bosswuzang");
+    }
+
+    virtual int getDrawNum(ServerPlayer *player, int n) const
+    {
+        if (n <= 0) return n;
+        player->getRoom()->sendCompulsoryTriggerLog(player, "bosswuzang");
+        player->broadcastSkillInvoke("bosswuzang");
+        return qMax(player->getHp() / 2, 5);
+    }
+};
+
+class BossWuzangKeep : public MaxCardsSkill
+{
+public:
+    BossWuzangKeep() : MaxCardsSkill("bosswuzang")
+    {
+    }
+
+    virtual int getFixed(const Player *target) const
+    {
+        if (target->hasSkill(objectName()))
+            return 0;
+        else
+            return -1;
+    }
+};
+
+class BossXiangde : public TriggerSkill
+{
+public:
+    BossXiangde() : TriggerSkill("bossxiangde")
+    {
+        events << DamageInflicted;
+        frequency = Compulsory;
+    }
+
+    bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        DamageStruct damage = data.value<DamageStruct>();
+        if (!damage.from || !damage.from->getWeapon()) return false;
+        room->sendCompulsoryTriggerLog(player, objectName());
+        player->broadcastSkillInvoke(objectName());
+        damage.damage++;
+        data = QVariant::fromValue(damage);
+        return false;
+    }
+};
+
+class BossYinzei : public MasochismSkill
+{
+public:
+    BossYinzei() : MasochismSkill("bossyinzei")
+    {
+        frequency = Compulsory;
+    }
+
+    virtual void onDamaged(ServerPlayer *boss, const DamageStruct &damage) const
+    {
+        ServerPlayer *from = damage.from;
+        Room *room = boss->getRoom();
+        if (boss->isKongcheng() && from && from->isAlive()) {
+            QList<int> ids = from->forceToDiscard(1, true);
+            if (ids.isEmpty()) return;
+            room->sendCompulsoryTriggerLog(boss, objectName());
+            boss->broadcastSkillInvoke(objectName());
+            room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, boss->objectName(), from->objectName());
+            room->throwCard(ids.first(), from);
+        }
+    }
+};
+
+class BossZhue : public TriggerSkill
+{
+public:
+    BossZhue() : TriggerSkill("bosszhue")
+    {
+        events << Damage;
+        frequency = Compulsory;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *target, QVariant &) const
+    {
+        foreach (ServerPlayer *boss, room->getOtherPlayers(target)) {
+            if (!TriggerSkill::triggerable(boss)) continue;
+            room->sendCompulsoryTriggerLog(boss, objectName());
+            boss->broadcastSkillInvoke(objectName());
+            if (target->isAlive())
+                room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, boss->objectName(), target->objectName());
+            boss->drawCards(1, objectName());
+            target->drawCards(1, objectName());
+        }
+        return false;
+    }
+};
+
+class BossFutai : public TriggerSkill
+{
+public:
+    BossFutai() : TriggerSkill("bossfutai")
+    {
+        events << EventPhaseStart << AskForPeaches;
+        frequency = Compulsory;
+    }
+
+    int getPriority(TriggerEvent triggerEvent) const
+    {
+        if (triggerEvent == AskForPeaches)
+            return 1;
+        else
+            return TriggerSkill::getPriority(triggerEvent);
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (triggerEvent == EventPhaseStart && player->getPhase() == Player::RoundStart && TriggerSkill::triggerable(player)) {
+            QList<ServerPlayer *> woundeds;
+            foreach (ServerPlayer *p, room->getAlivePlayers()) {
+                if (p->isWounded())
+                    woundeds << p;
+            }
+            if (woundeds.isEmpty()) return false;
+            room->sendCompulsoryTriggerLog(player, objectName());
+            player->broadcastSkillInvoke(objectName());
+            foreach (ServerPlayer *p, woundeds)
+                room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), p->objectName());
+            foreach (ServerPlayer *p, woundeds)
+                room->recover(p, RecoverStruct(player));
+        } else if (triggerEvent == AskForPeaches) {
+            DyingStruct dying_data = data.value<DyingStruct>();
+            if (dying_data.who == player) return false;
+            foreach (ServerPlayer *p, room->findPlayersBySkillName(objectName())) {
+                if (p->getPhase() == Player::NotActive && p != player) {
+                    room->setTag("SkipGameRule", true);
+                    break;
+                }
+            }
+        }
+        return false;
+    }
+};
+
+class BossFutaiCardLimited : public CardLimitedSkill
+{
+public:
+    BossFutaiCardLimited() : CardLimitedSkill("#bossfutai-limited")
+    {
+    }
+    virtual bool isCardLimited(const Player *player, const Card *card, Card::HandlingMethod method) const
+    {
+        if (!card->isKindOf("Peach") || method != Card::MethodUse) return false;
+        foreach(const Player *sib, player->getAliveSiblings()) {
+            if (sib->hasSkill("bossfutai") && sib->getPhase() == Player::NotActive)
+                return true;
+        }
+        return false;
+    }
+};
+
+class BossYanduRecord : public TriggerSkill
+{
+public:
+    BossYanduRecord() : TriggerSkill("#bossyandu-record")
+    {
+        events << DamageDone << TurnStart;
+        global = true;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *, QVariant &data) const
+    {
+        if (triggerEvent == DamageDone) {
+            DamageStruct damage = data.value<DamageStruct>();
+            if (damage.from && damage.from->getPhase() != Player::NotActive) {
+                damage.from->setMark("yanduHasDamege", 1);
+            }
+        } else {
+            foreach(ServerPlayer *p, room->getAlivePlayers())
+                p->setMark("yanduHasDamege", 0);
+        }
+
+        return false;
+    }
+};
+
+class BossYandu : public PhaseChangeSkill
+{
+public:
+    BossYandu() : PhaseChangeSkill("bossyandu")
+    {
+        frequency = Compulsory;
+    }
+
+    virtual int getPriority(TriggerEvent) const
+    {
+        return 1;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *player) const
+    {
+        Room *room = player->getRoom();
+        if (player->getPhase() == Player::NotActive && player->getMark("yanduHasDamege") == 0) {
+            foreach (ServerPlayer *p, room->getOtherPlayers(player)) {
+                if (TriggerSkill::triggerable(p) && player->isAlive() && !player->isNude()) {
+                    room->sendCompulsoryTriggerLog(p, objectName());
+                    p->broadcastSkillInvoke(objectName());
+                    room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, p->objectName(), player->objectName());
+                    int card_id = room->askForCardChosen(p, player, "he", objectName());
+                    CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, p->objectName());
+                    room->obtainCard(p, Sanguosha->getCard(card_id),
+                        reason, room->getCardPlace(card_id) != Player::PlaceHand);
+                }
+            }
+        }
+        return false;
+    }
+};
+
+class BossMingwan : public TriggerSkill
+{
+public:
+    BossMingwan() : TriggerSkill("bossmingwan")
+    {
+        events << Damage << CardUsed << CardResponded << EventPhaseStart;
+        frequency = Compulsory;
+    }
+
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (triggerEvent == Damage) {
+            DamageStruct damage = data.value<DamageStruct>();
+            QStringList assignee_list = player->property("bossmingwan_targets").toString().split("+");
+            if (TriggerSkill::triggerable(player) && !assignee_list.contains(damage.to->objectName()) && player->getPhase() != Player::NotActive) {
+                room->sendCompulsoryTriggerLog(player, objectName());
+                player->broadcastSkillInvoke(objectName());
+                room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), damage.to->objectName());
+                assignee_list << damage.to->objectName();
+                room->setPlayerProperty(player, "bossmingwan_targets", assignee_list.join("+"));
+            }
+        } else if (triggerEvent == EventPhaseStart) {
+            if (player->getPhase() == Player::NotActive)
+                room->setPlayerProperty(player, "bossmingwan_targets", QString());
+        } else {
+            const Card *card = NULL;
+            if (triggerEvent == CardUsed)
+                card = data.value<CardUseStruct>().card;
+            else {
+                CardResponseStruct response = data.value<CardResponseStruct>();
+                if (response.m_isUse)
+                    card = response.m_card;
+            }
+            if (card && card->getTypeId() != Card::TypeSkill && card->getHandlingMethod() == Card::MethodUse) {
+                if (player->property("bossmingwan_targets").toString().isEmpty()) return false;
+                room->sendCompulsoryTriggerLog(player, objectName());
+                player->broadcastSkillInvoke(objectName());
+                player->drawCards(1, objectName());
+            }
+        }
+        return false;
+    }
+};
+
+class BossMingwanProhibit : public ProhibitSkill
+{
+public:
+    BossMingwanProhibit() : ProhibitSkill("#bossmingwan-prohibit")
+    {
+    }
+
+    bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> & /* = QList<const Player *>() */) const
+    {
+        if (!from || card->isKindOf("SkillCard") || from->property("bossmingwan_targets").toString().isEmpty()
+                || !to || from == to) return false;
+        return !from->property("bossmingwan_targets").toString().split("+").contains(to->objectName());
+    }
+};
+
+class BossNitai : public TriggerSkill
+{
+public:
+    BossNitai() : TriggerSkill("bossnitai")
+    {
+        events << DamageInflicted;
+        frequency = Compulsory;
+    }
+
+    bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        DamageStruct damage = data.value<DamageStruct>();
+        if (player->getPhase() == Player::NotActive && damage.nature != DamageStruct::Fire) return false;
+        room->sendCompulsoryTriggerLog(player, objectName());
+        player->broadcastSkillInvoke(objectName());
+        if (player->getPhase() == Player::NotActive) {
+            damage.damage++;
+            data = QVariant::fromValue(damage);
+        } else
+            return true;
+        return false;
+    }
+};
+
+class BossLuanchang : public TriggerSkill
+{
+public:
+    BossLuanchang() : TriggerSkill("bossluanchang")
+    {
+        events << EventPhaseStart << EventPhaseChanging;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *boss, QVariant &data) const
+    {
+        if (triggerEvent == EventPhaseChanging) {
+            if (data.value<PhaseChangeStruct>().to != Player::NotActive) return false;
+            ArcheryAttack *aa = new ArcheryAttack(Card::NoSuit, 0);
+            aa->setSkillName("_" + objectName());
+            if (!aa->isAvailable(boss)) return false;
+            room->sendCompulsoryTriggerLog(boss, objectName());
+            boss->broadcastSkillInvoke(objectName());
+            room->useCard(CardUseStruct(aa, boss, QList<ServerPlayer *>()));
+
+        } else if (triggerEvent == EventPhaseStart) {
+            if (boss->getPhase() != Player::RoundStart) return false;
+            SavageAssault *sa = new SavageAssault(Card::NoSuit, 0);
+            sa->setSkillName("_" + objectName());
+            if (!sa->isAvailable(boss)) return false;
+            room->sendCompulsoryTriggerLog(boss, objectName());
+            boss->broadcastSkillInvoke(objectName());
+            room->useCard(CardUseStruct(sa, boss, QList<ServerPlayer *>()));
+        }
+        return false;
+    }
+};
+
+class BossTanyu : public TriggerSkill
+{
+public:
+    BossTanyu() : TriggerSkill("bosstanyu")
+    {
+        events << EventPhaseStart << EventPhaseChanging;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (triggerEvent == EventPhaseChanging) {
+            if (data.value<PhaseChangeStruct>().to != Player::Discard || player->isSkipped(Player::Discard)) return false;
+            room->sendCompulsoryTriggerLog(player, objectName());
+            player->broadcastSkillInvoke(objectName());
+            player->skip(Player::Discard);
+        } else if (triggerEvent == EventPhaseStart) {
+            if (player->getPhase() != Player::Finish) return false;
+            foreach (ServerPlayer *p, room->getOtherPlayers(player)) {
+                if (p->getHandcardNum() > player->getHandcardNum())
+                    return false;
+            }
+            room->sendCompulsoryTriggerLog(player, objectName());
+            player->broadcastSkillInvoke(objectName());
+            room->loseHp(player);
+
+        }
+        return false;
+    }
+};
+
+class BossCangmu : public DrawCardsSkill
+{
+public:
+    BossCangmu() : DrawCardsSkill("bosscangmu")
+    {
+        frequency = Compulsory;
+    }
+
+    virtual int getDrawNum(ServerPlayer *player, int n) const
+    {
+        if (n <= 0) return n;
+        player->getRoom()->sendCompulsoryTriggerLog(player, objectName());
+        player->broadcastSkillInvoke(objectName());
+        return player->getRoom()->alivePlayerCount();
+    }
+};
+
+class BossJicai : public TriggerSkill
+{
+public:
+    BossJicai() : TriggerSkill("bossjicai")
+    {
+        events << HpRecover;
+        frequency = Compulsory;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const
+    {
+        foreach (ServerPlayer *boss, room->getAlivePlayers()) {
+            if (!TriggerSkill::triggerable(boss)) continue;
+            room->sendCompulsoryTriggerLog(boss, objectName());
+            boss->broadcastSkillInvoke(objectName());
+            room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, boss->objectName(), player->objectName());
+            boss->drawCards(1, objectName());
+            if (boss != player)
+                player->drawCards(1, objectName());
+        }
+        return false;
+    }
+};
+
 class GodBladeSkill: public WeaponSkill {
 public:
     GodBladeSkill(): WeaponSkill("god_blade") {
@@ -362,6 +861,49 @@ public:
 
 };
 
+GodsReturnPackage::GodsReturnPackage()
+    : Package("GodsReturn")
+{
+
+    General *boss_zhuyin = new General(this, "fierce_zhuyin", "qun", 4, true, true);
+    boss_zhuyin->addSkill(new BossXiongshou);
+    boss_zhuyin->addSkill(new BossXiongshouDistance);
+    related_skills.insertMulti("bossxiongshou", "#bossxiongshou-distance");
+
+    General *boss_hundun = new General(this, "fierce_hundun", "qun", 20, true, true);
+    boss_hundun->addSkill("bossxiongshou");
+    boss_hundun->addSkill(new BossWuzang);
+    boss_hundun->addSkill(new BossWuzangKeep);
+    related_skills.insertMulti("bosswuzang", "#bosswuzang-keep");
+    boss_hundun->addSkill(new BossXiangde);
+    boss_hundun->addRelateSkill("bossyinzei");
+
+    General *boss_qiongqi = new General(this, "fierce_qiongqi", "qun", 16, true, true);
+    boss_qiongqi->addSkill("bossxiongshou");
+    boss_qiongqi->addSkill(new BossZhue);
+    boss_qiongqi->addSkill(new BossFutai);
+    boss_qiongqi->addSkill(new BossFutaiCardLimited);
+    related_skills.insertMulti("bossfutai", "#bossfutai-limited");
+    boss_qiongqi->addRelateSkill("bossyandu");
+
+    General *boss_taowu = new General(this, "fierce_taowu", "qun", 16, true, true);
+    boss_taowu->addSkill("bossxiongshou");
+    boss_taowu->addSkill(new BossMingwan);
+    boss_taowu->addSkill(new BossMingwanProhibit);
+    related_skills.insertMulti("bossmingwan", "#bossmingwan-prohibit");
+    boss_taowu->addSkill(new BossNitai);
+    boss_taowu->addRelateSkill("bossluanchang");
+
+    General *boss_taotie = new General(this, "fierce_taotie", "qun", 20, true, true);
+    boss_taotie->addSkill("bossxiongshou");
+    boss_taotie->addSkill(new BossTanyu);
+    boss_taotie->addSkill(new BossCangmu);
+    boss_taotie->addRelateSkill("bossjicai");
+
+    skills << new BossYinzei << new BossYandu << new BossYanduRecord
+           << new BossLuanchang << new BossJicai << new BossWake;
+}
+
 GodsReturnCardPackage::GodsReturnCardPackage()
     : Package("GodsReturnCard", Package::CardPack)
 {
@@ -395,4 +937,5 @@ GodsReturnCardPackage::GodsReturnCardPackage()
 
 }
 
+ADD_PACKAGE(GodsReturn)
 ADD_PACKAGE(GodsReturnCard)

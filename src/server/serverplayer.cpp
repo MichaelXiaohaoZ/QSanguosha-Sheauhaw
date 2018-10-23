@@ -776,7 +776,28 @@ void ServerPlayer::turnOver(const QString &skill_name)
     turnst.name = skill_name;
     QVariant data = QVariant::fromValue(turnst);
 
-    if (hasSkill("bossxiongshou") || hasSkill("bossshenyi")) return;
+    if (hasSkill("bossxiongshou") || hasSkill("bossshenyi") || hasSkill("yearwuma"))
+    {
+        LogMessage turnlog;
+        turnlog.type = "#turnlog";
+        turnlog.from = this;
+        if (hasSkill("bossxiongshou"))
+        {
+            turnlog.arg = "bossxiongshou";
+            room->sendLog(turnlog);
+        }
+        if (hasSkill("bossshenyi"))
+        {
+            turnlog.arg = "bossshenyi";
+            room->sendLog(turnlog);
+        }
+        if (hasSkill("yearwuma"))
+        {
+            turnlog.arg = "yearwuma";
+            room->sendLog(turnlog);
+        }
+        return;
+    }
     setFaceUp(!faceUp());
     room->broadcastProperty(this, "faceup");
 

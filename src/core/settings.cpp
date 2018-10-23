@@ -245,7 +245,7 @@ void Settings::init()
     forbid_packages << "New3v3Card" << "New3v3_2013Card" << "New1v1Card" << "BossMode" << "JianGeDefense"
                     << "BestLoyalist" << "test" << "BestLoyalistCard" << "DerivativeCard"
                     << "Special3v3" << "Special3v3Ext" << "Special1v1" << "Special1v1Ext"
-                    << "DragonBoat" << "DragonBoatCard" << "GodsReturnCard" << "AttackDong";
+                    << "DragonBoat" << "DragonBoatCard" << "GodsReturn" << "GodsReturnCard" << "AttackDong";
 
     setValue("ForbidPackages", forbid_packages);
 

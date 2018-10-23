@@ -357,10 +357,19 @@ public:
 
     virtual int getCorrect(const Player *from, const Player *to) const{
         foreach (const Player *p, from->getAliveSiblings()) {
-            if (p->hasSkill(objectName()) && p->isYourFriend(from) && !p->isYourFriend(to))
+            if (p->hasSkill(objectName()) && isFriendEach(p, from) && !isFriendEach(p, to))
                 return -1;
         }
         return 0;
+    }
+
+    virtual bool isFriendEach(const Player *player, const Player *to) const
+    {
+        if ((player->isLord() || player->getRole() == "loyalist") && (to->isLord() || to->getRole() == "loyalist"))
+            return true;
+        if (player->getRole() == to->getRole())
+            return true;
+        return false;
     }
 };
 
@@ -462,7 +471,7 @@ public:
                     rebel->drawCards(room->getLord()->getMark("bosspolunum"), objectName());
         }
         else
-            if (player->hasSkill(objectName()) && player->getRole() == "rebel" && death.damage->from
+            if (player->hasSkill(objectName()) && player->getRole() == "rebel" && death.damage && death.damage->from
                     && death.damage->from->getRole() == "rebel" && death.who->getRole() != "rebel")
             {
                 room->addPlayerMark(room->getLord(), "bosspolunum", 1);
@@ -482,6 +491,14 @@ public:
     {
         events << TurnStart;
         frequency = Compulsory;
+        global = true;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target, Room *room) const
+    {
+        if (room->getMode() == "05_zhfd" && (Config.value("zhfd/Mode", "NormalMode").toString() == "BossMode"))
+            return target->isLord();
+        return false;
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
@@ -545,11 +562,13 @@ AttackDongPackage::AttackDongPackage()
     boss_huaxiong->addSkill(new Moqu);
     boss_huaxiong->addSkill("yaowu");
     boss_huaxiong->addSkill("mojun");
-    boss_huaxiong->addSkill(new BossHuaxiongTurnStart);
+    //boss_huaxiong->addSkill(new BossHuaxiongTurnStart);
 
     General *ai_sunjian = new General(this, "sp_sunjian", "qun", 6, true, true);
     ai_sunjian->addSkill("yinghun");
     ai_sunjian->addSkill(new BossPolu);
+
+    skills << new BossHuaxiongTurnStart;
 
     addMetaObject<KuangxiCard>();
 }

@@ -1206,7 +1206,7 @@ void GameRule::rewardAndPunish(ServerPlayer *killer, ServerPlayer *victim) const
                     room->drawCards(p, 3);
     }
     else {
-        if (victim->getRole() == "rebel" && victim->getGeneralName() != "sp_sunjian" && killer != victim)
+        if (victim->getRole() == "rebel" && killer != victim)
             killer->drawCards(3, "kill");
         else if (victim->getRole() == "loyalist" && killer->isLord())
             killer->throwAllHandCardsAndEquips();
