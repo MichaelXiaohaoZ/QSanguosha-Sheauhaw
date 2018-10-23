@@ -579,7 +579,7 @@ public:
                     l_copy << s.value<ServerPlayer *>();
                 l_copy << use.from;
                 int n = l_copy.count(use.from);
-                room->addPlayerMark(use.from, "zhanjuedraw", 1);
+                room->addPlayerMark(use.from, "zhanjuedraw", n);
                 room->sortByActionOrder(l_copy);
                 foreach(ServerPlayer *p, l_copy)
 				    p->drawCards(1);

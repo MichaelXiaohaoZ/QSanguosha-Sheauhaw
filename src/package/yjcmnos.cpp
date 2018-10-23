@@ -471,80 +471,6 @@ public:
     }
 };
 
-class ZhannjyueVS : public ZeroCardViewAsSkill
-{
-public:
-    ZhannjyueVS() : ZeroCardViewAsSkill("zhannjyue")
-    {
-
-    }
-
-    const Card *viewAs() const
-    {
-        Duel *duel = new Duel(Card::SuitToBeDecided, -1);
-        duel->addSubcards(Self->getHandcards());
-        duel->setSkillName("zhannjyue");
-        return duel;
-    }
-
-    bool isEnabledAtPlay(const Player *player) const
-    {
-        return player->getMark("zhannjyuedraw") < 2 && !player->isKongcheng();
-    }
-};
-
-class Zhannjyue : public TriggerSkill
-{
-public:
-    Zhannjyue() : TriggerSkill("zhannjyue")
-    {
-        view_as_skill = new ZhannjyueVS;
-        events << CardFinished << PreDamageDone << EventPhaseChanging;
-    }
-
-    bool triggerable(const ServerPlayer *target) const
-    {
-        return target != NULL;
-    }
-
-    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
-    {
-        if (triggerEvent == PreDamageDone) {
-            DamageStruct damage = data.value<DamageStruct>();
-            if (damage.card != NULL && damage.card->isKindOf("Duel") && damage.card->getSkillName() == "zhannjyue" && damage.from != NULL) {
-                QVariantMap m = room->getTag("zhannjyue").toMap();
-                QVariantList l = m.value(damage.card->toString(), QVariantList()).toList();
-                l << QVariant::fromValue(damage.to);
-                m[damage.card->toString()] = l;
-                room->setTag("zhannjyue", m);
-            }
-        } else if (triggerEvent == CardFinished) {
-            CardUseStruct use = data.value<CardUseStruct>();
-            if (use.card != NULL && use.card->isKindOf("Duel") && use.card->getSkillName() == "zhannjyue") {
-                QVariantMap m = room->getTag("zhannjyue").toMap();
-                QVariantList l = m.value(use.card->toString(), QVariantList()).toList();
-                if (!l.isEmpty()) {
-                    QList<ServerPlayer *> l_copy;
-                    foreach (const QVariant &s, l)
-                        l_copy << s.value<ServerPlayer *>();
-                    l_copy << use.from;
-                    int n = l_copy.count(use.from);
-                    room->addPlayerMark(use.from, "zhannjyuedraw", n);
-                    room->sortByActionOrder(l_copy);
-                    room->drawCards(l_copy, 1, objectName());
-                }
-                m.remove(use.card->toString());
-                room->setTag("zhannjyue", m);
-            }
-        } else if (triggerEvent == EventPhaseChanging) {
-            PhaseChangeStruct change = data.value<PhaseChangeStruct>();
-            if (change.to == Player::NotActive)
-                room->setPlayerMark(player, "zhannjyuedraw", 0);
-        }
-        return false;
-    }
-};
-
 TsydyiCard::TsydyiCard()
 {
     target_fixed = true;
@@ -1263,10 +1189,6 @@ NostalYJCM2015Package::NostalYJCM2015Package()
 
     General *zhuzhi = new General(this, "nos_zhuzhi", "wu");
     zhuzhi->addSkill(new Angwo);
-
-    General *liuchen = new General(this, "nos_liuchen$", "shu");
-    liuchen->addSkill(new Zhannjyue);
-    liuchen->addSkill("qinwang");
 
     addMetaObject<AngwoCard>();
     addMetaObject<ZhenshanCard>();
