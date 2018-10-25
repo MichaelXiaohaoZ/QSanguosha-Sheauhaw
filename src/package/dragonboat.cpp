@@ -577,7 +577,7 @@ public:
         if (player->hasFlag("DTunjiangDisabled")) return false;
         QList<ServerPlayer *> targets;
         foreach (ServerPlayer *p, room->getAllPlayers())
-            if (!p->isNude() && p->getKingdom() == player->getKingdom())
+            if (p->getKingdom() == player->getKingdom())
                 targets << p;
         foreach (ServerPlayer *p, room->getAllPlayers())
             if (p->hasSkill(objectName()) && p->getKingdom() == player->getKingdom())

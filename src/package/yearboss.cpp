@@ -672,6 +672,449 @@ public:
     }
 };
 
+class YearXugou : public TriggerSkill
+{
+public:
+    YearXugou() : TriggerSkill("yearxugou")
+    {
+        events << SlashEffected << DamageCaused;
+        frequency = Compulsory;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL && TriggerSkill::triggerable(target);
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (triggerEvent == SlashEffected)
+        {
+            SlashEffectStruct effect = data.value<SlashEffectStruct>();
+            if (effect.slash->isRed()) {
+                player->broadcastSkillInvoke(objectName());
+                room->notifySkillInvoked(player, objectName());
+
+                LogMessage log;
+                log.type = "#SkillNullify";
+                log.from = player;
+                log.arg = objectName();
+                log.arg2 = effect.slash->objectName();
+                room->sendLog(log);
+
+                return true;
+            }
+        }
+        else
+        {
+            if (!player->isAlive())
+                return false;
+            DamageStruct damage = data.value<DamageStruct>();
+            if (damage.chain || damage.transfer || !damage.by_user) return false;
+            const Card *reason = damage.card;
+            if (reason && reason->isKindOf("Slash") && reason->isRed())
+            {
+                LogMessage log;
+                log.type = "#YearXugouBuff";
+                log.from = player;
+                log.to << damage.to;
+                room->sendLog(log);
+                damage.damage++;
+                data = QVariant::fromValue(damage);
+            }
+        }
+        return false;
+    }
+};
+
+class YearXugouTargetMod : public TargetModSkill
+{
+public:
+    YearXugouTargetMod() : TargetModSkill("#yearxugou-target")
+    {
+    }
+
+    virtual int getDistanceLimit(const Player *from, const Card *card, const Player *) const
+    {
+        if (from->hasSkill("yearxugou") && card->isRed() && card->isKindOf("Slash"))
+            return 1000;
+        else
+            return 0;
+    }
+};
+
+class YearChuanchengXugou : public TriggerSkill
+{
+public:
+    YearChuanchengXugou() : TriggerSkill("yearchuanchengxugou")
+    {
+        events << Death;
+        frequency = Compulsory;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL && target->hasSkill(this);
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        DeathStruct death = data.value<DeathStruct>();
+        if (player->hasSkill(objectName()) && death.who == player && death.damage && death.damage->from)
+        {
+            if (death.damage->from->hasSkill("yearchenlong") && death.damage->from->getMark("chuanchengedchenlong"))
+            {
+                room->detachSkillFromPlayer(death.damage->from, "yearchenlong");
+                room->setPlayerMark(death.damage->from, "chuanchengedchenlong", 0);
+            }
+            if (death.damage->from->hasSkill("yearweiyang") && death.damage->from->getMark("chuanchengedweiyang"))
+            {
+                room->detachSkillFromPlayer(death.damage->from, "yearweiyang");
+                room->setPlayerMark(death.damage->from, "chuanchengedweiyang", 0);
+            }
+            if (death.damage->from->hasSkill("yearshenhou") && death.damage->from->getMark("chuanchengedshenhou"))
+            {
+                room->detachSkillFromPlayer(death.damage->from, "yearshenhou");
+                room->setPlayerMark(death.damage->from, "chuanchengedshenhou", 0);
+            }
+            if (death.damage->from->hasSkill("yearxugou") && death.damage->from->getMark("chuanchengedxugou"))
+            {
+                room->detachSkillFromPlayer(death.damage->from, "yearxugou");
+                room->setPlayerMark(death.damage->from, "chuanchengedxugou", 0);
+            }
+            room->acquireSkill(death.damage->from, "yearxugou");
+            room->addPlayerMark(death.damage->from, "chuanchengedxugou");
+        }
+        return false;
+    }
+};
+
+class YearHaizhu : public TriggerSkill
+{
+public:
+    YearHaizhu() : TriggerSkill("yearhaizhu")
+    {
+        events << CardsMoveOneTime << EventPhaseStart;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *caozhi, QVariant &data) const
+    {
+        if (triggerEvent == CardsMoveOneTime)
+        {
+            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+            if (move.from == caozhi || move.from == NULL)
+                return false;
+            if (move.to_place == Player::DiscardPile
+                && ((move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD
+                || move.reason.m_reason == CardMoveReason::S_REASON_JUDGEDONE))
+            {
+                QList<int> card_ids;
+                int i = 0;
+                foreach (int card_id, move.card_ids)
+                {
+                    if ((Sanguosha->getCard(card_id)->getSuit() == Card::Club
+                        && ((move.reason.m_reason != CardMoveReason::S_REASON_JUDGEDONE
+                        && (move.from_places[i] == Player::PlaceHand || move.from_places[i] == Player::PlaceEquip))))
+                        && move.active_ids.contains(card_id) && room->getDiscardPile().contains(card_id))
+                        card_ids << card_id;
+                    {
+                        i++;
+                    }
+                }
+                if (card_ids.isEmpty())
+                    return false;
+                else
+                {
+                    foreach (int id, card_ids) {
+                        move.active_ids.removeOne(id);
+                    }
+                    data = QVariant::fromValue(move);
+                    DummyCard *dummy = new DummyCard(card_ids);
+                    room->obtainCard(caozhi, dummy);
+                    delete dummy;
+                }
+            }
+        }
+        else
+            if (caozhi->getPhase() == Player::Start)
+            {
+                foreach (ServerPlayer *p, room->getOtherPlayers(caozhi))
+                    if (p->getHandcardNum() > caozhi->getHandcardNum())
+                        return false;
+                room->loseHp(caozhi);
+            }
+        return false;
+    }
+};
+
+class YearJiyuan : public TriggerSkill
+{
+public:
+    YearJiyuan() : TriggerSkill("yearjiyuan")
+    {
+        events << EventPhaseStart;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (player->getPhase() == Player::Finish)
+            room->drawCards(player, player->getMaxHp() / 2 + player->getMaxHp()%2, objectName());
+        return false;
+    }
+};
+
+class YearSuizhongEasy : public TriggerSkill
+{
+public:
+    YearSuizhongEasy() : TriggerSkill("yearsuizhongeasy")
+    {
+        events << AskForPeaches;
+        frequency = Limited;
+        limit_mark = "@suizhong";
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return TriggerSkill::triggerable(target) && target->getMark("@suizhong") > 0;
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *pangtong, QVariant &data) const
+    {
+        DyingStruct dying_data = data.value<DyingStruct>();
+        if (dying_data.who != pangtong)
+            return false;
+
+        if (pangtong->askForSkillInvoke(this, data))
+        {
+            pangtong->broadcastSkillInvoke(objectName());
+            room->removePlayerMark(pangtong, "@suizhong");
+            room->recover(pangtong, RecoverStruct(pangtong, NULL, 1 - pangtong->getHp()));
+            if (pangtong->getPhase() == Player::NotActive)
+                throw TurnBroken;
+        }
+
+        return false;
+    }
+};
+
+class YearSuizhong : public TriggerSkill
+{
+public:
+    YearSuizhong() : TriggerSkill("yearsuizhong")
+    {
+        events << AskForPeaches;
+        frequency = Limited;
+        limit_mark = "@suizhong";
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return TriggerSkill::triggerable(target) && target->getMark("@suizhong") > 0;
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *pangtong, QVariant &data) const
+    {
+        DyingStruct dying_data = data.value<DyingStruct>();
+        if (dying_data.who != pangtong)
+            return false;
+
+        if (pangtong->askForSkillInvoke(this, data))
+        {
+            pangtong->broadcastSkillInvoke(objectName());
+            room->removePlayerMark(pangtong, "@suizhong");
+            room->recover(pangtong, RecoverStruct(pangtong, NULL, 1 - pangtong->getHp()));
+
+            foreach (ServerPlayer *player, room->getOtherPlayers(pangtong))
+                player->throwAllHandCardsAndEquips();
+
+            if (pangtong->getPhase() == Player::NotActive)
+                throw TurnBroken;
+        }
+
+        return false;
+    }
+};
+
+class YearCuikuEasy : public TriggerSkill
+{
+public:
+    YearCuikuEasy() : TriggerSkill("yearcuikueasy")
+    {
+        events << RoundStart;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (room->getTurn()%6 == 1 && player->getSeat() == 1)
+        {
+            ServerPlayer *target =
+                    room->askForPlayerChosen(player, room->getOtherPlayers(player), objectName(), QString(), true);
+            if (target)
+                room->damage(DamageStruct(objectName(), player, target, 2));
+        }
+    }
+};
+
+class YearCuiku : public TriggerSkill
+{
+public:
+    YearCuiku() : TriggerSkill("yearcuiku")
+    {
+        events << RoundStart;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (room->getTurn()%6 == 1 && player->getSeat() == 1)
+        {
+            QList<ServerPlayer *> targets =
+                    room->askForPlayersChosen(player, room->getOtherPlayers(player), objectName(), 0, 2, QString(), true);
+            if (!targets.isEmpty())
+                foreach (ServerPlayer *target, targets)
+                    room->damage(DamageStruct(objectName(), player, target, 2));
+        }
+    }
+};
+
+class YearCuikuDifficult : public TriggerSkill
+{
+public:
+    YearCuikuDifficult() : TriggerSkill("yearcuikudifficult")
+    {
+        events << RoundStart;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (room->getTurn()%6 == 1 && player->getSeat() == 1)
+        {
+            foreach (ServerPlayer *target, room->getOtherPlayers(player))
+            {
+                room->damage(DamageStruct(objectName(), player, target, target->getMaxHp() / 2));
+                if (target->getMaxHp()%2)
+                    room->drawCards(player, 1, objectName());
+            }
+        }
+    }
+};
+
+class YearNianyi : public TriggerSkill
+{
+public:
+    YearNianyi() : TriggerSkill("yearnianyi")
+    {
+        events << EventPhaseStart;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (player->getPhase() == Player::Start)
+        {
+            QList<const Card *> tricks = player->getJudgingArea();
+            if (!tricks.isEmpty())
+            {
+                int index = qrand()%tricks.length();
+                CardMoveReason reason(CardMoveReason::S_REASON_THROW, player->objectName(), objectName(), QString());
+                room->throwCard(tricks.at(index), reason, player, NULL);
+            }
+        }
+    }
+};
+
+class YearNianyiDifficult : public TriggerSkill
+{
+public:
+    YearNianyiDifficult() : TriggerSkill("yearnianyidifficult")
+    {
+        events << EventPhaseStart << CardsMoveOneTime;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (triggerEvent == EventPhaseStart)
+        {
+            if (player->getPhase() == Player::Start)
+            {
+                QList<const Card *> tricks = player->getJudgingArea();
+                if (!tricks.isEmpty())
+                {
+                    int index = qrand()%tricks.length();
+                    CardMoveReason reason(CardMoveReason::S_REASON_THROW, player->objectName(), objectName(), QString());
+                    room->throwCard(tricks.at(index), reason, player, NULL);
+                }
+            }
+        }
+        else if (triggerEvent == CardsMoveOneTime)
+        {
+            if (player->getPhase() == Player::NotActive)
+            {
+                CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+                if (move.from == player && (move.from_places.contains(Player::PlaceHand)
+                                            || move.from_places.contains(Player::PlaceEquip))
+                    && !(move.to == player && (move.to_place == Player::PlaceHand
+                                               || move.to_place == Player::PlaceEquip)))
+                {
+                    room->addPlayerMark(player, "#nianyi", 1);
+                }
+            }
+        }
+    }
+};
+
+class YearNianyiDifficultEffect : public PhaseChangeSkill
+{
+public:
+    YearNianyiDifficultEffect() : PhaseChangeSkill("#yearnianyidifficult-effect")
+    {
+
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *player) const
+    {
+        Room *room = player->getRoom();
+        if (player->getPhase() != Player::Finish) return false;
+        foreach (ServerPlayer *boss, room->getAllPlayers())
+        {
+            if (boss->hasSkill(objectName()))
+                if (boss->getMark("#nianyi"))
+                {
+                    if (boss->getMark("#nianyi") > 2 && boss->getPhase() == Player::NotActive)
+                        foreach (ServerPlayer *p, room->getOtherPlayers(boss))
+                            room->damage(DamageStruct("yearnianyidifficult", boss, p));
+                    room->setPlayerMark(boss, "#nianyi", 0);
+                }
+        }
+    }
+};
+
+class YearNianyiTargetMod : public TargetModSkill
+{
+public:
+    YearNianyiTargetMod() : TargetModSkill("#yearnianyi-target")
+    {
+        pattern = ".";
+    }
+
+    virtual int getDistanceLimit(const Player *from, const Card *card, const Player *to) const
+    {
+        if ((from->hasSkill("yearnianyi") || from->hasSkill("yearnianyidifficult")) && to)
+            return 10000;
+        return 0;
+    }
+};
+
 YearBossPackage::YearBossPackage()
     : Package("YearBoss")
 {
@@ -717,6 +1160,36 @@ YearBossPackage::YearBossPackage()
     General *youji = new General(this, "bossyouji", "god", 3, true, true);
     youji->addSkill(new YearYouji);
     youji->addSkill("yearruishou");
+
+    General *xugou = new General(this, "bossxugou", "god", 4, true, true);
+    xugou->addSkill(new YearXugou);
+    xugou->addSkill(new YearXugouTargetMod);
+    xugou->addSkill(new YearChuanchengXugou);
+    xugou->addSkill("yearruishou");
+
+    General *haizhu = new General(this, "bosshaizhu", "god", 5, true, true);
+    haizhu->addSkill(new YearHaizhu);
+    haizhu->addSkill("yearruishou");
+
+    General *easyyear = new General(this, "easy_boss_year", "god", 6, true, true);
+    easyyear->addSkill(new YearJiyuan);
+    easyyear->addSkill(new YearSuizhongEasy);
+    easyyear->addSkill(new YearCuikuEasy);
+
+    General *year = new General(this, "boss_year", "god", 8, true, true);
+    year->addSkill("yearjiyuan");
+    year->addSkill(new YearNianyi);
+    year->addSkill(new YearNianyiTargetMod);
+    year->addSkill(new YearSuizhong);
+    year->addSkill(new YearCuiku);
+
+    General *diyear = new General(this, "difficult_boss_year", "god", 10, true, true);
+    diyear->addSkill("yearjiyuan");
+    diyear->addSkill(new YearNianyiDifficult);
+    diyear->addSkill(new YearNianyiDifficultEffect);
+    diyear->addSkill("#yearnianyi-target");
+    diyear->addSkill("yearsuizhong");
+    diyear->addSkill(new YearCuikuDifficult);
 
     addMetaObject<YearZishuCard>();
     addMetaObject<YearYinhuCard>();
