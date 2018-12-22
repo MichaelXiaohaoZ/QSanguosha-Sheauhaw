@@ -1804,7 +1804,7 @@ public:
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *, QVariant &data) const
     {
         ServerPlayer *ganning = room->findPlayerBySkillName(objectName());
-        if (!ganning || ganning->getMark("@fenwei") <= 0 || ganning->getMark("FenweiHeqiUsed")) return false;
+        if (!ganning || ganning->getMark("@fenwei") <= 0) return false;
 
         CardUseStruct use = data.value<CardUseStruct>();
         if (use.to.length() <= 1 || !use.card->isNDTrick())

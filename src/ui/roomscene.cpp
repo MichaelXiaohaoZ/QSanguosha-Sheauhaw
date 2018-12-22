@@ -2975,9 +2975,9 @@ Dashboard *RoomScene::getDasboard() const
 
 void RoomScene::setTurn(int number)
 {
-    if (number == 0)
+    if (number < 0)
         turn_box->hide();
-    else if (number > 0) {
+    else if (number >= 0) {
         turn_box->setText(tr("%1Turn").arg(number));
         turn_box->setPos(_m_infoPlane.x() - turn_box->boundingRect().width(), 0);
         turn_box->show();

@@ -306,7 +306,7 @@ ServerPlayer *RoomThread::find3v3Next(QList<ServerPlayer *> &first, QList<Server
 {
     bool all_actioned = true;
     foreach (ServerPlayer *player, room->m_alivePlayers) {
-        if (!player->hasFlag("actioned")) {
+        if (!player->getMark("actionedM")) {
             all_actioned = false;
             break;
         }
@@ -315,6 +315,7 @@ ServerPlayer *RoomThread::find3v3Next(QList<ServerPlayer *> &first, QList<Server
     if (all_actioned) {
         foreach (ServerPlayer *player, room->m_alivePlayers) {
             room->setPlayerFlag(player, "-actioned");
+            room->setPlayerMark(player, "actionedM", 0);
             trigger(ActionedReset, room, player);
         }
 
@@ -334,7 +335,7 @@ ServerPlayer *RoomThread::find3v3Next(QList<ServerPlayer *> &first, QList<Server
             another = first.at(1);
         else
             another = first.last();
-        if (!another->hasFlag("actioned") && another->isAlive())
+        if (!another->getMark("actionedM") && another->isAlive())
             return another;
     }
 
@@ -343,7 +344,7 @@ ServerPlayer *RoomThread::find3v3Next(QList<ServerPlayer *> &first, QList<Server
         targets.clear();
         qSwap(first, second);
         foreach (ServerPlayer *player, first) {
-            if (!player->hasFlag("actioned") && player->isAlive())
+            if (!player->getMark("actionedM") && player->isAlive())
                 targets << player;
         }
     } while (targets.isEmpty());
@@ -358,6 +359,7 @@ void RoomThread::run3v3(QList<ServerPlayer *> &first, QList<ServerPlayer *> &sec
             room->setCurrent(current);
             trigger(TurnStart, room, room->getCurrent());
             room->setPlayerFlag(current, "actioned");
+            room->setPlayerMark(current, "actionedM", 1);
             current = find3v3Next(first, second);
         }
     }
@@ -381,6 +383,8 @@ void RoomThread::_handleTurnBroken3v3(QList<ServerPlayer *> &first, QList<Server
         }
         if (!player->hasFlag("actioned"))
             room->setPlayerFlag(player, "actioned");
+        if (!player->getMark("actionedM"))
+            room->setPlayerMark(player, "actionedM", 1);
 
         ServerPlayer *next = find3v3Next(first, second);
         run3v3(first, second, game_rule, next);
@@ -400,7 +404,7 @@ ServerPlayer *RoomThread::findHulaoPassNext(ServerPlayer *shenlvbu, QList<Server
     if (stage == 1) {
         if (current == shenlvbu) {
             foreach (ServerPlayer *p, league) {
-                if (p->isAlive() && !p->hasFlag("actioned"))
+                if (p->isAlive() && !p->getMark("actionedM"))
                     return p;
             }
             foreach (ServerPlayer *p, league) {
@@ -430,10 +434,12 @@ void RoomThread::actionHulaoPass(ServerPlayer *shenlvbu, QList<ServerPlayer *> l
                 if (current != shenlvbu) {
                     if (current->isAlive() && !current->hasFlag("actioned"))
                         room->setPlayerFlag(current, "actioned");
+                    if (current->isAlive() && !current->getMark("actionedM"))
+                        room->setPlayerMark(current, "actionedM", 1);
                 } else {
                     bool all_actioned = true;
                     foreach (ServerPlayer *player, league) {
-                        if (player->isAlive() && !player->hasFlag("actioned")) {
+                        if (player->isAlive() && !player->getMark("actionedM")) {
                             all_actioned = false;
                             break;
                         }
@@ -442,6 +448,8 @@ void RoomThread::actionHulaoPass(ServerPlayer *shenlvbu, QList<ServerPlayer *> l
                         foreach (ServerPlayer *player, league) {
                             if (player->hasFlag("actioned"))
                                 room->setPlayerFlag(player, "-actioned");
+                            if (player->getMark("actionedM"))
+                                room->setPlayerMark(player, "actionedM", 0);
                         }
                         foreach (ServerPlayer *player, league) {
                             if (player->isDead()) {
@@ -461,6 +469,7 @@ void RoomThread::actionHulaoPass(ServerPlayer *shenlvbu, QList<ServerPlayer *> l
                                     room->setPlayerProperty(player, "hp", qMin(player->getMaxHp(), 3));
                                     player->drawCards(3, "revive");
                                     room->setPlayerFlag(player, "actioned");
+                                    room->setPlayerMark(player, "actionedM", 1);
                                 } else
                                     room->setTag(tag_name, x+1);
                             }
@@ -497,6 +506,7 @@ void RoomThread::actionHulaoPass(ServerPlayer *shenlvbu, QList<ServerPlayer *> l
                                 room->setPlayerProperty(player, "hp", qMin(player->getMaxHp(), 3));
                                 player->drawCards(3, "revive");
                                 room->setPlayerFlag(player, "actioned");
+                                room->setPlayerMark(player, "actionedM", 1);
                             } else
                                 room->setTag(tag_name, x+1);
                         }
@@ -514,6 +524,8 @@ void RoomThread::actionHulaoPass(ServerPlayer *shenlvbu, QList<ServerPlayer *> l
                 if (player != shenlvbu) {
                     if (player->hasFlag("actioned"))
                         room->setPlayerFlag(player, "-actioned");
+                    if (player->getMark("actionedM"))
+                        room->setPlayerMark(player, "actionedM", 0);
 
                     if (player->getPhase() != Player::NotActive) {
                         QVariant v;
@@ -544,7 +556,10 @@ void RoomThread::_handleTurnBrokenHulaoPass(ServerPlayer *shenlvbu, QList<Server
             game_rule->trigger(EventPhaseEnd, room, player, v);
             player->changePhase(player->getPhase(), Player::NotActive);
             if (player != shenlvbu && stage == 1)
+            {
                 room->setPlayerFlag(player, "actioned");
+                room->setPlayerMark(player, "actionedM", 1);
+            }
         }
 
         room->setCurrent(next);

@@ -320,6 +320,7 @@ Engine::Engine(bool isManualMode)
     modes["04p"] = tr("4 players");
     modes["04_1v3"] = tr("4 players (Hulao Pass)");
     modes["04_boss"] = tr("4 players(Boss)");
+    modes["04_year"] = tr("4 players (Year Boss)");
     modes["05p"] = tr("5 players");
     modes["05_zhfd"] = tr("5 players (Attack Dongzhuo)");
     modes["06p"] = tr("6 players");
@@ -779,6 +780,8 @@ void Engine::setExtraGeneralsBan()
 
     if (ServerInfo.GameMode == "04_boss")
         ban_list.append(Config.value("Banlist/BossMode", "").toStringList());
+    else if (ServerInfo.GameMode == "04_year")
+        ban_list.append(Config.value("Banlist/YearBoss", "").toStringList());
     else if (ServerInfo.GameMode == "05_zhfd")
         ban_list.append(Config.value("Banlist/AttackDong", "").toStringList());
     else if (ServerInfo.GameMode == "06_swzs")
@@ -1102,6 +1105,8 @@ int Engine::getPlayerCount(const QString &mode) const
 {
     if (mode == "05_zhfd" && Config.value("zhfd/Mode", "NormalMode").toString() == "BossMode")
         return 8;
+    if (mode == "04_year" && Config.value("year/Mode", "2018").toString() == "2018")
+        return 6;
     if (modes.contains(mode) || isNormalGameMode(mode)) { // hidden pz settings?
         QRegExp rx("(\\d+)");
         int index = rx.indexIn(mode);
@@ -1125,6 +1130,9 @@ QString Engine::getRoles(const QString &mode) const
         return "ZN";
     } else if (mode == "04_1v3" || mode == "04_boss") {
         return "ZFFF";
+    } else if (mode == "04_year") {
+        if (Config.value("year/Mode", "2018").toString() == "2018")
+            return "FCFCFC";
     } else if (mode == "05_zhfd") {
         if (Config.value("zhfd/Mode", "NormalMode").toString() == "BossMode")
             return "ZCFCFCFC";
@@ -1487,7 +1495,7 @@ QStringList Engine::getRandomFemaleGenerals(int count, const QSet<QString> &ban_
 QList<int> Engine::getRandomCards() const
 {
     bool exclude_disaters = false, using_2012_3v3 = false, using_2013_3v3 = false, exclude_zdyj = false,
-         exclude_dragonboat = false, exclude_swzs = false;
+         exclude_dragonboat = false, exclude_swzs = false, exclude_year = false;
     QStringList extra_ban = QStringList();
 
     if (Config.GameMode == "06_3v3") {
@@ -1514,6 +1522,14 @@ QList<int> Engine::getRandomCards() const
         exclude_disaters = true;
         extra_ban << Config.DragonBoatBanC["cards"];
     }
+
+    if (Config.GameMode == "04_year")
+        if (Config.value("year/Mode", "2018").toString() == "2018")
+        {
+            exclude_year = true;
+            exclude_disaters = false;
+            extra_ban << Config.YearBossBanC["cards"];
+        }
 
     if (Config.GameMode == "06_swzs")
     {
@@ -1548,6 +1564,8 @@ QList<int> Engine::getRandomCards() const
         else if (card->getPackage() == "BestLoyalistCard" && exclude_zdyj)
             list << card->getId();
         else if (card->getPackage() == "DragonBoatCard" && exclude_dragonboat)
+            list << card->getId();
+        else if (card->getPackage() == "YearBossCard" && exclude_year)
             list << card->getId();
         else if (card->getPackage() == "GodsReturnCard" && exclude_swzs)
             list << card->getId();

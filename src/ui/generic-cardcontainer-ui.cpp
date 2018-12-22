@@ -702,7 +702,7 @@ void PlayerCardContainer::refresh(bool)
     } else if (m_player) {
         if (_m_faceTurnedIcon) _m_faceTurnedIcon->setVisible(!m_player->faceUp());
         if (_m_chainIcon) _m_chainIcon->setVisible(m_player->isChained());
-        if (_m_actionIcon) _m_actionIcon->setVisible(m_player->hasFlag("actioned"));
+        if (_m_actionIcon) _m_actionIcon->setVisible(m_player->hasFlag("actioned") || m_player->getMark("actionedM"));
         if (_m_deathIcon && !(ServerInfo.GameMode == "04_1v3" && m_player->getGeneralName() != "shenlvbu2" && m_player->getGeneralName() != "shenlvbu3"))
             _m_deathIcon->setVisible(m_player->isDead());
     }

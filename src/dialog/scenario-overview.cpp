@@ -29,7 +29,8 @@ ScenarioOverview::ScenarioOverview(QWidget *parent)
     setLayout(layout);
 
     QStringList names = Sanguosha->getModScenarioNames();
-    names << "BossMode" << "Hulaopass" << "Basara" << "Hegemony" << "MiniScene";
+    names << "BossMode" << "Hulaopass" << "Basara" << "Hegemony" << "MiniScene"
+          << "BestLoyalist" << "GodsReturn" << "AttackDong" << "DragonBoat" << "YearBoss2018";
     foreach (QString name, names) {
         QString text = Sanguosha->translate(name);
         QListWidgetItem *item = new QListWidgetItem(text, list);

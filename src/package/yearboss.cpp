@@ -27,39 +27,35 @@ public:
     {
         DamageStruct damage = data.value<DamageStruct>();
         bool whether = false;
-        if (damage.from->hasSkill(objectName()))
-        {
-            foreach (ServerPlayer *p, room->getOtherPlayers(damage.from, false))
-                if (p->getKingdom() == damage.from->getKingdom())
-                    whether = true;
-        }
-        else if (damage.to->hasSkill(objectName()))
-        {
-            foreach (ServerPlayer *p, room->getOtherPlayers(damage.to, false))
-                if (p->getKingdom() == damage.to->getKingdom())
-                    whether = true;
-        }
+        if (!damage.from)
+            return false;
+        foreach (ServerPlayer *p, room->getOtherPlayers(damage.from, false))
+            if (p->getKingdom() == damage.from->getKingdom())
+                whether = true;
         if (whether && damage.to->getKingdom() != damage.from->getKingdom())
         {
             if (damage.from->hasSkill(objectName()))
             {
-                room->broadcastSkillInvoke(objectName(), damage.from);
+                room->broadcastSkillInvoke(objectName());
+                room->sendCompulsoryTriggerLog(damage.from, objectName());
                 LogMessage rslog;
                 rslog.type = "#ruishoulog";
                 rslog.from = damage.from;
                 rslog.arg = QString::number(damage.damage);
                 room->sendLog(rslog);
+                return true;
             }
             if (damage.to->hasSkill(objectName()))
             {
-                room->broadcastSkillInvoke(objectName(), damage.to);
+                room->broadcastSkillInvoke(objectName());
+                room->sendCompulsoryTriggerLog(damage.to, objectName());
                 LogMessage rslog;
                 rslog.type = "#ruishoulog";
                 rslog.from = damage.to;
                 rslog.arg = QString::number(damage.damage);
                 room->sendLog(rslog);
+                return true;
             }
-            return true;
         }
         return false;
     }
@@ -145,29 +141,50 @@ class YearChouniu : public TriggerSkill
 public:
     YearChouniu() : TriggerSkill("yearchouniu")
     {
-        events << TurnStart << EventPhaseStart;
+        events << EventPhaseStart;
         frequency = Compulsory;
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
     {
-        if (triggerEvent == TurnStart)
+        if (player->getPhase() != Player::Finish)
+            return false;
+        bool min = true;
+        foreach (ServerPlayer *p, room->getAlivePlayers())
+            if (p->getHp() < player->getHp())
+            {
+                min = false;
+                break;
+            }
+        if (min)
         {
-            if (room->getTag("FirstRound").toBool())
-                room->loseHp(player, player->getHp() - 1);
+            room->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(player, objectName());
+            room->recover(player, RecoverStruct(player));
         }
-        else
-        {
-            bool min = true;
-            foreach (ServerPlayer *p, room->getAlivePlayers())
-                if (p->getHp() > player->getHp())
-                {
-                    min = false;
-                    break;
-                }
-            if (min)
-                room->recover(player, RecoverStruct(player));
-        }
+        return false;
+    }
+};
+
+class ChouNiuHpSkill : public TriggerSkill
+{
+public:
+    ChouNiuHpSkill() : TriggerSkill("#chouniuhp")
+    {
+        events << TurnStart;
+        frequency = Compulsory;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target, Room *room) const
+    {
+        return room->getTag("FirstRound").toBool();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        foreach (ServerPlayer *p, room->getAllPlayers())
+            if (p->hasSkill(objectName()))
+                room->loseHp(p, p->getHp() - 1);
         return false;
     }
 };
@@ -365,7 +382,7 @@ class YearChuanchengChenlong : public TriggerSkill
 public:
     YearChuanchengChenlong() : TriggerSkill("yearchuanchengchenlong")
     {
-        events << Death;
+        events << BeforeGameOverJudge;
         frequency = Compulsory;
     }
 
@@ -399,6 +416,9 @@ public:
                 room->detachSkillFromPlayer(death.damage->from, "yearxugou");
                 room->setPlayerMark(death.damage->from, "chuanchengedxugou", 0);
             }
+            room->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(player, objectName());
+            room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), death.damage->from->objectName());
             room->acquireSkill(death.damage->from, "yearchenlong");
             room->addPlayerMark(death.damage->from, "chuanchengedchenlong");
         }
@@ -420,7 +440,8 @@ public:
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.from && damage.from != player && room->askForSkillInvoke(player, objectName()))
         {
-            room->broadcastSkillInvoke(objectName(), player);
+            room->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(player, objectName());
             room->damage(DamageStruct(objectName(), player, damage.from, damage.damage));
         }
         return false;
@@ -440,7 +461,8 @@ public:
     {
         if (triggerEvent == EventPhaseSkipping)
         {
-            room->broadcastSkillInvoke(objectName(), player);
+            room->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(player, objectName());
             return true;
         }
         else
@@ -448,7 +470,8 @@ public:
             CardUseStruct use = data.value<CardUseStruct>();
             if (use.card->isKindOf("TrickCard") && use.to.contains(player))
             {
-                room->broadcastSkillInvoke(objectName(), player);
+                room->broadcastSkillInvoke(objectName());
+                room->sendCompulsoryTriggerLog(player, objectName());
                 player->drawCards(1);
             }
         }
@@ -535,7 +558,7 @@ class YearChuanchengWeiyang : public TriggerSkill
 public:
     YearChuanchengWeiyang() : TriggerSkill("yearchuanchengweiyang")
     {
-        events << Death;
+        events << BeforeGameOverJudge;
         frequency = Compulsory;
     }
 
@@ -569,6 +592,9 @@ public:
                 room->detachSkillFromPlayer(death.damage->from, "yearxugou");
                 room->setPlayerMark(death.damage->from, "chuanchengedxugou", 0);
             }
+            room->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(player, objectName());
+            room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), death.damage->from->objectName());
             room->acquireSkill(death.damage->from, "yearweiyang");
             room->addPlayerMark(death.damage->from, "chuanchengedweiyang");
         }
@@ -600,6 +626,8 @@ public:
                 room->judge(judge);
                 if (judge.isGood())
                 {
+                    room->broadcastSkillInvoke(objectName());
+                    room->sendCompulsoryTriggerLog(player, objectName());
                     LogMessage log;
                     log.type = "#shenhoueffectlog";
                     log.from = player;
@@ -614,9 +642,9 @@ public:
 class YearChuanchengShenhou : public TriggerSkill
 {
 public:
-    YearChuanchengShenhou() : TriggerSkill("yearchuanchengshouhou")
+    YearChuanchengShenhou() : TriggerSkill("yearchuanchengshenhou")
     {
-        events << Death;
+        events << BeforeGameOverJudge;
         frequency = Compulsory;
     }
 
@@ -650,6 +678,9 @@ public:
                 room->detachSkillFromPlayer(death.damage->from, "yearxugou");
                 room->setPlayerMark(death.damage->from, "chuanchengedxugou", 0);
             }
+            room->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(player, objectName());
+            room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), death.damage->from->objectName());
             room->acquireSkill(death.damage->from, "yearshenhou");
             room->addPlayerMark(death.damage->from, "chuanchengedshenhou");
         }
@@ -668,6 +699,8 @@ public:
     virtual int getDrawNum(ServerPlayer *player, int n) const
     {
         Room *room = player->getRoom();
+        room->broadcastSkillInvoke(objectName());
+        room->sendCompulsoryTriggerLog(player, objectName());
         return n + room->getTurn();
     }
 };
@@ -718,8 +751,9 @@ public:
                 log.type = "#YearXugouBuff";
                 log.from = player;
                 log.to << damage.to;
+                log.arg = QString::number(damage.damage);
+                log.arg2 = QString::number(++damage.damage);
                 room->sendLog(log);
-                damage.damage++;
                 data = QVariant::fromValue(damage);
             }
         }
@@ -782,6 +816,9 @@ public:
                 room->detachSkillFromPlayer(death.damage->from, "yearxugou");
                 room->setPlayerMark(death.damage->from, "chuanchengedxugou", 0);
             }
+            room->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(player, objectName());
+            room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), death.damage->from->objectName());
             room->acquireSkill(death.damage->from, "yearxugou");
             room->addPlayerMark(death.damage->from, "chuanchengedxugou");
         }
@@ -813,14 +850,14 @@ public:
                 int i = 0;
                 foreach (int card_id, move.card_ids)
                 {
-                    if ((Sanguosha->getCard(card_id)->getSuit() == Card::Club
+                    if ((Sanguosha->getCard(card_id)->isBlack()
                         && ((move.reason.m_reason != CardMoveReason::S_REASON_JUDGEDONE
                         && (move.from_places[i] == Player::PlaceHand || move.from_places[i] == Player::PlaceEquip))))
                         && move.active_ids.contains(card_id) && room->getDiscardPile().contains(card_id))
-                        card_ids << card_id;
                     {
-                        i++;
+                        card_ids << card_id;
                     }
+                    i++;
                 }
                 if (card_ids.isEmpty())
                     return false;
@@ -831,6 +868,8 @@ public:
                     }
                     data = QVariant::fromValue(move);
                     DummyCard *dummy = new DummyCard(card_ids);
+                    room->broadcastSkillInvoke(objectName());
+                    room->sendCompulsoryTriggerLog(caozhi, objectName());
                     room->obtainCard(caozhi, dummy);
                     delete dummy;
                 }
@@ -842,6 +881,8 @@ public:
                 foreach (ServerPlayer *p, room->getOtherPlayers(caozhi))
                     if (p->getHandcardNum() > caozhi->getHandcardNum())
                         return false;
+                room->broadcastSkillInvoke(objectName());
+                room->sendCompulsoryTriggerLog(caozhi, objectName());
                 room->loseHp(caozhi);
             }
         return false;
@@ -860,7 +901,11 @@ public:
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
     {
         if (player->getPhase() == Player::Finish)
+        {
+            room->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(player, objectName());
             room->drawCards(player, player->getMaxHp() / 2 + player->getMaxHp()%2, objectName());
+        }
         return false;
     }
 };
@@ -888,7 +933,8 @@ public:
 
         if (pangtong->askForSkillInvoke(this, data))
         {
-            pangtong->broadcastSkillInvoke(objectName());
+            room->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(pangtong, objectName());
             room->removePlayerMark(pangtong, "@suizhong");
             room->recover(pangtong, RecoverStruct(pangtong, NULL, 1 - pangtong->getHp()));
             if (pangtong->getPhase() == Player::NotActive)
@@ -922,7 +968,8 @@ public:
 
         if (pangtong->askForSkillInvoke(this, data))
         {
-            pangtong->broadcastSkillInvoke(objectName());
+            room->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(pangtong, objectName());
             room->removePlayerMark(pangtong, "@suizhong");
             room->recover(pangtong, RecoverStruct(pangtong, NULL, 1 - pangtong->getHp()));
 
@@ -948,12 +995,17 @@ public:
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
     {
-        if (room->getTurn()%6 == 1 && player->getSeat() == 1)
+        if (room->getTurn()%6 == 1)
         {
             ServerPlayer *target =
                     room->askForPlayerChosen(player, room->getOtherPlayers(player), objectName(), QString(), true);
             if (target)
+            {
+                room->broadcastSkillInvoke(objectName());
+                room->sendCompulsoryTriggerLog(player, objectName());
+                room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), target->objectName());
                 room->damage(DamageStruct(objectName(), player, target, 2));
+            }
         }
     }
 };
@@ -969,13 +1021,20 @@ public:
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
     {
-        if (room->getTurn()%6 == 1 && player->getSeat() == 1)
+        if (room->getTurn()%6 == 1)
         {
             QList<ServerPlayer *> targets =
                     room->askForPlayersChosen(player, room->getOtherPlayers(player), objectName(), 0, 2, QString(), true);
             if (!targets.isEmpty())
+            {
+                room->broadcastSkillInvoke(objectName());
+                room->sendCompulsoryTriggerLog(player, objectName());
                 foreach (ServerPlayer *target, targets)
+                {
+                    room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), target->objectName());
                     room->damage(DamageStruct(objectName(), player, target, 2));
+                }
+            }
         }
     }
 };
@@ -991,11 +1050,14 @@ public:
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
     {
-        if (room->getTurn()%6 == 1 && player->getSeat() == 1)
+        if (room->getTurn()%6 == 1)
         {
+            room->broadcastSkillInvoke(objectName());
+            room->sendCompulsoryTriggerLog(player, objectName());
             foreach (ServerPlayer *target, room->getOtherPlayers(player))
             {
                 room->damage(DamageStruct(objectName(), player, target, target->getMaxHp() / 2));
+                room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), target->objectName());
                 if (target->getMaxHp()%2)
                     room->drawCards(player, 1, objectName());
             }
@@ -1021,6 +1083,8 @@ public:
             {
                 int index = qrand()%tricks.length();
                 CardMoveReason reason(CardMoveReason::S_REASON_THROW, player->objectName(), objectName(), QString());
+                room->broadcastSkillInvoke(objectName());
+                room->sendCompulsoryTriggerLog(player, objectName());
                 room->throwCard(tricks.at(index), reason, player, NULL);
             }
         }
@@ -1047,6 +1111,8 @@ public:
                 {
                     int index = qrand()%tricks.length();
                     CardMoveReason reason(CardMoveReason::S_REASON_THROW, player->objectName(), objectName(), QString());
+                    room->broadcastSkillInvoke(objectName());
+                    room->sendCompulsoryTriggerLog(player, objectName());
                     room->throwCard(tricks.at(index), reason, player, NULL);
                 }
             }
@@ -1056,12 +1122,12 @@ public:
             if (player->getPhase() == Player::NotActive)
             {
                 CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-                if (move.from == player && (move.from_places.contains(Player::PlaceHand)
+                if (move.from && move.from == player && (move.from_places.contains(Player::PlaceHand)
                                             || move.from_places.contains(Player::PlaceEquip))
-                    && !(move.to == player && (move.to_place == Player::PlaceHand
+                    && !(move.to && move.to == player && (move.to_place == Player::PlaceHand
                                                || move.to_place == Player::PlaceEquip)))
                 {
-                    room->addPlayerMark(player, "#nianyi", 1);
+                    room->addPlayerMark(player, "#nianyi", move.card_ids.length());
                 }
             }
         }
@@ -1091,8 +1157,12 @@ public:
                 if (boss->getMark("#nianyi"))
                 {
                     if (boss->getMark("#nianyi") > 2 && boss->getPhase() == Player::NotActive)
+                    {
+                        room->broadcastSkillInvoke(objectName());
+                        room->sendCompulsoryTriggerLog(player, objectName());
                         foreach (ServerPlayer *p, room->getOtherPlayers(boss))
                             room->damage(DamageStruct("yearnianyidifficult", boss, p));
+                    }
                     room->setPlayerMark(boss, "#nianyi", 0);
                 }
         }
@@ -1115,6 +1185,190 @@ public:
     }
 };
 
+FireCracker::FireCracker(Card::Suit suit, int number)
+    : SingleTargetTrick(suit, number)
+{
+    setObjectName("firecracker");
+    target_fixed = true;
+}
+
+bool FireCracker::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const
+{
+    return targets.isEmpty();
+}
+
+QList<ServerPlayer *> FireCracker::defaultTargets(Room *, ServerPlayer *source) const
+{
+    return QList<ServerPlayer *>() << source;
+}
+
+bool FireCracker::isAvailable(const Player *player) const
+{
+    return player->getRole() == "rebel" && !player->isProhibited(player, this) && TrickCard::isAvailable(player) && !player->getMark("#firecracker");
+}
+
+void FireCracker::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const
+{
+    room->setEmotion(source, "firecracker");
+    //room->setPlayerMark(source, "#firecracker", 1);
+    room->addPlayerTip(source, "#firecracker");
+}
+
+bool FireCracker::isCancelable(const CardEffectStruct &effect) const
+{
+    return false;
+}
+
+SpringCouplet::SpringCouplet(Card::Suit suit, int number)
+    : SingleTargetTrick(suit, number)
+{
+    setObjectName("spring_couplet");
+    target_fixed = true;
+}
+
+bool SpringCouplet::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const
+{
+    return targets.isEmpty();
+}
+
+QList<ServerPlayer *> SpringCouplet::defaultTargets(Room *, ServerPlayer *source) const
+{
+    return QList<ServerPlayer *>() << source;
+}
+
+bool SpringCouplet::isAvailable(const Player *player) const
+{
+    return player->getRole() == "rebel" && !player->isProhibited(player, this) && TrickCard::isAvailable(player);
+}
+
+void SpringCouplet::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const
+{
+    room->setEmotion(source, "spring_couplet");
+    room->drawCards(source, 2, objectName());
+    LogMessage splog;
+    splog.type = "#SpringCoupletH";
+    splog.from = source;
+    room->sendLog(splog);
+    LogMessage log;
+    log.type = "#RemoveCard";
+    log.card_str = this->toString();
+    room->sendLog(log);
+    CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, source->objectName(), QString(), objectName(), QString());
+    room->moveCardTo(this, NULL, Player::PlaceTable, reason, true);
+}
+
+bool SpringCouplet::isCancelable(const CardEffectStruct &effect) const
+{
+    return false;
+}
+
+class FireCrackerProhibit : public ProhibitSkill
+{
+public:
+    FireCrackerProhibit() : ProhibitSkill("firecrack-prohibit")
+    {
+
+    }
+
+    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &) const
+    {
+        return to->getMark("#firecracker") && from->getRole() != to->getRole() && !from->getMark("isyearboss");
+    }
+};
+
+class FireCrackerSkill : public TriggerSkill
+{
+public:
+    FireCrackerSkill() : TriggerSkill("firecrackskill")
+    {
+        events << DamageForseen << TurnStart;
+        frequency = Compulsory;
+        global = true;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (triggerEvent == DamageForseen)
+        {
+            DamageStruct damage = data.value<DamageStruct>();
+            if (damage.to && damage.to->getMark("#firecracker") && damage.from && damage.from->getMark("isyearboss"))
+            {
+                LogMessage log;
+                log.type = "#firecrackerlog";
+                log.from = damage.to;
+                log.to.append(damage.from);
+                log.arg = QString::number(damage.damage);
+                room->sendLog(log);
+                return true;
+            }
+        }
+        else
+        {
+            if (player->getMark("#firecracker"))
+                room->setPlayerMark(player, "#firecracker", 0);
+        }
+        return false;
+    }
+};
+
+class YearBossRevive : public TriggerSkill
+{
+public:
+    YearBossRevive() : TriggerSkill("yearbossrevive")
+    {
+        events << RoundStart;
+        frequency = Compulsory;
+        global = true;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target, Room *room) const
+    {
+        if (room->getMode() != "04_year" || Config.value("year/Mode", "2018").toString() != "2018")
+            return false;
+        foreach (ServerPlayer *p, room->getAllPlayers(true))
+            if (p->getMark("isyearboss"))
+                return false;
+        return true;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        foreach (ServerPlayer *p, room->getAllPlayers(true))
+            if (p->isDead() && p->getRole() == "rebel")
+            {
+                room->revivePlayer(p);
+                room->drawCards(p, 3);
+                room->addPlayerMark(p, "yearbossrevived", 1);
+                room->setPlayerProperty(p, "hp", p->getMaxHp());
+            }
+        return false;
+    }
+};
+
+class YearBossChange : public TriggerSkill
+{
+public :
+    YearBossChange() : TriggerSkill("yearbosschange")
+    {
+        events << RoundStart;
+        global = true;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (room->getTurn() < 7 || room->getMode() != "04_year" || Config.value("year/Mode", "2018").toString() != "2018")
+            return false;
+        room->appearYearBoss(0);
+        return false;
+    }
+};
+
 YearBossPackage::YearBossPackage()
     : Package("YearBoss")
 {
@@ -1124,6 +1378,7 @@ YearBossPackage::YearBossPackage()
 
     General *chouniu = new General(this, "bosschouniu", "god", 5, true, true);
     chouniu->addSkill(new YearChouniu);
+    chouniu->addSkill(new ChouNiuHpSkill);
     chouniu->addSkill("yearruishou");
 
     General *yinhu = new General(this, "bossyinhu", "god", 4, true, true);
@@ -1197,4 +1452,33 @@ YearBossPackage::YearBossPackage()
     addMetaObject<YearWeiyangCard>();
 }
 
+YearBossCardPackage::YearBossCardPackage()
+    : Package("YearBossCard", Package::CardPack)
+{
+    QList<Card *> cards;
+
+    cards << new FireCracker(Card::Spade, 1)
+          << new FireCracker(Card::Club, 1)
+          << new FireCracker(Card::Heart, 1)
+          << new FireCracker(Card::Diamond, 1);
+
+    cards << new SpringCouplet(Card::Heart, 13)
+          << new SpringCouplet(Card::Diamond,13);
+
+    cards << new Duel(Card::Spade, 1)
+          << new Duel(Card::Heart, 1)
+          << new Duel(Card::Heart, 12)
+          << new Duel(Card::Diamond, 12);
+
+    cards << new FireAttack(Card::Spade, 7)
+          << new FireAttack(Card::Spade, 13)
+          << new FireAttack(Card::Club, 7);
+
+    foreach (Card *card, cards)
+        card->setParent(this);
+
+    skills << new FireCrackerProhibit << new FireCrackerSkill << new YearBossRevive << new YearBossChange;
+}
+
 ADD_PACKAGE(YearBoss)
+ADD_PACKAGE(YearBossCard)

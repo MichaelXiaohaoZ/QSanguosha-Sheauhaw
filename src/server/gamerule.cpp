@@ -232,7 +232,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                         log.type = "#RemoveCard";
                         log.card_str = card->toString();
                         room->sendLog(log);
-                        CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, room->getLord()->objectName(), QString(), objectName(), QString());
+                        CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, room->getLord()->objectName(), QString(), objectName(), QString());
                         room->moveCardTo(Sanguosha->getCard(id), NULL, Player::PlaceTable, reason, true);
                         //room->setCardMapping(card->getEffectiveId(), NULL, Player::PlaceSpecial);
                     }
@@ -240,7 +240,8 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
             }
             foreach (ServerPlayer *player, room->getPlayers()) {
                 if (player->getGeneral()->getKingdom() == "god" && player->getGeneralName() != "anjiang"
-                    && !player->getGeneralName().startsWith("boss_") && room->getMode() != "06_swzs")
+                    && !player->getGeneralName().startsWith("boss_") && room->getMode() != "06_swzs"
+                    && room->getMode() != "04_year")
                     room->setPlayerProperty(player, "kingdom", room->askForKingdom(player));
                 foreach (const Skill *skill, player->getVisibleSkillList()) {
                     if (skill->getFrequency() == Skill::Limited && !skill->getLimitMark().isEmpty()
@@ -820,6 +821,15 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                 player->setFlags("Global_DebutFlag");
             room->doLightbox(QString("BossLevelA\\ %1 \\BossLevelB").arg(level + 1), 2000, 100);
             return false;
+        } else if (room->getMode() == "04_year" && Config.value("year/Mode", "2018").toString() == "2018" && player->getRole() == "rebel") {
+            foreach (ServerPlayer *p, room->getAllPlayers())
+                if (p->getMark("isyearboss"))
+                    return false;
+            LogMessage log;
+            log.type = "#Reforming";
+            log.from = player;
+            room->sendLog(log);
+            return false;
         }
 
         break;
@@ -1205,6 +1215,10 @@ void GameRule::rewardAndPunish(ServerPlayer *killer, ServerPlayer *victim) const
                 if (p->getRole() == "rebel")
                     room->drawCards(p, 3);
     }
+    else if (room->getMode() == "04_year")
+    {
+
+    }
     else {
         if (victim->getRole() == "rebel" && killer != victim)
             killer->drawCards(3, "kill");
@@ -1241,6 +1255,24 @@ QString GameRule::getWinner(ServerPlayer *victim) const
         else if (!alive_roles.contains("rebel"))
             winner = "loyalist";
     } else if (room->getMode() == "08_dragonboat") {
+    } else if (room->getMode() == "04_year" && Config.value("year/Mode", "2018").toString() == "2018") {
+        foreach (ServerPlayer *sp, room->getAllPlayers(true))
+            if (sp->getMark("isyearboss"))
+                goto normalWinnerJudge;
+        if (room->getChangingSituation())
+            return winner;
+        QStringList alive_roles = room->aliveRoles(victim);
+        if (alive_roles.contains("rebel") && !alive_roles.contains("loyalist"))
+        {
+            if (room->getTurn() < 4)
+                return room->appearYearBoss(2);
+            foreach (ServerPlayer *sp, room->getAllPlayers(true))
+                if (sp->getRole() == "rebel" && (sp->isDead() || sp->getHp() < sp->getMaxHp() || sp->getMark("yearbossrevived")))
+                    return room->appearYearBoss(1);
+            return room->appearYearBoss(2);
+        }
+        if (alive_roles.contains("loyalist") && !alive_roles.contains("rebel"))
+            return room->appearYearBoss(0);
     } else if (Config.EnableHegemony) {
         bool has_anjiang = false, has_diff_kingdoms = false;
         QString init_kingdom;
@@ -1291,6 +1323,7 @@ QString GameRule::getWinner(ServerPlayer *victim) const
             }
         }
     } else {
+        normalWinnerJudge:
         QStringList alive_roles = room->aliveRoles(victim);
         switch (victim->getRoleEnum()) {
         case Player::Lord: {
@@ -1411,6 +1444,7 @@ bool HulaoPassMode::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer 
     }
     case BuryVictim: {
         if (player->hasFlag("actioned")) room->setPlayerFlag(player, "-actioned");
+        if (player->getMark("actionedM")) room->setPlayerMark(player, "actionedM", 0);
 
         LogMessage log;
         log.type = "#Reforming";

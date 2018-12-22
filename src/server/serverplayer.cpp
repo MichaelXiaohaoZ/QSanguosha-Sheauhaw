@@ -134,6 +134,8 @@ void ServerPlayer::throwAllMarks(bool visible_only)
             continue;
         if (mark_name == "@boattreasure")
             continue;
+        if (mark_name == "@waked" && visible_only)
+            continue;
         int n = marks.value(mark_name, 0);
         if (n != 0)
             room->setPlayerMark(this, mark_name, 0);

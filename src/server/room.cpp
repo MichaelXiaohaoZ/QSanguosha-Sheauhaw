@@ -269,13 +269,14 @@ ServerPlayer *Room::getCurrentDyingPlayer() const
     return who;
 }
 
-void Room::revivePlayer(ServerPlayer *player, bool sendlog)
+void Room::revivePlayer(ServerPlayer *player, bool sendlog, bool emotion)
 {
     int turn = player->getMark("Global_TurnCount");
     player->setAlive(true);
     player->throwAllMarks(false);
     broadcastProperty(player, "alive");
-    setEmotion(player, "revive");
+    if (emotion)
+        setEmotion(player, "revive");
     setPlayerMark(player, "Global_TurnCount", turn);
 
     m_alivePlayers.clear();
@@ -369,7 +370,17 @@ void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason)
         if (p->isAlive() || p == victim)
             thread->trigger(Death, this, p, data);
 
-    victim->detachAllSkills();
+    bool isnotYearBoss = true;
+    foreach (ServerPlayer *sp, getAllPlayers())
+        if (sp->getMark("isyearboss"))
+        {
+            isnotYearBoss = false;
+            break;
+        }
+
+    if (mode != "04_year" || Config.value("year/Mode", "2018").toString() != "2018" || isnotYearBoss)
+        victim->detachAllSkills();
+
     thread->trigger(BuryVictim, this, victim, data);
 
     if (!victim->isAlive() && Config.EnableAI) {
@@ -3558,6 +3569,145 @@ void Room::assignGeneralsForPlayersOfAttackDongMode(const QList<ServerPlayer *> 
     }
 }
 
+void Room::assignGeneralsForPlayersOfYearBossMode(const QList<ServerPlayer *> &to_assign)
+{
+    QSet<QString> existed;
+    foreach (ServerPlayer *player, m_players) {
+        if (player->getGeneral()) {
+            QString m_name = Sanguosha->getMainGeneral(player->getGeneralName());
+            existed << m_name;
+            foreach (QString _sp, Sanguosha->getConvertGenerals(m_name)) {
+                existed << _sp;
+            }
+        }
+        if (player->getGeneral2()) {
+            QString m_name = Sanguosha->getMainGeneral(player->getGeneral2Name());
+            existed << m_name;
+            foreach (QString _sp, Sanguosha->getConvertGenerals(m_name)) {
+                existed << _sp;
+            }
+        }
+    }
+    if (Config.Enable2ndGeneral) {
+        foreach(QString name, BanPair::getAllBanSet())
+            existed << name;
+        if (to_assign.first()->getGeneral()) {
+            foreach(QString name, BanPair::getSecondBanSet())
+                existed << name;
+        }
+    }
+
+    const int max_choice = (Config.EnableHegemony && Config.Enable2ndGeneral) ?
+        Config.value("HegemonyMaxChoice", 7).toInt() :
+        Config.value("MaxChoice", 5).toInt();
+
+    QStringList removewill;
+
+    foreach (ServerPlayer *player, to_assign)
+    {
+        QStringList all_choices;
+
+        if (!player->getGeneral() && player->isLord())
+        {
+
+        }
+        else if (!player->getGeneral() && player->getRole() == "loyalist")
+        {
+            all_choices << "bosszishu" << "bosschouniu" << "bossyinhu" << "bossmaotu"
+                        << "bosschenlong" << "bosssishe" << "bosswuma" << "bossweiyang"
+                        << "bossshenshou" << "bossyouji" << "bossxugou" << "bosshaizhu";
+        }
+        else
+        {
+            all_choices = Sanguosha->getRandomGenerals(0, existed);
+            QString kingdomBR;
+            const QString kingdomsBR[4] = {"wei", "shu", "wu", "qun"};
+            foreach (ServerPlayer *sp, m_players)
+                if ((sp->getSeat())%m_players.length() + 1 == player->getSeat())
+                    for(int i = 0; i < 4; i++)
+                        if (sp->getMark(kingdomsBR[i] + "YearBoss"))
+                            kingdomBR = kingdomsBR[i];
+            foreach (QString a_choice, all_choices)
+                if (Sanguosha->getGeneral(a_choice)->getKingdom() != kingdomBR)
+                    all_choices.removeOne(a_choice);
+        }
+
+        QStringList choices = Sanguosha->getMainGenerals(all_choices);
+
+        foreach (QString aremove, removewill)
+            choices.removeOne(aremove);
+
+        player->clearSelected();
+
+        int extra = 0;
+
+        int choice_count = max_choice + extra;
+
+        if (player->getRole() == "lord")
+            choice_count = 1;
+        else if (player->getRole() == "loyalist")
+            choice_count = 4;
+
+        QStringList own_choices;
+        for (int i = 0; i < choice_count; i++) {
+            qShuffle(choices);
+            QStringList ai_ban = QStringList();
+            if (player->getState() == "robot")
+                ai_ban = Config.value("Banlist/AI", "").toStringList();
+            QString choice;
+            foreach (QString name, choices) {
+                QStringList all_name = Sanguosha->getConvertGenerals(name);
+                all_name << name;
+                QStringList temp = all_name;
+                foreach (QString name1, temp) {
+                    if (ai_ban.contains(name1))
+                        all_name.removeOne(name1);
+                }
+                QString _name = player->findReasonable(all_name, true);
+                if (!_name.isEmpty()) {
+                    choice = name;
+                    break;
+                }
+            }
+
+            if (choice.isEmpty()) break;
+            if (all_choices.contains(choice) && !ai_ban.contains(choice))
+            {
+                player->addToSelected(choice);
+                own_choices << choice;
+            }
+
+            removewill << choice;
+        }
+
+        if (player->getRole() == "rebel")
+            foreach (ServerPlayer *p, getOtherPlayers(player))
+                if (p->getRole() == player->getRole())
+                    foreach (QString own_choice, own_choices)
+                    {
+                        LogMessage log;
+                        log.type = "#mate_choices";
+                        log.from = player;
+                        log.arg = own_choice;
+                        log.arg2 = QString::number(player->getSeat());
+                        sendLog(log, p);
+                    }
+    }
+}
+
+void Room::assignKingdomForPlayers()
+{
+    QStringList kingdomM;
+    kingdomM << "wei" << "shu" << "wu" << "qun";
+    qShuffle(kingdomM);
+    foreach (ServerPlayer *player, m_players)
+        if (player->getRole() == "loyalist")
+        {
+            addPlayerMark(player, kingdomM.first() + "YearBoss", 1, false);
+            kingdomM.removeFirst();
+        }
+}
+
 void Room::chooseGenerals(QList<ServerPlayer *> players)
 {
     if (players.isEmpty()) players = m_players;
@@ -4082,6 +4232,91 @@ void Room::chooseGeneralsOfAttackDongMode(QList<ServerPlayer *> players)
     }
 }
 
+void Room::chooseGeneralsOfYearBossMode(QList<ServerPlayer *> players)
+{
+    if (players.isEmpty()) players = m_players;
+
+    QString rankrole[2];
+    const QString rankrole2018[2] = {"loyalist", "rebel"};
+    if (Config.value("year/Mode", "2018").toString() == "2018")
+        for (int i = 0; i < 2; i++)
+            rankrole[i] = rankrole2018[i];
+
+    for (int i = 0; i < 2; i++)
+    {
+        QList<ServerPlayer *> to_assign;
+
+        foreach (ServerPlayer *player, getAllPlayers())
+            if (player->getRole() == rankrole[i])
+                to_assign << player;
+
+        assignGeneralsForPlayersOfYearBossMode(to_assign);
+
+        foreach (ServerPlayer *player, to_assign)
+            _setupChooseGeneralRequestArgs(player, true, true);
+
+        doBroadcastRequest(to_assign, S_COMMAND_CHOOSE_GENERAL);
+        foreach (ServerPlayer *player, to_assign) {
+            if (player->getGeneral() != NULL) continue;
+            QString generalName = player->getClientReply().toString();
+            if (!player->m_isClientResponseReady ||  !_setPlayerGeneral(player, generalName, true))
+            {
+                generalName = _chooseDefaultGeneral(player);
+                _setPlayerGeneral(player, generalName, true);
+            }
+            player->setGeneralName(generalName);
+            broadcastProperty(player, "general", generalName);
+        }
+        if (i == 0)
+            foreach (ServerPlayer *yearbossS, to_assign)
+            {
+                const QString kingdomsM[4] = {"wei", "shu", "wu", "qun"};
+                for (int kingdomNum = 0; kingdomNum < 4; kingdomNum++)
+                    if (yearbossS->getMark(kingdomsM[kingdomNum] + "YearBoss"))
+                        setPlayerProperty(yearbossS, "kingdom", kingdomsM[kingdomNum]);
+            }
+    }
+    if (Config.Enable2ndGeneral) {
+        QList<ServerPlayer *> to_assign = players;
+        assignGeneralsForPlayers(to_assign);
+        foreach(ServerPlayer *player, to_assign)
+            _setupChooseGeneralRequestArgs(player, true, true);
+
+        doBroadcastRequest(to_assign, S_COMMAND_CHOOSE_GENERAL);
+        foreach (ServerPlayer *player, to_assign) {
+            if (player->getGeneral2() != NULL) continue;
+            QString generalName = player->getClientReply().toString();
+            if (!player->m_isClientResponseReady ||  !_setPlayerGeneral(player, generalName, false))
+            {
+                generalName = _chooseDefaultGeneral(player);
+                _setPlayerGeneral(player, generalName, false);
+            }
+            player->setGeneral2Name(generalName);
+            broadcastProperty(player, "general2", generalName);
+        }
+    }
+
+    if (Config.EnableBasara) {
+        foreach (ServerPlayer *player, m_players) {
+            QStringList names;
+            if (player->getGeneral()) {
+                QString name = player->getGeneralName();
+                names.append(name);
+                player->setGeneralName("anjiang");
+                notifyProperty(player, player, "general");
+            }
+            if (player->getGeneral2() && Config.Enable2ndGeneral) {
+                QString name = player->getGeneral2Name();
+                names.append(name);
+                player->setGeneral2Name("anjiang");
+                notifyProperty(player, player, "general2");
+            }
+            player->setProperty("basara_generals", names.join("+"));
+            notifyProperty(player, player, "basara_generals");
+        }
+    }
+}
+
 void Room::run()
 {
     Sanguosha->playSystemAudioEffect("prerun");
@@ -4211,6 +4446,16 @@ void Room::run()
     } else if (mode == "05_zhfd") {
         chooseGeneralsOfAttackDongMode();
         startGame();
+    } else if (mode == "04_year") {
+        if (Config.value("year/mode", "2018").toString() == "2018")
+        {
+            assignKingdomForPlayers();
+            foreach (ServerPlayer *p, m_players)
+                if (p->getSeat() == m_players.length())
+                    addPlayerMark(p, "willBeYearBoss", 1, false);
+        }
+        chooseGeneralsOfYearBossMode();
+        startGame();
     } else {
         chooseGenerals();
         startGame();
@@ -4250,7 +4495,7 @@ void Room::assignRoles()
         roles = Sanguosha->getRoleList(mode);
 
 
-    if (mode != "08_defense" && mode != "08_dragonboat" && mode != "06_swzs" && mode != "05_zhfd")
+    if (mode != "08_defense" && mode != "08_dragonboat" && mode != "06_swzs" && mode != "05_zhfd" && mode != "04_year")
         qShuffle(roles);
 
 
@@ -4269,7 +4514,7 @@ void Room::assignRoles()
             } else
                 notifyProperty(player, player, "role");
         }
-        else if (mode == "08_dragonboat" || mode == "06_swzs" || mode == "05_zhfd")
+        else if (mode == "08_dragonboat" || mode == "06_swzs" || mode == "05_zhfd" || mode == "04_year")
             broadcastProperty(player, "role", player->getRole());
         else {
             if ((role == "lord" && !ServerInfo.EnableHegemony)
@@ -4323,6 +4568,11 @@ void Room::adjustSeats()
         {
             int itemp = (i - 2)%m_players.length();
             if (m_players.at(i)->getRoleEnum() == Player::Rebel && m_players.at(itemp)->getRoleEnum() == Player::Lord)
+                break;
+        }
+        else if (mode == "04_year")
+        {
+            if (Config.value("year/Mode", "2018").toString() == "2018" && m_players.at(i)->getRoleEnum() == Player::Rebel)
                 break;
         }
         else if (m_players.at(i)->getRoleEnum() == Player::Lord)
@@ -8345,10 +8595,10 @@ void Room::speakRanks(bool over)
                             LogMessage ranklog;
                             switch (rank)
                             {
-                                case 1: ranklog.type = "#Ranks1"; break;
-                                case 2: ranklog.type = "#Ranks2"; break;
-                                case 3: ranklog.type = "#Ranks3"; break;
-                                case 4: ranklog.type = "#Ranks4"; break;
+                            case 1: ranklog.type = "#Ranks1"; break;
+                            case 2: ranklog.type = "#Ranks2"; break;
+                            case 3: ranklog.type = "#Ranks3"; break;
+                            case 4: ranklog.type = "#Ranks4"; break;
                             }
                             rank++;
                             ranklog.arg = kingdom;
@@ -8442,3 +8692,115 @@ QString Room::getRankKingdom(int rank_ask)
         return "ZeroKingdom";
 }
 
+QString Room::appearYearBoss(int difficulty)
+{
+    if (mode != "04_year" || Config.value("year/Mode", "2018").toString() != "2018")
+        return NULL;
+
+    isChanging = true;
+    setTurn(0);
+
+    ServerPlayer *boss;
+    foreach (ServerPlayer *sp, getAllPlayers(true))
+    {
+        if (sp->getRole() == "loyalist")
+        {
+            if (sp->getMark("willBeYearBoss"))
+            {
+                boss = sp;
+                setCurrent(boss);
+            }
+            if (sp->isAlive())
+                killPlayer(sp);
+        }
+        else
+        {
+            if (sp->isDead())
+                revivePlayer(sp, false, false);
+            sp->bury();
+            foreach (const Skill *skill, sp->getSkillList())
+                if (!sp->getMark(skill->getLimitMark()))
+                    addPlayerMark(sp, skill->getLimitMark());
+            setPlayerProperty(sp, "hp", sp->getMaxHp());
+            if (!sp->faceUp())
+                sp->turnOver();
+            if (sp->isChained())
+                setPlayerProperty(sp, "chained", false);
+        }
+    }
+
+    switch (difficulty)
+    {
+    case 0:
+        revivePlayer(boss, false, false);
+        changeHero(boss, "easy_boss_year", true, true, false, false);
+        setPlayerProperty(boss, "role", "lord");
+        setPlayerMark(boss, "isyearboss", 1);
+        if (!boss->faceUp())
+            boss->turnOver();
+        if (boss->isChained())
+            setPlayerProperty(boss, "chained", false);
+        break;
+    case 1:
+        revivePlayer(boss, false, false);
+        changeHero(boss, "boss_year", true, true, false, false);
+        setPlayerProperty(boss, "role", "lord");
+        setPlayerMark(boss, "isyearboss", 1);
+        if (!boss->faceUp())
+            boss->turnOver();
+        if (boss->isChained())
+            setPlayerProperty(boss, "chained", false);
+        break;
+    case 2:
+        revivePlayer(boss, false, false);
+        changeHero(boss, "difficult_boss_year", true, true, false, false);
+        setPlayerProperty(boss, "role", "lord");
+        setPlayerMark(boss, "isyearboss", 1);
+        int NmaxHp = 0;
+        foreach (ServerPlayer *sp, getOtherPlayers(boss))
+            NmaxHp += sp->getMaxHp();
+        setPlayerProperty(boss, "maxhp", NmaxHp);
+        setPlayerProperty(boss, "hp", NmaxHp);
+        if (!boss->faceUp())
+            boss->turnOver();
+        if (boss->isChained())
+            setPlayerProperty(boss, "chained", false);
+        break;
+    }
+
+    isChanging = false;
+    LogMessage msl;
+    msl.type = "#yearbosschange";
+    msl.to.append(boss);
+    sendLog(msl);
+    thread->sleep(1.5);
+    drawCards(getAlivePlayers(), 4);
+
+    throw TurnBroken;
+
+    return NULL;
+}
+
+bool Room::getChangingSituation()
+{
+    return isChanging;
+}
+
+void Room::doGanluRevive(ServerPlayer *player, ServerPlayer *lord, bool emotion)
+{
+    player->bury();
+
+    setPlayerFlag(player, "-Global_Dying");
+    if (emotion)
+        setEmotion(player, "revive");
+
+    if (player->getMaxHp() < 3)
+        recover(player, RecoverStruct(player, NULL, player->getMaxHp() - player->getHp()));
+    else
+        recover(player, RecoverStruct(player, NULL, 3 - player->getHp()));
+
+    drawCards(player, 3, "ganlu");
+
+    if (lord)
+        addPlayerMark(lord, "#ganlu", 1);
+}

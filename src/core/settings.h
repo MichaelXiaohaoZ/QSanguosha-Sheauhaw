@@ -68,6 +68,7 @@ public:
     QMap<QString, QStringList> BestLoyalistSets;
     QMap<QString, QStringList> DragonBoatBanC;
     QMap<QString, QStringList> GodsReturnBanC;
+    QMap<QString, QStringList> YearBossBanC;
     QMap<QString, QStringList> CardsBan;
 
     // client side

@@ -422,6 +422,26 @@ public:
     }
 };
 
+class JigongMark : public TriggerSkill
+{
+public:
+    JigongMark() : TriggerSkill("#jigongmark")
+    {
+        events << DamageDone;
+    }
+
+    bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (player->hasFlag("jigong"))
+            room->setPlayerMark(player, "#jigong", player->getMark("damage_point_play_pause"));
+    }
+
+    int getPriority(TriggerEvent triggerEvent) const
+    {
+        return 10;
+    }
+};
+
 class JigongMax : public MaxCardsSkill
 {
 public:

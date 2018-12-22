@@ -315,7 +315,6 @@ bool FenweiCard::targetFilter(const QList<const Player *> &, const Player *to_se
 void FenweiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const
 {
     room->removePlayerMark(source, "@fenwei");
-    room->setPlayerMark(source, "FenweiHeqiUsed", 1);
     CardUseStruct use = source->tag["fenwei"].value<CardUseStruct>();
     foreach(ServerPlayer *p, targets)
         use.nullified_list << p->objectName();

@@ -31,6 +31,7 @@ config = {
         "BestLoyalistCard",
 		"DragonBoatCard",
 		"GodsReturnCard",
+		"YearBossCard",
 		"New3v3Card",
 		"New3v3_2013Card",
 		"New1v1Card",
@@ -440,6 +441,10 @@ config = {
 	swzs_ban_cards = {
 		cards = "ex_nihilo+collateral+indulgence+supply_shortage",
 	},
+	
+	yearboss_ban_cards = {
+		cards = "lightning+halberd+archery_attack+savage_assault"
+	},
 
     zdyj_ban = {
         "cuiyan",
@@ -471,10 +476,16 @@ config = {
 	},
 	
 	zhfd_ban = {
-		"sp_jiaxu", "sp_buzhi", "lingju", "as_lingju", "sp_guanyu", "yuanshu", "zuoci",
+		"sp_jiaxu", "buzhi", "lingju", "as_lingju", "sp_guanyu", "yuanshu", "zuoci",
 		"huanghao", "daqiao", "nos_daqiao", "xuhuang", "nos_xuhuang", "hanhaoshihuan",
 		"huatuo", "nos_huatuo", "sunjian", "shenguanyu", "shenlvmeng", "shenzhouyu",
 		"shenzhugeliang", "shencaocao", "shenlvbu", "shenzhaoyun", "shensimayi",
 		"nosms_shencaocao",
-	}
+	},
+	
+	year_ban = {
+		"shenguanyu", "zhangchunhua", "nos_zhangchunhua", "yuji", "nos_yuji", "zuoci", "zhaoxiang", "xiaoqiao",
+		"nos_xiaoqiao", "erqiao", "wuxian", "sp_jiaxu", "chenlin", "caiwenji", "sp_caiwenji", "yuanshu", "buzhi", 
+		"huanghao", "manchong", "xunyou", "zhangrang", "guohuanghou", "zhouyu", "twyj_xiahouba", "xiahoujuan",
+	},
 }

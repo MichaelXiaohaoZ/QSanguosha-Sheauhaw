@@ -2,8 +2,8 @@ return {
 	["YearBoss"] = "年兽",
 	
 	["yearruishou"] = "瑞兽",
-	[":yearruishou"] = "锁定技，当场上存在与你势力相同的其他角色存活时，防止与你势力不同的角色对你造成或由你造成的伤害。",
-	["#ruishoulog"] = "%from  的“<b><font color=\"yellow\">瑞兽</font></b>”效果被触发，防止了本次 %arg  点伤害",
+	[":yearruishou"] = "锁定技，当与你势力不同的角色对你造成或你对其造成的伤害是，若场上存在与伤害来源势力相同的其他角色存活时，你防止此伤害。",
+	["#ruishoulog"] = "%from 的“<b><font color=\"yellow\">瑞兽</font></b>”效果被触发，防止了本次 %arg 点伤害",
 	
 	["bosszishu"] = "子鼠",
 	["#bosszishu"] = "生肖试炼",
@@ -41,7 +41,7 @@ return {
 	["#bosswuma"] = "生肖试炼",
 	["yearwuma"] = "午马",
 	[":yearwuma"] = "<b><font color=\"blue\">锁定技。</font></b>你的武将牌不能被翻面。你的阶段不能被跳过。当你成为锦囊牌的目标时，你摸一张牌。",
-	["#turnlog"] = "%from  的“%arg”效果被触发，防止了本次翻面效果。",
+	["#turnlog"] = "%from 的“%arg”效果被触发，防止了本次翻面效果。",
 	
 	["bossweiyang"] = "未羊",
 	["#bossweiyang"] = "生肖试炼",
@@ -50,5 +50,70 @@ return {
 	["yearchuanchengweiyang"] = "传承",
 	[":yearchuanchengweiyang"] = "锁定技，你令杀死你的角色失去所有因“传承”获得的技能，并令其获得“未羊”。",
 	
+	["bossshenhou"] = "申猴",
+	["#bossshenhou"] = "生肖试炼",
+	["yearshenhou"] = "申猴",
+	[":yearshenhou"] = "当你成为【杀】的目标时，你可以进行判定，若结果为红色，则此【杀】对你无效。",
+	["yearchuanchengshenhou"] = "传承",
+	[":yearchuanchengshenhou"] = "锁定技，你令杀死你的角色失去所有因“传承”获得的技能，并令其获得“申猴”。",
+	["#shenhoueffectlog"] = "%from 的“<b><font color=\"yellow\">申猴</font></b>”效果生效",
+	
+	["bossyouji"] = "酉鸡",
+	["#bossyouji"] = "生肖试炼",
+	["yearyouji"] = "酉鸡",
+	[":yearyouji"] = "锁定技，摸牌阶段，你多摸张数等于当前游戏轮数的牌。",
+	
+	["bossxugou"] = "戌狗",
+	["#bossxugou"] = "生肖试炼",
+	["yearxugou"] = "戌狗",
+	[":yearxugou"] = "锁定技，红色【杀】对你无效；你使用红色【杀】无距离限制且红色【杀】造成的伤害+1。",
+	["yearchuanchengxugou"] = "传承",
+	[":yearchuanchengxugou"] = "锁定技，你令杀死你的角色失去所有因“传承”获得的技能，并令其获得“戌狗”。",
+	["#YearXugouBuff"] = "%from 的“<font color=\"yellow\"><b>戌狗</b></font>”效果被触发，伤害从 %arg 点增加至 %arg2 点",
+	
+	["bosshaizhu"] = "亥猪",
+	["#bosshaizhu"] = "生肖试炼",
+	["yearhaizhu"] = "亥猪",
+	[":yearhaizhu"] = "<b><font color=\"blue\">锁定技。</font></b>当其他角色的黑色牌因弃置而置入弃牌堆后，你获得这些牌；准备阶段开始时，若你的手牌数为场上最多的或之一，你失去1点体力。",
+	
+	["easy_boss_year"] = "简单年兽",
+	["#easy_boss_year"] = "简单年兽",
+	["&easy_boss_year"] = "年兽",
+	["yearjiyuan"] = "汲源",
+	[":yearjiyuan"] = "锁定技，结束阶段，你摸X张牌。（X为体力上限的一半，向上取整）",
+	["yearsuizhongeasy"] = "岁终",
+	[":yearsuizhongeasy"] = "限定技，当你处于濒死状态时，你可以将体力值回复至1，若当前回合角色不为你，则结束当前回合。",
+	["yearcuikueasy"] = "摧枯",
+	[":yearcuikueasy"] = "锁定技，游戏开始时或游戏每进行6轮时，你对至多1名其他角色造成2点伤害。",
+	
+	["boss_year"] = "普通年兽",
+	["#boss_year"] = "普通年兽",
+	["&boss_year"] = "年兽",
+	["yearnianyi"] = "年裔",
+	[":yearnianyi"] = "<b><font color=\"blue\">锁定技。</font></b>你使用牌无距离限制。准备阶段开始时，你随机弃置你判定区内的一张牌。",
+	["yearsuizhong"] = "岁终",
+	[":yearsuizhong"] = "限定技，当你处于濒死状态时，你可以将体力值回复至1，然后令所有其他角色弃置所有牌，若当前回合角色不为你，则结束当前回合。",
+	["yearcuiku"] = "摧枯",
+	[":yearcuiku"] = "锁定技，游戏开始时或游戏每进行6轮时，你对至多2名其他角色造成2点伤害。",
+	
+	["difficult_boss_year"] = "困难年兽",
+	["#difficult_boss_year"] = "困难年兽",
+	["&difficult_boss_year"] = "年兽",
+	["yearnianyidifficult"] = "年裔",
+	[":yearnianyidifficult"] = "<b><font color=\"blue\">锁定技。</font></b>你使用牌无距离限制。准备阶段开始时，你随机弃置你判定区内的一张牌。一名其他角色回合结束后，若你于该回合内失去的牌不少于三张，则你对所有其他角色造成1点伤害。",
+	["nianyi"] = "年裔",
+	["yearcuikudifficult"] = "摧枯",
+	[":yearcuikudifficult"] = "锁定技，游戏开始时或游戏每进行6轮时，你对所有其他角色造成X点伤害（X为其体力值一半，向下取整），然后每有一名体力上限为奇数的其他角色，你便摸一张牌。",
+	
+	
+	["YearBossCard"] = "年兽卡牌",
+	["firecracker"] = "爆竹",
+	[":firecracker"] = "普通锦囊牌\n\n使用时机：出牌阶段限一次\n使用目标：你（不可以额外指定目标）\n使用效果：吓年兽一跳。直到你的下回合开始，生肖不会对你使用牌，防止年兽对你造成的伤害。（此牌不可以被无懈可击）",
+	["#firecrackerlog"] = "%from 的“<b><font color=\"red\">爆竹</font></b>”效果被触发，吓了 %to 一跳！防止了本次 %arg 点伤害",
+	["spring_couplet"] = "春联",
+	[":spring_couplet"] = "普通锦囊牌\n\n使用时机：出牌阶段\n使用目标：你（不可以额外指定目标）\n使用效果：摸一张牌，获得并展示一副春联。然后将此牌移出游戏。（此牌不可以被无懈可击）",
+	["#SpringCoupletH"] = "%from 展示了一幅春联，为<font color=\"green\"><b>太阳神三国杀</b></font>添加了<font color=\"red\"><b>喜庆</b></font>的元素！<br>上联是：<font color=\"red\"><b>新年納餘慶</b></font><br/>下联是：<font color=\"red\"><b>嘉節號長春</b></font>",
+
+	["#yearbosschange"] = "-----------------------------<br>恭喜您通过了了 <font color=\"green\"><b>生肖试炼</b></font> ，现在快去挑战 %to 吧！",
 	
 }

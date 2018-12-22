@@ -35,6 +35,8 @@
 
 using namespace QSanProtocol;
 
+const int lrSp = 14;
+
 static QLayout *HLay(QWidget *left, QWidget *right)
 {
     QHBoxLayout *layout = new QHBoxLayout;
@@ -491,7 +493,7 @@ BanlistDialog::BanlistDialog(QWidget *parent, bool view)
     setMinimumWidth(455);
 
     if (ban_list.isEmpty())
-        ban_list << "AI" << "Roles" << "BestLoyalist" << "DragonBoat" << "GodsReturn" << "1v1" << "BossMode" << "Basara" << "Hegemony" << "Pairs" << "Cards";
+        ban_list << "AI" << "Roles" << "BestLoyalist" << "DragonBoat" << "GodsReturn" << "AttackDong" << "YearBoss" << "1v1" << "BossMode" << "Basara" << "Hegemony" << "Pairs" << "Cards";
     QVBoxLayout *layout = new QVBoxLayout;
 
     QTabWidget *tab = new QTabWidget;
@@ -855,6 +857,31 @@ QGroupBox *ServerDialog::createAttackDongBox()
 
 }
 
+QGroupBox *ServerDialog::createYearBossBox()
+{
+    QGroupBox *box = new QGroupBox(tr("Year Boss options"));
+    box->setEnabled(Config.GameMode == "04_year");
+    box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    QVBoxLayout *vlayout = new QVBoxLayout;
+
+    QComboBox *officialComboBox = new QComboBox;
+    officialComboBox->addItem("2018", "2018");
+
+    mode_choose_year_ComboBox = officialComboBox;
+
+    QString rule = Config.value("year/Mode", "2018").toString();
+    //if (rule == "BossMode")
+        //officialComboBox->setCurrentIndex(1);
+
+    vlayout->addLayout(HLay(new QLabel(tr("Rule option")), mode_choose_year_ComboBox));
+
+    box->setLayout(vlayout);
+
+    return box;
+
+}
+
 QGroupBox *ServerDialog::createGameModeBox()
 {
     QGroupBox *mode_box = new QGroupBox(tr("Game mode"));
@@ -899,6 +926,11 @@ QGroupBox *ServerDialog::createGameModeBox()
             item_list << button << box;
         } else if (itor.key() == "05_zhfd") {
             QGroupBox *box = createAttackDongBox();
+            connect(button, SIGNAL(toggled(bool)), box, SLOT(setEnabled(bool)));
+
+            item_list << button << box;
+        } else if (itor.key() == "04_year") {
+            QGroupBox *box = createYearBossBox();
             connect(button, SIGNAL(toggled(bool)), box, SLOT(setEnabled(bool)));
 
             item_list << button << box;
@@ -982,7 +1014,7 @@ QGroupBox *ServerDialog::createGameModeBox()
     for (int i = 0; i < item_list.length(); i++) {
         QObject *item = item_list.at(i);
 
-        QVBoxLayout *side = i <= 13 ? left : right; // WARNING: Magic Number
+        QVBoxLayout *side = i <= lrSp ? left : right; // WARNING: Magic Number
 
         if (item->isWidgetType()) {
             QWidget *widget = qobject_cast<QWidget *>(item);
@@ -1401,6 +1433,10 @@ int ServerDialog::config()
 
     Config.beginGroup("zhfd");
     Config.setValue("Mode", mode_choose_zhfd_ComboBox->itemData(mode_choose_zhfd_ComboBox->currentIndex()).toString());
+    Config.endGroup();
+
+    Config.beginGroup("year");
+    Config.setValue("Mode", mode_choose_year_ComboBox->itemData(mode_choose_year_ComboBox->currentIndex()).toString());
     Config.endGroup();
 
     QSet<QString> ban_packages;

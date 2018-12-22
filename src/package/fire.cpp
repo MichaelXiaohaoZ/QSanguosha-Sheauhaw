@@ -328,11 +328,16 @@ public:
                 if (no_jink)
                     jink_list.replace(index, QVariant(0));
                 else if (room->isAllOnPlace(use.card, Player::PlaceTable))
-                    target->obtainCard(use.card);
+                    room->obtainCard(target, use.card);
             }
             index++;
         }
         pangde->tag["Jink_" + use.card->toString()] = QVariant::fromValue(jink_list);
+        LogMessage rslog;
+        rslog.type = "#ruishoulog";
+        rslog.from = pangde;
+        rslog.arg = QString::number(0);
+        room->sendLog(rslog);
         return false;
     }
 };

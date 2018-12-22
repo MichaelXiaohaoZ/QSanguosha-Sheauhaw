@@ -828,30 +828,12 @@ public:
                 {
                     if (room->askForSkillInvoke(rebel, "ganlu"))
                     {
-                        player->clearFlags();
-                        player->clearHistory();
-                        player->throwAllCards();
-                        player->throwAllMarks();
-
-                        room->clearPlayerCardLimitation(player, false);
-
-                        room->setPlayerFlag(player, "-Global_Dying");
-                        room->setEmotion(player, "revive");
-
-                        if (player->getMaxHp() < 3)
-                            room->recover(player, RecoverStruct(player, NULL, player->getMaxHp() - player->getHp()));
-                        else
-                            room->recover(player, RecoverStruct(player, NULL, 3 - player->getHp()));
-
-                        room->drawCards(player, 3, "ganlu");
-
-                        room->addPlayerMark(lord, "#ganlu", 1);
+                        room->doGanluRevive(player, lord);
                         return false;
                     }
                     break;
                 }
         return false;
-
     }
 
     virtual int getPriority(TriggerEvent triggerEvent) const
