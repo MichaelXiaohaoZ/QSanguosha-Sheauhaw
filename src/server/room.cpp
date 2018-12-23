@@ -8788,7 +8788,12 @@ bool Room::getChangingSituation()
 
 void Room::doGanluRevive(ServerPlayer *player, ServerPlayer *lord, bool emotion)
 {
-    player->bury();
+    player->clearFlags();
+    player->clearHistory();
+    player->throwAllCards();
+    player->throwAllMarks();
+
+    clearPlayerCardLimitation(player, false);
 
     setPlayerFlag(player, "-Global_Dying");
     if (emotion)

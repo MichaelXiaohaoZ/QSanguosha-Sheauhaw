@@ -168,6 +168,9 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                     }
                 }
             }
+            if (room->getMode() == "04_year" && Config.value("year/Mode", "2018").toString() == "2018")
+                foreach (ServerPlayer *sp, room->getAllPlayers())
+                    room->acquireSkill(sp, "#ganluyear");
             if (room->getMode() == "06_swzs") {
                 ServerPlayer *lord = room->getLord();
                 room->acquireSkill(lord, "#ganluswzs");
@@ -1218,6 +1221,13 @@ void GameRule::rewardAndPunish(ServerPlayer *killer, ServerPlayer *victim) const
     else if (room->getMode() == "04_year")
     {
 
+    }
+    else if (room->getMode() == "08_zdyj" && Config.value("zdyj/Rule", "2017").toString() == "2017" && victim->getMark("shown_loyalist"))
+    {
+        if (killer->getRole() == "lord")
+            killer->throwAllHandCardsAndEquips();
+        else
+            killer->drawCards(3);
     }
     else {
         if (victim->getRole() == "rebel" && killer != victim)

@@ -1158,8 +1158,8 @@ public:
                 {
                     if (boss->getMark("#nianyi") > 2 && boss->getPhase() == Player::NotActive)
                     {
-                        room->broadcastSkillInvoke(objectName());
-                        room->sendCompulsoryTriggerLog(player, objectName());
+                        room->broadcastSkillInvoke("yearnianyidifficult");
+                        room->sendCompulsoryTriggerLog(boss, "yearnianyidifficult");
                         foreach (ServerPlayer *p, room->getOtherPlayers(boss))
                             room->damage(DamageStruct("yearnianyidifficult", boss, p));
                     }
@@ -1364,9 +1364,54 @@ public :
     {
         if (room->getTurn() < 7 || room->getMode() != "04_year" || Config.value("year/Mode", "2018").toString() != "2018")
             return false;
+        foreach (ServerPlayer *sp, room->getAllPlayers())
+            if (sp->getMark("isyearboss"))
+                return false;
         room->appearYearBoss(0);
         return false;
     }
+};
+
+class GanluYear : public TriggerSkill
+{
+public:
+    GanluYear() : TriggerSkill("#ganluyear")
+    {
+        events << AskForPeachesDone;
+        frequency = Compulsory;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const
+    {
+        return target != NULL && target->getRole() == "rebel";
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (!player->hasFlag("Global_Dying") || player->getHp() > 0) return false;
+        int revive = 0;
+        foreach (ServerPlayer *sp, room->getAllPlayers(true))
+            revive += sp->getMark("#ganlu");
+        if (revive > 2) return false;
+        for (int i = 1; i < 7; i++)
+            foreach (ServerPlayer *rebel, room->getAllPlayers())
+                if (rebel->getRole() == "rebel" && rebel->getSeat()%6 == i%6)
+                {
+                    if (room->askForSkillInvoke(rebel, "ganlu"))
+                    {
+                        room->doGanluRevive(player, player);
+                        return false;
+                    }
+                    break;
+                }
+        return false;
+    }
+
+    virtual int getPriority(TriggerEvent triggerEvent) const
+    {
+        return 0;
+    }
+
 };
 
 YearBossPackage::YearBossPackage()
@@ -1476,6 +1521,8 @@ YearBossCardPackage::YearBossCardPackage()
 
     foreach (Card *card, cards)
         card->setParent(this);
+
+    skills << new GanluYear;
 
     skills << new FireCrackerProhibit << new FireCrackerSkill << new YearBossRevive << new YearBossChange;
 }

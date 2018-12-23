@@ -1,4 +1,8 @@
 return {
+	["Hongyan_Lesbian"] = "红颜百合赛",
+	["HongyanLesbian"] = "红颜百合赛",
+	["hongyan_lesbian"] = "红颜百合赛",
+
 	["lesbianlijian"] = "离间",
 	["lesbianlijian"] = "离间",
 	[":lesbianlijian"] = "出牌阶段限一次，你可以弃置一张牌并选择一名能使用【决斗】的其他角色A和一名是A使用【决斗】的合法目标的其他角色B。A对B使用无实体牌的【决斗】。",
