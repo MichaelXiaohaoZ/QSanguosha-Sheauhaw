@@ -244,6 +244,7 @@ class Disaster : public DelayedTrick
 public:
     Disaster(Card::Suit suit, int number);
     virtual bool isAvailable(const Player *player) const;
+    virtual QList<ServerPlayer *> defaultTargets(Room *room, ServerPlayer *source) const;
 };
 
 class Lightning : public Disaster

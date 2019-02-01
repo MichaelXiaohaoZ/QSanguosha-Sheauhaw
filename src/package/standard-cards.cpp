@@ -1123,6 +1123,11 @@ bool Disaster::isAvailable(const Player *player) const
     return !player->isProhibited(player, this) && DelayedTrick::isAvailable(player);
 }
 
+QList<ServerPlayer *> Disaster::defaultTargets(Room *room, ServerPlayer *source) const
+{
+    return QList<ServerPlayer *>() << source;
+}
+
 Lightning::Lightning(Suit suit, int number) :Disaster(suit, number)
 {
     setObjectName("lightning");

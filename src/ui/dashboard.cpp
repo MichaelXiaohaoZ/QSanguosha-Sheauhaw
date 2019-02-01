@@ -239,9 +239,9 @@ void Dashboard::_updateFrames()
     button_widget->setX(rect.width() - btnMove);
     button_widget->setY(-24);
 
-    //QRectF btnWidgetRect = button_widget->mapRectToItem(this, button_widget->boundingRect());
-    m_btnNoNullification->setPos(_m_treeFrame->boundingRect().right() - m_btnNoNullification->boundingRect().width(),
-                                 24 - m_trustButton->boundingRect().height());
+    QRectF btnWidgetRect = button_widget->mapRectToItem(this, button_widget->boundingRect());
+    m_btnNoNullification->setPos(btnWidgetRect.x() + btnWidgetRect.width() + 75,
+                                 btnWidgetRect.y() - m_btnNoNullification->boundingRect().height());
 
     _paintRightFrame();
     _m_rightFrame->setX(_m_width - G_DASHBOARD_LAYOUT.m_rightWidth);
