@@ -30,6 +30,7 @@ public:
     QString ServerName;
     int CountDownSeconds;
     int NullificationCountDown;
+    int GeneralLevel;
     bool EnableMinimizeDialog;
     QString GameMode;
     QStringList BanPackages;

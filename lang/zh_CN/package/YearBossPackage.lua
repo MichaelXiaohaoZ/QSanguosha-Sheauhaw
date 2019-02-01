@@ -29,9 +29,11 @@ return {
 	["bosschenlong"] = "辰龙",
 	["#bosschenlong"] = "生肖试炼",
 	["yearchenlong"] = "辰龙",
-	[":yearchenlong"] = "限定技，出牌阶段，你可以失去至多X点体力（X为你的体力值且至多为5），对一名其他角色造成等量的伤害。若你以此法进入濒死状态时，你将体力值回复至1点，并将体力上限减至1点。",
-	["yearchuanchengchenlong"] = "传承",
+	[":yearchenlong"] = "<b><font color=\"green\">可传承技能。</font></b>限定技，出牌阶段，你可以失去至多X点体力（X为你的体力值且至多为5），对一名其他角色造成等量的伤害。若你以此法进入濒死状态时，你将体力值回复至1点，并将体力上限减至1点。",
+	["yearchuanchengchenlong"] = "传承", -- 已经统一划进了同一个技能
 	[":yearchuanchengchenlong"] = "锁定技，你令杀死你的角色失去所有因“传承”获得的技能，并令其获得“辰龙”。",
+	["yearchuancheng"] = "传承",
+	[":yearchuancheng"] = "锁定技，你令杀死你的角色失去所有因“传承”获得的技能，并令其获得你的可传承技能。",
 	
 	["bosssishe"] = "巳蛇",
 	["#bosssishe"] = "生肖试炼",
@@ -47,14 +49,14 @@ return {
 	["bossweiyang"] = "未羊",
 	["#bossweiyang"] = "生肖试炼",
 	["yearweiyang"] = "未羊",
-	[":yearweiyang"] = "出牌阶段限一次，你可以弃置任意张类型不同的牌，并令至少一名至多等量的角色回复一点体力。",
+	[":yearweiyang"] = "<b><font color=\"green\">可传承技能。</font></b>出牌阶段限一次，你可以弃置任意张类型不同的牌，并令至少一名至多等量的角色回复一点体力。",
 	["yearchuanchengweiyang"] = "传承",
 	[":yearchuanchengweiyang"] = "锁定技，你令杀死你的角色失去所有因“传承”获得的技能，并令其获得“未羊”。",
 	
 	["bossshenhou"] = "申猴",
 	["#bossshenhou"] = "生肖试炼",
 	["yearshenhou"] = "申猴",
-	[":yearshenhou"] = "当你成为【杀】的目标时，你可以进行判定，若结果为红色，则此【杀】对你无效。",
+	[":yearshenhou"] = "<b><font color=\"green\">可传承技能。</font></b>当你成为【杀】的目标时，你可以进行判定，若结果为红色，则此【杀】对你无效。",
 	["yearchuanchengshenhou"] = "传承",
 	[":yearchuanchengshenhou"] = "锁定技，你令杀死你的角色失去所有因“传承”获得的技能，并令其获得“申猴”。",
 	["#shenhoueffectlog"] = "%from 的“<b><font color=\"yellow\">申猴</font></b>”效果生效",
@@ -67,7 +69,7 @@ return {
 	["bossxugou"] = "戌狗",
 	["#bossxugou"] = "生肖试炼",
 	["yearxugou"] = "戌狗",
-	[":yearxugou"] = "锁定技，红色【杀】对你无效；你使用红色【杀】无距离限制且红色【杀】造成的伤害+1。",
+	[":yearxugou"] = "<b><font color=\"green\">可传承技能。</font></b>锁定技，红色【杀】对你无效；你使用红色【杀】无距离限制且红色【杀】造成的伤害+1。",
 	["yearchuanchengxugou"] = "传承",
 	[":yearchuanchengxugou"] = "锁定技，你令杀死你的角色失去所有因“传承”获得的技能，并令其获得“戌狗”。",
 	["#YearXugouBuff"] = "%from 的“<font color=\"yellow\"><b>戌狗</b></font>”效果被触发，伤害从 %arg 点增加至 %arg2 点",
@@ -108,6 +110,7 @@ return {
 	
 	
 	["YearBossCard"] = "年兽卡牌",
+	["YearBoss2018Card"] = "年兽2018卡牌",
 	["firecracker"] = "爆竹",
 	[":firecracker"] = "普通锦囊牌\n\n使用时机：出牌阶段限一次\n使用目标：你（不可以额外指定目标）\n使用效果：吓年兽一跳。直到你的下回合开始，生肖不会对你使用牌，防止年兽对你造成的伤害。（此牌不可以被无懈可击）",
 	["#firecrackerlog"] = "%from 的“<b><font color=\"red\">爆竹</font></b>”效果被触发，吓了 %to 一跳！防止了本次 %arg 点伤害",

@@ -455,8 +455,8 @@ void MainWindow::on_actionAbout_triggered()
         "\"A Short Song\" by Cao Cao");
     content.append(QString("<p align='right'><i>%1</i></p>").arg(poem));
 
-    QString Qixipoem = tr("I can just see the sun, I can't see Chang'an. <br/> \"Shi Shuo Xin Yu\"");
-    content.append(QString("<p align='right'><i>%1</i></p>").arg(Qixipoem));
+    // QString Qixipoem = tr("I can just see the sun, I can't see Chang'an. <br/> \"Shi Shuo Xin Yu\"");
+    // content.append(QString("<p align='right'><i>%1</i></p>").arg(Qixipoem));
 
     // Cao Cao's signature
     //QString signature = tr("\"A Short Song\" by Cao Cao");
@@ -1001,7 +1001,7 @@ void MainWindow::on_actionAbout_New_Button_triggered()
     scene->addItem(window);
 
     ContentLine.append(tr("%1<br/>%2").arg(content).arg(tip));
-    ContentLine.append("<br/><br/>Changer Shifwu Jang");
+    ContentLine.append("<br/><br/>2018-08-17");
     window->addContent(ContentLine);
     window->addCloseButton(tr("OK"));
     window->shift(scene && scene->inherits("RoomScene") ? scene->width() : 0,

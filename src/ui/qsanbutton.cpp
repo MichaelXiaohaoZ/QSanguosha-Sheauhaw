@@ -527,7 +527,7 @@ void QSanInvokeSkillDock::update()
         int m1 = 0;
         int btnHeight = G_DASHBOARD_LAYOUT.m_confirmButtonArea.height();
         int rowTop1 = G_DASHBOARD_LAYOUT.m_confirmButtonArea.top() - G_DASHBOARD_LAYOUT.m_normalHeight + btnHeight;
-        int rowLeft1 = G_DASHBOARD_LAYOUT.m_handCardArea.left();
+        int rowLeft1 = G_DASHBOARD_LAYOUT.m_handCardArea.left() - 10;
         // int btnWidth1 = _m_width / 2;
         for (int i = 0; i < lordskillNum; i++) {
             QSanInvokeSkillButton *button = lordskill_buttons[m1++];

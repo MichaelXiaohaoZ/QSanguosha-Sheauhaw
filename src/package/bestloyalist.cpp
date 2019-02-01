@@ -846,7 +846,7 @@ public:
                 int new_maxhp = player->getMaxHp() + 1;
                 log.arg2 = QString::number(new_maxhp);
                 room->sendLog(log);
-                room->setPlayerProperty(player, "maxhp", new_maxhp);
+                room->setPlayerProperty(loyalist, "maxhp", new_maxhp);
 
                 int to_hp = loyalist->getHp();
                 room->recover(player, RecoverStruct(player, NULL, to_hp - player->getHp()));
@@ -866,6 +866,7 @@ public:
 
                 return false;
             }
+        return false;
     }
 
     virtual int getPriority(TriggerEvent triggerEvent) const

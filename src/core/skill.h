@@ -47,12 +47,14 @@ public:
 	QString getOwner() const;
     QString getLimitMark() const;
     QStringList getSources() const;
+    QStringList getInheritSkill() const;
 
 protected:
     Frequency frequency;
     QString limit_mark;
 	QString owner;//for sort out skill audio
     bool attached_lord_skill;
+    QStringList inherit_skills;
 
 private:
     bool lord_skill;

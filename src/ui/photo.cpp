@@ -108,7 +108,7 @@ void Photo::repaintAll()
 {
     resetTransform();
     setTransform(QTransform::fromTranslate(-G_PHOTO_LAYOUT.m_normalWidth / 2, -G_PHOTO_LAYOUT.m_normalHeight / 2), true);
-    _paintPixmap(_m_mainFrame, G_PHOTO_LAYOUT.m_mainFrameArea, QSanRoomSkin::S_SKIN_KEY_MAINFRAME);
+    _paintPixmap(_m_mainFrame, G_PHOTO_LAYOUT.m_mainFrameArea, QSanRoomSkin::S_SKIN_KEY_MAINFRAME[Config.GeneralLevel]);
     setFrame(_m_frameType);
     hideSkillName(); // @todo: currently we don't adjust skillName's position for simplicity,
     // consider repainting it instead of hiding it in the future.

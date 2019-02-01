@@ -940,7 +940,7 @@ SkillCard *Engine::cloneSkillCard(const QString &name) const
 #ifndef USE_BUILDBOT
 QString Engine::getVersionNumber() const
 {
-    return "20180830";
+    return "20190128";
 }
 #endif
 
@@ -961,7 +961,7 @@ QString Engine::getVersionName() const
 
 QString Engine::getMODName() const
 {
-    return tr("Chang'an");
+    return NULL;
 }
 
 QStringList Engine::getExtensions() const
@@ -1083,7 +1083,8 @@ QString Engine::getSetupString() const
         << QString::number(timeout)
         << QString::number(Config.NullificationCountDown)
         << Sanguosha->getBanPackages().join("+")
-        << flags;
+        << flags
+        << QString::number(Config.GeneralLevel);
 
     return setup_items.join(":");
 }
@@ -1495,7 +1496,7 @@ QStringList Engine::getRandomFemaleGenerals(int count, const QSet<QString> &ban_
 QList<int> Engine::getRandomCards() const
 {
     bool exclude_disaters = false, using_2012_3v3 = false, using_2013_3v3 = false, exclude_zdyj = false,
-         exclude_dragonboat = false, exclude_swzs = false, exclude_year = false;
+         exclude_dragonboat = false, exclude_swzs = false, exclude_year_18 = false, exclude_year_19 = false;
     QStringList extra_ban = QStringList();
 
     if (Config.GameMode == "06_3v3") {
@@ -1526,7 +1527,13 @@ QList<int> Engine::getRandomCards() const
     if (Config.GameMode == "04_year")
         if (Config.value("year/Mode", "2018").toString() == "2018")
         {
-            exclude_year = true;
+            exclude_year_18 = true;
+            exclude_disaters = false;
+            extra_ban << Config.YearBossBanC["cards"];
+        }
+        if (Config.value("year/Mode", "2018").toString() == "2019")
+        {
+            exclude_year_19 = true;
             exclude_disaters = false;
             extra_ban << Config.YearBossBanC["cards"];
         }
@@ -1565,7 +1572,9 @@ QList<int> Engine::getRandomCards() const
             list << card->getId();
         else if (card->getPackage() == "DragonBoatCard" && exclude_dragonboat)
             list << card->getId();
-        else if (card->getPackage() == "YearBossCard" && exclude_year)
+        else if (card->getPackage() == "YearBoss18Card" && exclude_year_18)
+            list << card->getId();
+        else if (card->getPackage() == "YearBoss19Card" && exclude_year_19)
             list << card->getId();
         else if (card->getPackage() == "GodsReturnCard" && exclude_swzs)
             list << card->getId();

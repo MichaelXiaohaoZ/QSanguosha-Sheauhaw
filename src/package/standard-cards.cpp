@@ -1118,14 +1118,6 @@ Disaster::Disaster(Card::Suit suit, int number)
     target_fixed = true;
 }
 
-void Disaster::onUse(Room *room, const CardUseStruct &card_use) const
-{
-    CardUseStruct use = card_use;
-    if (use.to.isEmpty())
-        use.to << use.from;
-    DelayedTrick::onUseYanxiao(room, use);
-}
-
 bool Disaster::isAvailable(const Player *player) const
 {
     return !player->isProhibited(player, this) && DelayedTrick::isAvailable(player);

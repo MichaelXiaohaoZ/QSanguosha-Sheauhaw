@@ -131,12 +131,10 @@ void ServerPlayer::throwAllMarks(bool visible_only)
     // throw all marks
     foreach (QString mark_name, marks.keys()) {
         if (mark_name == "@bossExp" || mark_name == "@boattreasure" ||
-                mark_name == "#ganlu" || (visible_only && !mark_name.startsWith("@")))
+                mark_name == "#ganlu" || (visible_only && !mark_name.startsWith("@")) || (mark_name == "@waked" && visible_only))
         {
             continue;
         }
-        if (mark_name == "@waked" && visible_only)
-            continue;
         int n = marks.value(mark_name, 0);
         if (n != 0)
             room->setPlayerMark(this, mark_name, 0);

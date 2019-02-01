@@ -130,6 +130,7 @@ void Settings::init()
     EnableSuperDrag = value("EnableSuperDrag", false).toBool();
     EnableAutoBackgroundChange = value("EnableAutoBackgroundChange", true).toBool();
     NullificationCountDown = value("NullificationCountDown", 8).toInt();
+    GeneralLevel = value("GeneralLevel", 6).toInt();
     OperationTimeout = value("OperationTimeout", 15).toInt();
     OperationNoLimit = value("OperationNoLimit", false).toBool();
     EnableEffects = value("EnableEffects", true).toBool();
@@ -255,7 +256,7 @@ void Settings::init()
                     << "BestLoyalist" << "test" << "BestLoyalistCard" << "DerivativeCard"
                     << "Special3v3" << "Special3v3Ext" << "Special1v1" << "Special1v1Ext"
                     << "DragonBoat" << "DragonBoatCard" << "GodsReturn" << "GodsReturnCard" << "AttackDong"
-                    << "YearBoss" << "YearBossCard";
+                    << "YearBoss2018" << "YearBoss2018Card" << "YearBoss2019" << "YearBoss2019Card";
 
     setValue("ForbidPackages", forbid_packages);
 

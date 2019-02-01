@@ -171,6 +171,11 @@ QStringList Skill::getSources() const
     return sources;
 }
 
+QStringList Skill::getInheritSkill() const
+{
+    return inherit_skills;
+}
+
 QDialog *Skill::getDialog() const
 {
     return NULL;

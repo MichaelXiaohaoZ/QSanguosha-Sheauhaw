@@ -177,6 +177,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
     connect(ClientInstance, SIGNAL(gongxin(QList<int>, bool, QList<int>)), this, SLOT(doGongxin(QList<int>, bool, QList<int>)));
     connect(ClientInstance, SIGNAL(focus_moved(QStringList, QSanProtocol::Countdown)), this, SLOT(moveFocus(QStringList, QSanProtocol::Countdown)));
     connect(ClientInstance, SIGNAL(emotion_set(QString, QString)), this, SLOT(setEmotion(QString, QString)));
+    connect(ClientInstance, SIGNAL(full_emotion_set(QString)), this, SLOT(setFullEmotion(QString)));
     connect(ClientInstance, SIGNAL(skill_invoked(QString, QString)), this, SLOT(showSkillInvocation(QString, QString)));
     connect(ClientInstance, SIGNAL(skill_acquired(const ClientPlayer *, QString)), this, SLOT(acquireSkill(const ClientPlayer *, QString)));
     connect(ClientInstance, SIGNAL(animated(int, QStringList)), this, SLOT(doAnimation(int, QStringList)));
@@ -243,6 +244,11 @@ RoomScene::RoomScene(QMainWindow *main_window)
     addItem(m_chooseOptionsBox);
     m_chooseOptionsBox->setZValue(30000.0);
     m_chooseOptionsBox->moveBy(-120, 0);
+
+    m_fullemotion = new QGraphicsPixmapItem;
+    addItem(m_fullemotion);
+    m_fullemotion->setZValue(50000);
+    m_fullemotion->setPos(0, 0);
 
     m_playerCardBox = new PlayerCardBox;
     m_playerCardBox->hide();
@@ -672,7 +678,7 @@ void RoomScene::handleGameEvent(const QVariant &args)
 
 QGraphicsPixmapItem *RoomScene::createDashboardButtons()
 {
-    QGraphicsPixmapItem *widget = new QGraphicsPixmapItem(G_ROOM_SKIN.getPixmap(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG)
+    QGraphicsPixmapItem *widget = new QGraphicsPixmapItem(G_ROOM_SKIN.getPixmap(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM)
         .scaled(G_DASHBOARD_LAYOUT.m_buttonSetSize));
     ok_button = new QSanButton("platter", "confirm", widget);
     ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonArea);
@@ -688,6 +694,7 @@ QGraphicsPixmapItem *RoomScene::createDashboardButtons()
     ok_button->setEnabled(false);
     cancel_button->setEnabled(false);
     discard_button->setEnabled(false);
+
     return widget;
 }
 
@@ -2318,6 +2325,8 @@ void RoomScene::useSelectedCard()
         dashboard->stopPending();
 
     dashboard->unselectAll();
+
+    dashboard->clearHighlightEquip();
 }
 
 void RoomScene::onEnabledChange()
@@ -2759,6 +2768,8 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
     }
     }
 
+    dashboard->clearHighlightEquip();
+
     if (newStatus != oldStatus && newStatus != Client::Playing && newStatus != Client::NotActive)
         QApplication::alert(QApplication::focusWidget());
 
@@ -2916,6 +2927,8 @@ void RoomScene::doCancelButton()
     default:
         break;
     }
+
+    dashboard->clearHighlightEquip();
 }
 
 void RoomScene::doDiscardButton()
@@ -4060,8 +4073,11 @@ void RoomScene::setEmotion(const QString &who, const QString &emotion)
     } else {
         PixmapAnimation *pma = PixmapAnimation::GetPixmapAnimation(dashboard, emotion);
         if (pma) {
-            if (emotion == "damage" || emotion == "chain") {
-                pma->moveBy(576, -6);
+            if (emotion == "damage" || emotion == "chain" || emotion == "appear4" || emotion == "appear5") {
+                //pma->moveBy(576, -6);
+                pma->setPos(dashboard->boundingRect().topLeft());
+                pma->moveBy(dashboard->getAvatarArea().center().x(), dashboard->getAvatarArea().center().y());
+                pma->moveBy(-pma->boundingRect().width() / 2, -pma->boundingRect().height() / 2);
             }
             //skill animation
             else if (emotion.startsWith("skill/")) {
@@ -4074,6 +4090,14 @@ void RoomScene::setEmotion(const QString &who, const QString &emotion)
             pma->setZValue(20002.0);
         }
     }
+}
+
+void RoomScene::setFullEmotion(const QString &emotion)
+{
+    PixmapAnimation *pma = PixmapAnimation::GetPixmapAnimation(m_fullemotion, QString("full/") + emotion);
+    pma->setPos(tableCenterPos());
+    pma->moveBy(-pma->boundingRect().width() / 2, -pma->boundingRect().height() / 2);
+    pma->setZValue(20002.0);
 }
 
 void RoomScene::showSkillInvocation(const QString &who, const QString &skill_name)
@@ -4303,7 +4327,7 @@ void RoomScene::showIndicator(const QString &from, const QString &to, int secs)
     QPointF start = obj1->sceneBoundingRect().center();
     QPointF finish = obj2->sceneBoundingRect().center();
 
-    IndicatorItem *indicator = new IndicatorItem(start, finish, ClientInstance->getPlayer(from));
+    IndicatorItem *indicator = new IndicatorItem(start, finish, ClientInstance->getPlayer(from), Config.GeneralLevel);
 
     qreal x = qMin(start.x(), finish.x());
     qreal y = qMin(start.y(), finish.y());

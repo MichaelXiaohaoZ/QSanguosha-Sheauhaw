@@ -54,6 +54,7 @@ void CardItem::_initialize()
     outerGlowColor = Qt::white;
     _m_validate_suit = Card::SuitToBeDecided;
     m_isChosen = false;
+    emotion_item = new Sprite(this);
 }
 
 CardItem::CardItem(const Card *card)
@@ -115,6 +116,10 @@ CardItem::~CardItem()
         m_currentAnimation = NULL;
     }
     m_animationMutex.unlock();
+    if (emotion_item) {
+        delete emotion_item;
+        emotion_item = NULL;
+    }
 }
 
 void CardItem::changeGeneral(const QString &general_name)
@@ -430,4 +435,45 @@ void CardItem::setFootnote(const QString &desc)
     QPainter painter(&_m_footnoteImage);
     font.paintText(&painter, QRect(QPoint(0, 0), rect.size()),
         (Qt::AlignmentFlag)((int)Qt::AlignHCenter | Qt::AlignBottom | Qt::TextWrapAnywhere), desc);
+}
+
+void CardItem::setEmotion(const QString &emotion, bool permanent)
+{
+    if (emotion == ".") {
+        hideEmotion();
+        return;
+    }
+
+    QString path = QString("image/system/emotion/goldencard/%1.png").arg(emotion);
+    if (QFile::exists(path)) {
+        QPixmap pixmap = QPixmap(path);
+        emotion_item->setPixmap(pixmap);
+        emotion_item->setPos((G_PHOTO_LAYOUT.m_normalWidth - pixmap.width()) / 2,
+            (G_PHOTO_LAYOUT.m_normalHeight - pixmap.height()) / 2);
+
+        QPropertyAnimation *appear = new QPropertyAnimation(emotion_item, "opacity");
+        appear->setStartValue(0.0);
+        if (permanent) {
+            appear->setEndValue(1.0);
+            appear->setDuration(500);
+        } else {
+            appear->setKeyValueAt(0.25, 1.0);
+            appear->setKeyValueAt(0.75, 1.0);
+            appear->setEndValue(0.0);
+            appear->setDuration(2000);
+        }
+        appear->start(QAbstractAnimation::DeleteWhenStopped);
+    } else {
+        QString wholemotion = QString("goldencard/") + emotion;
+        PixmapAnimation::GetPixmapAnimation(this, wholemotion);
+    }
+}
+
+void CardItem::hideEmotion()
+{
+    QPropertyAnimation *disappear = new QPropertyAnimation(emotion_item, "opacity");
+    disappear->setStartValue(1.0);
+    disappear->setEndValue(0.0);
+    disappear->setDuration(500);
+    disappear->start(QAbstractAnimation::DeleteWhenStopped);
 }

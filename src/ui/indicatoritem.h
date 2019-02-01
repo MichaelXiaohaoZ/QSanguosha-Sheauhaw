@@ -11,7 +11,7 @@ class IndicatorItem : public QGraphicsObject
     Q_PROPERTY(QPointF finish READ getFinish WRITE setFinish)
 
 public:
-    IndicatorItem(const QPointF &start, const QPointF &real_finish, Player *from);
+    IndicatorItem(const QPointF &start, const QPointF &real_finish, Player *from, int level);
 
     QPointF getFinish() const;
     void setFinish(const QPointF &finish);
@@ -25,8 +25,9 @@ public slots:
 
 private:
     QPointF start, finish, real_finish;
-    QColor color;
+    int level;
     qreal width;
+    QColor color;
 };
 
 #endif

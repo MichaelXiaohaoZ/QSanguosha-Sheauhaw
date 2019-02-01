@@ -374,7 +374,8 @@ public:
 
     // button
     static const char *S_SKIN_KEY_BUTTON;
-    static const char *S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG;
+    static const char *S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM;
+    static const char *S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG[7];
     static const char *S_SKIN_KEY_BUTTON_DASHBOARD_CONFIRM;
     static const char *S_SKIN_KEY_BUTTON_DASHBOARD_CANCEL;
     static const char *S_SKIN_KEY_BUTTON_DASHBOARD_DISCARD;
@@ -383,10 +384,11 @@ public:
     static const char *S_SKIN_KEY_BUTTON_SKILL;
 
     // player container
-    static const char *S_SKIN_KEY_MAINFRAME;
-    static const char *S_SKIN_KEY_LEFTFRAME;
-    static const char *S_SKIN_KEY_RIGHTFRAME;
-    static const char *S_SKIN_KEY_MIDDLEFRAME;
+    static const char *S_SKIN_KEY_MAINFRAME[7];
+    static const char *S_SKIN_KEY_LEFTFRAME[7];
+    static const char *S_SKIN_KEY_RIGHTFRAME[7];
+    static const char *S_SKIN_KEY_MIDDLEFRAME[7];
+    static const char *S_SKIN_KEY_FLOWERFRAME;
     static const char *S_SKIN_KEY_HANDCARDNUM;
     static const char *S_SKIN_KEY_FACETURNEDMASK;
     static const char *S_SKIN_KEY_BLANK_GENERAL;

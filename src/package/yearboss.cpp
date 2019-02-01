@@ -107,7 +107,7 @@ class YearZishu : public ZeroCardViewAsSkill
 public:
     YearZishu() : ZeroCardViewAsSkill("yearzishu")
     {
-
+        inherit_skills << objectName();
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const
@@ -143,6 +143,7 @@ public:
     {
         events << EventPhaseStart;
         frequency = Compulsory;
+        inherit_skills << objectName();
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
@@ -244,6 +245,7 @@ public:
     {
         events << EnterDying;
         view_as_skill = new YearYinhuVS;
+        inherit_skills << objectName();
     }
 
     bool triggerable(const ServerPlayer *target) const
@@ -355,6 +357,7 @@ public:
         frequency = Limited;
         limit_mark = "@yearchenlong";
         view_as_skill = new YearChenlongVS;
+        inherit_skills << objectName();
     }
 
     QString getSelectBox() const
@@ -377,10 +380,10 @@ public:
     }
 };
 
-class YearChuanchengChenlong : public TriggerSkill
+class YearChuancheng : public TriggerSkill
 {
 public:
-    YearChuanchengChenlong() : TriggerSkill("yearchuanchengchenlong")
+    YearChuancheng() : TriggerSkill("yearchuancheng")
     {
         events << BeforeGameOverJudge;
         frequency = Compulsory;
@@ -396,31 +399,22 @@ public:
         DeathStruct death = data.value<DeathStruct>();
         if (player->hasSkill(objectName()) && death.who == player && death.damage && death.damage->from)
         {
-            if (death.damage->from->hasSkill("yearchenlong") && death.damage->from->getMark("chuanchengedchenlong"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearchenlong");
-                room->setPlayerMark(death.damage->from, "chuanchengedchenlong", 0);
-            }
-            if (death.damage->from->hasSkill("yearweiyang") && death.damage->from->getMark("chuanchengedweiyang"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearweiyang");
-                room->setPlayerMark(death.damage->from, "chuanchengedweiyang", 0);
-            }
-            if (death.damage->from->hasSkill("yearshenhou") && death.damage->from->getMark("chuanchengedshenhou"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearshenhou");
-                room->setPlayerMark(death.damage->from, "chuanchengedshenhou", 0);
-            }
-            if (death.damage->from->hasSkill("yearxugou") && death.damage->from->getMark("chuanchengedxugou"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearxugou");
-                room->setPlayerMark(death.damage->from, "chuanchengedxugou", 0);
-            }
+            foreach (const Skill* askill, death.damage->from->getSkillList())
+                if (death.damage->from->getMark("chuanchenged" + askill->objectName()))
+                {
+                    room->detachSkillFromPlayer(death.damage->from, askill->objectName());
+                    room->setPlayerMark(death.damage->from, "chuanchenged" + askill->objectName(), 0);
+                }
             room->broadcastSkillInvoke(objectName());
             room->sendCompulsoryTriggerLog(player, objectName());
             room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), death.damage->from->objectName());
-            room->acquireSkill(death.damage->from, "yearchenlong");
-            room->addPlayerMark(death.damage->from, "chuanchengedchenlong");
+            foreach (const Skill* askill, death.damage->to->getSkillList())
+                if (!death.damage->from->getMark("chuanchenged" + askill->objectName()) && !askill->getInheritSkill().empty())
+                    foreach (QString inherit_skill, askill->getInheritSkill())
+                    {
+                        room->acquireSkill(death.damage->from, inherit_skill);
+                        room->addPlayerMark(death.damage->from, "chuanchenged" + inherit_skill);
+                    }
         }
         return false;
     }
@@ -433,6 +427,7 @@ public:
     {
         events << Damaged;
         frequency = Frequent;
+        inherit_skills << objectName();
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
@@ -455,6 +450,7 @@ public:
     {
         events << EventPhaseSkipping << TargetConfirmed;
         frequency = Compulsory;
+        inherit_skills << objectName();
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
@@ -512,7 +508,7 @@ class YearWeiyang : public ViewAsSkill
 public:
     YearWeiyang() : ViewAsSkill("yearweiyang")
     {
-
+        inherit_skills << objectName();
     }
 
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const
@@ -553,55 +549,6 @@ public:
     }
 };
 
-class YearChuanchengWeiyang : public TriggerSkill
-{
-public:
-    YearChuanchengWeiyang() : TriggerSkill("yearchuanchengweiyang")
-    {
-        events << BeforeGameOverJudge;
-        frequency = Compulsory;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const
-    {
-        return target != NULL && target->hasSkill(this);
-    }
-
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
-    {
-        DeathStruct death = data.value<DeathStruct>();
-        if (player->hasSkill(objectName()) && death.who == player && death.damage && death.damage->from)
-        {
-            if (death.damage->from->hasSkill("yearchenlong") && death.damage->from->getMark("chuanchengedchenlong"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearchenlong");
-                room->setPlayerMark(death.damage->from, "chuanchengedchenlong", 0);
-            }
-            if (death.damage->from->hasSkill("yearweiyang") && death.damage->from->getMark("chuanchengedweiyang"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearweiyang");
-                room->setPlayerMark(death.damage->from, "chuanchengedweiyang", 0);
-            }
-            if (death.damage->from->hasSkill("yearshenhou") && death.damage->from->getMark("chuanchengedshenhou"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearshenhou");
-                room->setPlayerMark(death.damage->from, "chuanchengedshenhou", 0);
-            }
-            if (death.damage->from->hasSkill("yearxugou") && death.damage->from->getMark("chuanchengedxugou"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearxugou");
-                room->setPlayerMark(death.damage->from, "chuanchengedxugou", 0);
-            }
-            room->broadcastSkillInvoke(objectName());
-            room->sendCompulsoryTriggerLog(player, objectName());
-            room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), death.damage->from->objectName());
-            room->acquireSkill(death.damage->from, "yearweiyang");
-            room->addPlayerMark(death.damage->from, "chuanchengedweiyang");
-        }
-        return false;
-    }
-};
-
 class YearShenhou : public TriggerSkill
 {
 public:
@@ -609,6 +556,7 @@ public:
     {
         events << TargetConfirmed;
         frequency = Frequent;
+        inherit_skills << objectName();
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
@@ -639,55 +587,6 @@ public:
     }
 };
 
-class YearChuanchengShenhou : public TriggerSkill
-{
-public:
-    YearChuanchengShenhou() : TriggerSkill("yearchuanchengshenhou")
-    {
-        events << BeforeGameOverJudge;
-        frequency = Compulsory;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const
-    {
-        return target != NULL && target->hasSkill(this);
-    }
-
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
-    {
-        DeathStruct death = data.value<DeathStruct>();
-        if (player->hasSkill(objectName()) && death.who == player && death.damage && death.damage->from)
-        {
-            if (death.damage->from->hasSkill("yearchenlong") && death.damage->from->getMark("chuanchengedchenlong"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearchenlong");
-                room->setPlayerMark(death.damage->from, "chuanchengedchenlong", 0);
-            }
-            if (death.damage->from->hasSkill("yearweiyang") && death.damage->from->getMark("chuanchengedweiyang"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearweiyang");
-                room->setPlayerMark(death.damage->from, "chuanchengedweiyang", 0);
-            }
-            if (death.damage->from->hasSkill("yearshenhou") && death.damage->from->getMark("chuanchengedshenhou"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearshenhou");
-                room->setPlayerMark(death.damage->from, "chuanchengedshenhou", 0);
-            }
-            if (death.damage->from->hasSkill("yearxugou") && death.damage->from->getMark("chuanchengedxugou"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearxugou");
-                room->setPlayerMark(death.damage->from, "chuanchengedxugou", 0);
-            }
-            room->broadcastSkillInvoke(objectName());
-            room->sendCompulsoryTriggerLog(player, objectName());
-            room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), death.damage->from->objectName());
-            room->acquireSkill(death.damage->from, "yearshenhou");
-            room->addPlayerMark(death.damage->from, "chuanchengedshenhou");
-        }
-        return false;
-    }
-};
-
 class YearYouji : public DrawCardsSkill
 {
 public:
@@ -712,6 +611,7 @@ public:
     {
         events << SlashEffected << DamageCaused;
         frequency = Compulsory;
+        inherit_skills << objectName() << "#yearxugou-target";
     }
 
     virtual bool triggerable(const ServerPlayer *target) const
@@ -777,55 +677,6 @@ public:
     }
 };
 
-class YearChuanchengXugou : public TriggerSkill
-{
-public:
-    YearChuanchengXugou() : TriggerSkill("yearchuanchengxugou")
-    {
-        events << Death;
-        frequency = Compulsory;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const
-    {
-        return target != NULL && target->hasSkill(this);
-    }
-
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
-    {
-        DeathStruct death = data.value<DeathStruct>();
-        if (player->hasSkill(objectName()) && death.who == player && death.damage && death.damage->from)
-        {
-            if (death.damage->from->hasSkill("yearchenlong") && death.damage->from->getMark("chuanchengedchenlong"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearchenlong");
-                room->setPlayerMark(death.damage->from, "chuanchengedchenlong", 0);
-            }
-            if (death.damage->from->hasSkill("yearweiyang") && death.damage->from->getMark("chuanchengedweiyang"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearweiyang");
-                room->setPlayerMark(death.damage->from, "chuanchengedweiyang", 0);
-            }
-            if (death.damage->from->hasSkill("yearshenhou") && death.damage->from->getMark("chuanchengedshenhou"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearshenhou");
-                room->setPlayerMark(death.damage->from, "chuanchengedshenhou", 0);
-            }
-            if (death.damage->from->hasSkill("yearxugou") && death.damage->from->getMark("chuanchengedxugou"))
-            {
-                room->detachSkillFromPlayer(death.damage->from, "yearxugou");
-                room->setPlayerMark(death.damage->from, "chuanchengedxugou", 0);
-            }
-            room->broadcastSkillInvoke(objectName());
-            room->sendCompulsoryTriggerLog(player, objectName());
-            room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), death.damage->from->objectName());
-            room->acquireSkill(death.damage->from, "yearxugou");
-            room->addPlayerMark(death.damage->from, "chuanchengedxugou");
-        }
-        return false;
-    }
-};
-
 class YearHaizhu : public TriggerSkill
 {
 public:
@@ -833,6 +684,7 @@ public:
     {
         events << CardsMoveOneTime << EventPhaseStart;
         frequency = Compulsory;
+        inherit_skills << "yearjinzhu" << "#yearjinzhu-draw" << "#yearjinzhu-maxcard";
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *caozhi, QVariant &data) const
@@ -1414,8 +1266,110 @@ public:
 
 };
 
-YearBossPackage::YearBossPackage()
-    : Package("YearBoss")
+class YearMaotu19 : public TriggerSkill
+{
+public:
+    YearMaotu19() : TriggerSkill("yearmaotu_19")
+    {
+        events << Death;
+        frequency = Compulsory;
+        inherit_skills << objectName() << "#yearmaotu-prohibit";
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        room->addPlayerTip(player, "#maotu");
+        return false;
+    }
+};
+
+class YearMaotu19Prohibit : public ProhibitSkill
+{
+public:
+    YearMaotu19Prohibit() : ProhibitSkill("#yearmaotu-prohibit")
+    {
+
+    }
+
+    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others) const
+    {
+        return to->getMark("#maotu") && from->getHp() >= to->getMaxHp();
+    }
+};
+
+class YearYouji19 : public DrawCardsSkill
+{
+public:
+    YearYouji19() : DrawCardsSkill("yearyouji_19")
+    {
+        frequency = Compulsory;
+        inherit_skills << objectName();
+    }
+
+    virtual int getDrawNum(ServerPlayer *player, int n) const
+    {
+        Room *room = player->getRoom();
+        room->broadcastSkillInvoke(objectName());
+        room->sendCompulsoryTriggerLog(player, objectName());
+        if (room->getTurn() > 5)
+            return n + 5;
+        return n + room->getTurn();
+    }
+};
+
+class YearJinzhu : public TriggerSkill
+{
+public:
+    YearJinzhu() : TriggerSkill("yearjinzhu")
+    {
+        events << AskForPeachesDone;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (!player->hasFlag("Global_Dying") || player->getHp() > 0) return false;
+        room->recover(player, RecoverStruct(player, NULL, 3 - player->getHp()));
+        room->detachSkillFromPlayer(player, objectName());
+        return false;
+    }
+};
+
+class YearJinzhuDraw : public DrawCardsSkill
+{
+public:
+    YearJinzhuDraw() : DrawCardsSkill("#yearjinzhu-draw")
+    {
+
+    }
+
+    virtual int getDrawNum(ServerPlayer *player, int n) const
+    {
+        Room *room = player->getRoom();
+        room->broadcastSkillInvoke(objectName());
+        room->sendCompulsoryTriggerLog(player, objectName());
+        return n + 1;
+    }
+};
+
+class YearJinzhuDrawMaxCard : public MaxCardsSkill
+{
+public:
+    YearJinzhuDrawMaxCard() : MaxCardsSkill("#yearjinzhu-maxcard")
+    {
+
+    }
+
+    virtual int getExtra(const Player *target) const
+    {
+        if (target->hasSkill(this))
+            return 1;
+        return 0;
+    }
+};
+
+YearBoss18Package::YearBoss18Package()
+    : Package("YearBoss2018")
 {
     General *zishu = new General(this, "bosszishu", "god", 3, true, true);
     zishu->addSkill(new YearZishu);
@@ -1436,7 +1390,7 @@ YearBossPackage::YearBossPackage()
 
     General *chenlong = new General(this, "bosschenlong", "god", 4, true, true);
     chenlong->addSkill(new YearChenlong);
-    chenlong->addSkill(new YearChuanchengChenlong);
+    chenlong->addSkill(new YearChuancheng);
     chenlong->addSkill("yearruishou");
 
     General *sishe = new General(this, "bosssishe", "god", 3, false, true);
@@ -1449,12 +1403,12 @@ YearBossPackage::YearBossPackage()
 
     General *weiyang = new General(this, "bossweiyang", "god", 3, false, true);
     weiyang->addSkill(new YearWeiyang);
-    weiyang->addSkill(new YearChuanchengWeiyang);
+    weiyang->addSkill("yearchuancheng");
     weiyang->addSkill("yearruishou");
 
     General *shenhou = new General(this, "bossshenhou", "god", 3, true, true);
     shenhou->addSkill(new YearShenhou);
-    shenhou->addSkill(new YearChuanchengShenhou);
+    shenhou->addSkill("yearchuancheng");
     shenhou->addSkill("yearruishou");
 
     General *youji = new General(this, "bossyouji", "god", 3, true, true);
@@ -1464,7 +1418,7 @@ YearBossPackage::YearBossPackage()
     General *xugou = new General(this, "bossxugou", "god", 4, true, true);
     xugou->addSkill(new YearXugou);
     xugou->addSkill(new YearXugouTargetMod);
-    xugou->addSkill(new YearChuanchengXugou);
+    xugou->addSkill("yearchuancheng");
     xugou->addSkill("yearruishou");
 
     General *haizhu = new General(this, "bosshaizhu", "god", 5, true, true);
@@ -1497,8 +1451,8 @@ YearBossPackage::YearBossPackage()
     addMetaObject<YearWeiyangCard>();
 }
 
-YearBossCardPackage::YearBossCardPackage()
-    : Package("YearBossCard", Package::CardPack)
+YearBoss18CardPackage::YearBoss18CardPackage()
+    : Package("YearBoss2018Card", Package::CardPack)
 {
     QList<Card *> cards;
 
@@ -1527,5 +1481,62 @@ YearBossCardPackage::YearBossCardPackage()
     skills << new FireCrackerProhibit << new FireCrackerSkill << new YearBossRevive << new YearBossChange;
 }
 
-ADD_PACKAGE(YearBoss)
-ADD_PACKAGE(YearBossCard)
+YearBoss19Package::YearBoss19Package()
+    : Package("YearBoss19")
+{
+    General *zishu = new General(this, "bosszishu19", "qun", 3, true, true);
+    zishu->addSkill("yearzishu");
+    zishu->addSkill("yearchuancheng");
+
+    General *chouniu = new General(this, "bosschouniu19", "wei", 5, true, true);
+    chouniu->addSkill("yearchouniu");
+    chouniu->addSkill("#chouniuhp");
+    chouniu->addSkill("yearchuancheng");
+
+    General *yinhu = new General(this, "bossyinhu19", "wu", 4, true, true);
+    yinhu->addSkill("yearyinhu");
+    yinhu->addSkill("yearchuancheng");
+
+    General *maotu = new General(this, "bossmaotu19", "wei", 3, false, true);
+    maotu->addSkill(new YearMaotu19);
+    maotu->addSkill(new YearMaotu19Prohibit);
+    maotu->addSkill("yearchuancheng");
+
+    General *chenlong = new General(this, "bosschenlong19", "shu", 4, true, true);
+    chenlong->addSkill("yearchenlong");
+    chenlong->addSkill("yearchuancheng");
+
+    General *sishe = new General(this, "bosssishe19", "qun", 3, false, true);
+    sishe->addSkill("yearsishe");
+    sishe->addSkill("yearchuancheng");
+
+    General *wuma = new General(this, "bosswuma19", "wu", 4, true, true);
+    wuma->addSkill("yearwuma");
+    wuma->addSkill("yearchuancheng");
+
+    General *weiyang = new General(this, "bossweiyang19", "wu", 3, false, true);
+    weiyang->addSkill("yearweiyang");
+    weiyang->addSkill("yearchuancheng");
+
+    General *shenhou = new General(this, "bossshenhou19", "wei", 3, true, true);
+    shenhou->addSkill("yearshenhou");
+    shenhou->addSkill("yearchuancheng");
+
+    General *youji = new General(this, "bossyouji19", "wei", 3, true, true);
+    youji->addSkill(new YearYouji19);
+    youji->addSkill("yearchuancheng");
+
+    General *xugou = new General(this, "bossxugou19", "shu", 4, true, true);
+    xugou->addSkill("yearxugou");
+    xugou->addSkill("#yearxugou-target");
+    xugou->addSkill("yearchuancheng");
+
+    General *haizhu = new General(this, "bosshaizhu19", "qun", 5, true, true);
+    haizhu->addSkill("yearhaizhu");
+    haizhu->addSkill("yearchuancheng");
+
+    skills << new YearJinzhu << new YearJinzhuDraw << new YearJinzhuDrawMaxCard;
+}
+
+ADD_PACKAGE(YearBoss18)
+ADD_PACKAGE(YearBoss18Card)

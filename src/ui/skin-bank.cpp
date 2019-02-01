@@ -30,16 +30,24 @@ const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD = "dashboard";
 
 // buttons
 const char *QSanRoomSkin::S_SKIN_KEY_BUTTON = "button-%1";
-const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG = "dashboardButtonSetBg";
+const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM = "dashboardButtonSetButtom";
+const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG[7] =
+    { "dashboardButtonSetBg", "dashboardButtonSetBg1", "dashboardButtonSetBg2", "dashboardButtonSetBg3",
+                              "dashboardButtonSetBg4", "dashboardButtonSetBg5", "dashboardButtonSetBg6" };
 const char *QSanRoomSkin::S_SKIN_KEY_BUTTON_SKILL = "skill";
 
 // player container
 const char *QSanRoomSkin::S_SKIN_KEY_EQUIP_ICON = "%1Equip-%2";
 const char *QSanRoomSkin::S_SKIN_KEY_HORSE_ICON = "%1Horse-%2";
-const char *QSanRoomSkin::S_SKIN_KEY_MAINFRAME = "%1MainFrame";
-const char *QSanRoomSkin::S_SKIN_KEY_LEFTFRAME = "%1LeftFrame";
-const char *QSanRoomSkin::S_SKIN_KEY_RIGHTFRAME = "%1RightFrame";
-const char *QSanRoomSkin::S_SKIN_KEY_MIDDLEFRAME = "%1MiddleFrame";
+const char *QSanRoomSkin::S_SKIN_KEY_MAINFRAME[7] =
+    { "%1MainFrame", "%1MainFrame1", "%1MainFrame2", "%1MainFrame3", "%1MainFrame4", "%1MainFrame5", "%1MainFrame6" };
+const char *QSanRoomSkin::S_SKIN_KEY_LEFTFRAME[7] =
+    { "%1LeftFrame", "%1LeftFrame1", "%1LeftFrame2", "%1LeftFrame3", "%1LeftFrame4", "%1LeftFrame5", "%1LeftFrame6" };
+const char *QSanRoomSkin::S_SKIN_KEY_RIGHTFRAME[7] =
+    { "%1RightFrame", "%1RightFrame1", "%1RightFrame2", "%1RightFrame3", "%1RightFrame4", "%1RightFrame5", "%1RightFrame6" };
+const char *QSanRoomSkin::S_SKIN_KEY_MIDDLEFRAME[7] =
+    { "%1MiddleFrame", "%1MiddleFrame1", "%1MiddleFrame2", "%1MiddleFrame3", "%1MiddleFrame4", "%1MiddleFrame5", "%1MiddleFrame6" };
+const char *QSanRoomSkin::S_SKIN_KEY_FLOWERFRAME = "%1FlowerFrame";
 const char *QSanRoomSkin::S_SKIN_KEY_HANDCARDNUM = "%1HandCardNum-%2";
 const char *QSanRoomSkin::S_SKIN_KEY_FACETURNEDMASK = "%1FaceTurnedMask";
 const char *QSanRoomSkin::S_SKIN_KEY_BLANK_GENERAL = "%1BlankGeneral";

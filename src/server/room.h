@@ -311,6 +311,7 @@ public:
     void removeTag(const QString &key);
 
     void setEmotion(ServerPlayer *target, const QString &emotion);
+    void setFullEmotion(const QString &emotion);
 	void setCardEmotion(ServerPlayer *target, const Card *card);
 
     Player::Place getCardPlace(int card_id) const;

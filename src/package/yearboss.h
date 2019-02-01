@@ -49,12 +49,12 @@ public:
     void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
 };
 
-class YearBossPackage : public Package
+class YearBoss18Package : public Package
 {
     Q_OBJECT
 
 public:
-    YearBossPackage();
+    YearBoss18Package();
 
 };
 
@@ -86,12 +86,29 @@ public:
     virtual bool isCancelable(const CardEffectStruct &effect) const;
 };
 
-class YearBossCardPackage : public Package
+class YearBoss18CardPackage : public Package
 {
     Q_OBJECT
 
 public:
-    YearBossCardPackage();
+    YearBoss18CardPackage();
+};
+
+class YearBoss19Package : public Package
+{
+    Q_OBJECT
+
+public:
+    YearBoss19Package();
+
+};
+
+class YearBoss19CardPackage : public Package
+{
+    Q_OBJECT
+
+public:
+    YearBoss19CardPackage();
 };
 
 #endif // YEARBOSS

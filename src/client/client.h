@@ -133,6 +133,7 @@ public:
     void addHistory(const QVariant &history);
     void moveFocus(const QVariant &focus);
     void setEmotion(const QVariant &set_str);
+    void setFullEmotion(const QVariant &set_str);
     void skillInvoked(const QVariant &invoke_str);
     void animate(const QVariant &animate_str);
     void cardLimitation(const QVariant &limit);
@@ -351,6 +352,7 @@ signals:
     void gongxin(const QList<int> &card_ids, bool enable_heart, QList<int> enabled_ids);
     void focus_moved(const QStringList &focus, QSanProtocol::Countdown countdown);
     void emotion_set(const QString &target, const QString &emotion);
+    void full_emotion_set(const QString &emotion);
     void skill_invoked(const QString &who, const QString &skill_name);
     void skill_acquired(const ClientPlayer *player, const QString &skill_name);
     void animated(int name, const QStringList &args);

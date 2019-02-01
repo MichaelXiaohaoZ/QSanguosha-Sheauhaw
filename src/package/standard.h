@@ -243,7 +243,6 @@ class Disaster : public DelayedTrick
 
 public:
     Disaster(Card::Suit suit, int number);
-    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
     virtual bool isAvailable(const Player *player) const;
 };
 

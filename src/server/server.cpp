@@ -393,6 +393,10 @@ QWidget *ServerDialog::createMiscTab()
     nullification_spinbox->setValue(Config.NullificationCountDown);
     nullification_spinbox->setSuffix(tr(" seconds"));
 
+    general_level_spinbox = new QSpinBox;
+    general_level_spinbox->setRange(1, 6);
+    general_level_spinbox->setValue(Config.GeneralLevel);
+
     minimize_dialog_checkbox = new QCheckBox(tr("Minimize the dialog when server runs"));
     minimize_dialog_checkbox->setChecked(Config.EnableMinimizeDialog);
 
@@ -441,6 +445,7 @@ QWidget *ServerDialog::createMiscTab()
     QVBoxLayout *tablayout = new QVBoxLayout;
     tablayout->addLayout(HLay(new QLabel(tr("Game start count down")), game_start_spinbox));
     tablayout->addLayout(HLay(new QLabel(tr("Nullification count down")), nullification_spinbox));
+    tablayout->addLayout(HLay(new QLabel(tr("General level")), general_level_spinbox));
     tablayout->addWidget(minimize_dialog_checkbox);
     tablayout->addWidget(surrender_at_death_checkbox);
     tablayout->addWidget(luck_card_checkbox);
@@ -1343,6 +1348,7 @@ int ServerDialog::config()
     Config.Address = address_edit->text();
     Config.CountDownSeconds = game_start_spinbox->value();
     Config.NullificationCountDown = nullification_spinbox->value();
+    Config.GeneralLevel = general_level_spinbox->value();
     Config.EnableMinimizeDialog = minimize_dialog_checkbox->isChecked();
     Config.EnableAI = ai_enable_checkbox->isChecked();
     Config.OriginAIDelay = ai_delay_spinbox->value();
@@ -1398,6 +1404,7 @@ int ServerDialog::config()
     Config.setValue("PreventAwakenBelow3", Config.PreventAwakenBelow3);
     Config.setValue("CountDownSeconds", game_start_spinbox->value());
     Config.setValue("NullificationCountDown", nullification_spinbox->value());
+    Config.setValue("GeneralLevel", general_level_spinbox->value());
     Config.setValue("EnableMinimizeDialog", Config.EnableMinimizeDialog);
     Config.setValue("EnableAI", Config.EnableAI);
     Config.setValue("AIChat", ai_chat_checkbox->isChecked());

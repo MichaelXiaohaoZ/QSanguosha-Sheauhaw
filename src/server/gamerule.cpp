@@ -187,7 +187,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                             (card->objectName() == "god_halberd" && p->getGeneralName().contains("shenlvbu")) ||
                             (card->objectName() == "god_blade" && p->getGeneralName().contains("shenguanyu")))
                         {
-                            CardMoveReason reason(CardMoveReason::S_REASON_PUT, p->objectName(), "gamerule", QString());
+                            CardMoveReason reason(CardMoveReason::S_REASON_PUT, p->objectName());
                             room->moveCardTo(card, NULL, p, Player::PlaceEquip, reason);
                             break;
                         }
@@ -235,7 +235,7 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                         log.type = "#RemoveCard";
                         log.card_str = card->toString();
                         room->sendLog(log);
-                        CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, room->getLord()->objectName(), QString(), objectName(), QString());
+                        CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, QString(), QString(), QString());
                         room->moveCardTo(Sanguosha->getCard(id), NULL, Player::PlaceTable, reason, true);
                         //room->setCardMapping(card->getEffectiveId(), NULL, Player::PlaceSpecial);
                     }
@@ -280,7 +280,8 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                 i++;
             }
             Sanguosha->playSystemAudioEffect("startgame");
-            room->getThread()->delay(1000);
+            room->setFullEmotion("startgame");
+            room->getThread()->delay(3000);
         }
         return false;
     }
