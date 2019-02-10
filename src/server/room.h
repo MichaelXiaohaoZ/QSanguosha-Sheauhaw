@@ -58,6 +58,8 @@ public:
     RoomThread *getThread() const;
     ServerPlayer *getCurrent() const;
     void setCurrent(ServerPlayer *current);
+    ServerPlayer *getNormalCurrent() const;
+    void setNormalCurrent(ServerPlayer *current);
     int alivePlayerCount() const;
     QList<ServerPlayer *> getOtherPlayers(ServerPlayer *except, bool include_dead = false) const;
     QList<ServerPlayer *> getPlayers() const;
@@ -249,6 +251,8 @@ public:
 	void broadcastSkillInvoke(const QString &skillName, const ServerPlayer *player = NULL, int type = -1);
     bool broadcastSkillInvoke(const QString &skillName, const ServerPlayer *player, const QList<int> &types);
     void broadcastSkillInvoke(const QString &skillName, const QString &category);
+    void broadcastSkillInvoke(const QString &skillName, int type);
+    void broadcastSkillInvoke(const QString &skillName, bool isMale, int type);
     void doLightbox(const QString &lightboxName, int duration = 2000, int pixelSize = 0);
     void doSuperLightbox(const QString &heroName, const QString &skillName);
     void doAnimate(QSanProtocol::AnimateType type, const QString &arg1 = QString(), const QString &arg2 = QString(),
@@ -311,7 +315,9 @@ public:
     void removeTag(const QString &key);
 
     void setEmotion(ServerPlayer *target, const QString &emotion);
-    void setFullEmotion(const QString &emotion);
+    void setFullEmotion(const QString &emotion, const int &dx = 0, const int &dy = 0);
+    void playRoomAudio(const QString &path, bool superpose = true);
+    void playSystemAudio(const QString &audio, bool superpose = true);
 	void setCardEmotion(ServerPlayer *target, const Card *card);
 
     Player::Place getCardPlace(int card_id) const;
@@ -438,8 +444,10 @@ public:
     int getTreasureRank(const QString &kingdom);
     QString getRankKingdom(int rank);
     QString appearYearBoss(int difficulty);
-    bool getChangingSituation();
+    bool getChangingSituation() const;
+    void setChangingSituation(bool sit);
     void doGanluRevive(ServerPlayer *player, ServerPlayer *recorder = NULL, bool emotion = true);
+    QString appearNextYear();
 
 protected:
     virtual void run();
@@ -542,7 +550,7 @@ private:
     QString mode;
     QList<ServerPlayer *> m_players, m_alivePlayers;
     int player_count;
-    ServerPlayer *current;
+    ServerPlayer *current, *normalcurrent;
     QList<int> pile1, pile2;
     QList<int> table_cards;
     QList<int> *m_drawPile, *m_discardPile;
@@ -605,7 +613,7 @@ private:
     void assignGeneralsForPlayersOfDragonBoatRace(const QList<ServerPlayer *> &to_assign);
     void assignGeneralsForPlayerOfGodsReturnMode(ServerPlayer *to_assign, const QStringList &gods = QStringList());
     void assignGeneralsForPlayersOfAttackDongMode(const QList<ServerPlayer *> &to_assign, const QString &bossname);
-    void assignGeneralsForPlayersOfYearBossMode(const QList<ServerPlayer *> &to_assign);
+    void assignGeneralsForPlayersOfYearBossMode(const QList<ServerPlayer *> &to_assign, const int &sclass);
     void chooseGenerals(QList<ServerPlayer *> players = QList<ServerPlayer *>());
     void chooseGeneralsOfJianGeDefenseMode();
     void chooseGeneralsOfBestLoyalistMode(QList<ServerPlayer *> players = QList<ServerPlayer *>());

@@ -336,9 +336,7 @@ void ServerPlayer::addToMateSelected(const QString &general)
 void ServerPlayer::addToMateSelected(const QStringList &generallist)
 {
     foreach (QString general, generallist)
-    {
         mateselected.append(general);
-    }
 }
 
 QStringList ServerPlayer::getSelected() const
@@ -792,7 +790,7 @@ void ServerPlayer::turnOver(const QString &skill_name)
             turnlog.arg = "bossshenyi";
             room->sendLog(turnlog);
         }
-        if (hasSkill("yearwuma"))
+        if (hasSkill("yearwuma") || hasSkill("yearwuma19"))
         {
             turnlog.arg = "yearwuma";
             room->sendLog(turnlog);
@@ -1412,6 +1410,30 @@ void ServerPlayer::gainAnExtraTurn()
         extraTurnList = room->getTag("ExtraTurnList").toStringList();
     extraTurnList.prepend(objectName());
     room->setTag("ExtraTurnList", QVariant::fromValue(extraTurnList));
+}
+
+void ServerPlayer::gainAnImmediateTurn(bool broken)
+{
+    if (broken)
+    {
+        gainAnExtraTurn();
+        throw TurnBroken;
+    }
+    else
+    {
+        room->setTag("ExtraTurn", true);
+        ServerPlayer *ori = room->getCurrent(), *current = room->getNormalCurrent();
+        room->setCurrent(this);
+        room->setNormalCurrent(current);
+
+        RoomThread *roomthread = room->getThread();
+        roomthread->trigger(TurnStart, room, this);
+
+        room->removeTag("ExtraTurn");
+        room->setCurrent(ori);
+        room->setNormalCurrent(current);
+    }
+
 }
 
 void ServerPlayer::copyFrom(ServerPlayer *sp)

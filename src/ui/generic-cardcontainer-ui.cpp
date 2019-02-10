@@ -737,7 +737,7 @@ void PlayerCardContainer::repaintAll()
         _getAvatarParent());
     if (_m_seatItem != NULL)
         _paintPixmap(_m_seatItem, _m_layout->m_seatIconRegion,
-        _getPixmap(QSanRoomSkin::S_SKIN_KEY_SEAT_NUMBER, QString::number(m_player->property("UI_Seat").toInt())),
+        _getPixmap(QSanRoomSkin::S_SKIN_KEY_SEAT_NUMBER, QString::number(m_player->getRealSeat())),
         _getAvatarParent());
     if (_m_roleComboBox != NULL)
         _m_roleComboBox->setPos(_m_layout->m_roleComboBoxPos);
@@ -1327,10 +1327,9 @@ void PlayerCardContainer::showDistance()
 void PlayerCardContainer::showSeat()
 {
     _paintPixmap(_m_seatItem, _m_layout->m_seatIconRegion,
-        _getPixmap(QSanRoomSkin::S_SKIN_KEY_SEAT_NUMBER, QString::number(m_player->getSeat())),
+        _getPixmap(QSanRoomSkin::S_SKIN_KEY_SEAT_NUMBER, QString::number(m_player->getRealSeat())),
         _getAvatarParent());
     //save the seat number for later use
-    m_player->setProperty("UI_Seat", m_player->getSeat());
     _m_seatItem->setZValue(1.1);
 }
 

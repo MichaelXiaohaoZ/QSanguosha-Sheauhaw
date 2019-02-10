@@ -35,7 +35,7 @@
 
 using namespace QSanProtocol;
 
-const int lrSp = 14;
+const int lrSp = 13;
 
 static QLayout *HLay(QWidget *left, QWidget *right)
 {
@@ -868,18 +868,34 @@ QGroupBox *ServerDialog::createYearBossBox()
     box->setEnabled(Config.GameMode == "04_year");
     box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    QVBoxLayout *vlayout = new QVBoxLayout;
-
     QComboBox *officialComboBox = new QComboBox;
     officialComboBox->addItem("2018", "2018");
+    officialComboBox->addItem(tr("2019General"), "2019G");
+    officialComboBox->addItem(tr("2019YearBoss"), "2019Y");
 
     mode_choose_year_ComboBox = officialComboBox;
-
     QString rule = Config.value("year/Mode", "2018").toString();
-    //if (rule == "BossMode")
-        //officialComboBox->setCurrentIndex(1);
+    if (rule == "2019G")
+        officialComboBox->setCurrentIndex(1);
+    else if (rule == "2019Y")
+        officialComboBox->setCurrentIndex(2);
 
+    year_using_year_skill_checkbox = new QCheckBox(tr("UseYearSkill"));
+    year_using_year_skill_checkbox->setChecked(Config.value("year/YearSkillStart", false).toBool());
+
+    year_using_uniform_kingdom_checkbox = new QCheckBox(tr("UniformKingdom"));
+    year_using_uniform_kingdom_checkbox->setChecked(Config.value("year/UniformKingdom", true).toBool());
+
+    year_yearmode_round_spinbox = new QSpinBox;
+    year_yearmode_round_spinbox->setRange(1, 3);
+    year_yearmode_round_spinbox->setValue(Config.value("year/RoundNum", 1).toInt());
+
+    QVBoxLayout *vlayout = new QVBoxLayout;
     vlayout->addLayout(HLay(new QLabel(tr("Rule option")), mode_choose_year_ComboBox));
+    vlayout->addWidget(year_using_year_skill_checkbox);
+    vlayout->addWidget(year_using_uniform_kingdom_checkbox);
+    vlayout->addLayout(HLay(new QLabel(tr("Round option")), year_yearmode_round_spinbox));
+
 
     box->setLayout(vlayout);
 
@@ -1444,6 +1460,9 @@ int ServerDialog::config()
 
     Config.beginGroup("year");
     Config.setValue("Mode", mode_choose_year_ComboBox->itemData(mode_choose_year_ComboBox->currentIndex()).toString());
+    Config.setValue("YearSkillStart", year_using_year_skill_checkbox->isChecked());
+    Config.setValue("UniformKingdom", year_using_uniform_kingdom_checkbox->isChecked());
+    Config.setValue("RoundNum", year_yearmode_round_spinbox->value());
     Config.endGroup();
 
     QSet<QString> ban_packages;

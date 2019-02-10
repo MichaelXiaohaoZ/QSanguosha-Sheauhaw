@@ -150,7 +150,9 @@ SOURCES += \
     src/package/dragonboat.cpp \
     src/package/godsreturn.cpp \
     src/package/attackdong.cpp \
-    src/package/yearboss.cpp
+    src/package/yearboss.cpp \
+    src/package/dialogtest.cpp \
+    src/ui/guhuodialog.cpp
 
 HEADERS += \
     src/client/aux-skills.h \
@@ -293,7 +295,9 @@ HEADERS += \
     src/package/dragonboat.h \
     src/package/godsreturn.h \
     src/package/attackdong.h \
-    src/package/yearboss.h
+    src/package/yearboss.h \
+    src/package/dialogtest.h \
+    src/ui/guhuodialog.h
 
 FORMS += \
     src/dialog/cardoverview.ui \

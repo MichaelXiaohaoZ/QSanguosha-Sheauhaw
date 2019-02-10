@@ -36,7 +36,7 @@
 using namespace QSanProtocol;
 
 Room::Room(QObject *parent, const QString &mode)
-    : QThread(parent), mode(mode), current(NULL), pile1(Sanguosha->getRandomCards()),
+    : QThread(parent), mode(mode), current(NULL), normalcurrent(NULL), pile1(Sanguosha->getRandomCards()),
     m_drawPile(&pile1), m_discardPile(&pile2),
     game_started(false), game_finished(false), game_paused(false), L(NULL), thread(NULL),
     thread_3v3(NULL), thread_xmode(NULL), thread_1v1(NULL), _m_semRaceRequest(0), _m_semRoomMutex(1),
@@ -104,6 +104,17 @@ ServerPlayer *Room::getCurrent() const
 void Room::setCurrent(ServerPlayer *current)
 {
     this->current = current;
+    this->normalcurrent = current;
+}
+
+ServerPlayer *Room::getNormalCurrent() const
+{
+    return normalcurrent;
+}
+
+void Room::setNormalCurrent(ServerPlayer *current)
+{
+    this->normalcurrent = current;
 }
 
 int Room::alivePlayerCount() const
@@ -3569,7 +3580,7 @@ void Room::assignGeneralsForPlayersOfAttackDongMode(const QList<ServerPlayer *> 
     }
 }
 
-void Room::assignGeneralsForPlayersOfYearBossMode(const QList<ServerPlayer *> &to_assign)
+void Room::assignGeneralsForPlayersOfYearBossMode(const QList<ServerPlayer *> &to_assign, const int &sclass)
 {
     QSet<QString> existed;
     foreach (ServerPlayer *player, m_players) {
@@ -3597,7 +3608,7 @@ void Room::assignGeneralsForPlayersOfYearBossMode(const QList<ServerPlayer *> &t
         }
     }
 
-    const int max_choice = (Config.EnableHegemony && Config.Enable2ndGeneral) ?
+    int choice_count = (Config.EnableHegemony && Config.Enable2ndGeneral) ?
         Config.value("HegemonyMaxChoice", 7).toInt() :
         Config.value("MaxChoice", 5).toInt();
 
@@ -3607,30 +3618,46 @@ void Room::assignGeneralsForPlayersOfYearBossMode(const QList<ServerPlayer *> &t
     {
         QStringList all_choices;
 
-        if (!player->getGeneral() && player->isLord())
-        {
-
-        }
-        else if (!player->getGeneral() && player->getRole() == "loyalist")
-        {
-            all_choices << "bosszishu" << "bosschouniu" << "bossyinhu" << "bossmaotu"
-                        << "bosschenlong" << "bosssishe" << "bosswuma" << "bossweiyang"
-                        << "bossshenshou" << "bossyouji" << "bossxugou" << "bosshaizhu";
-        }
-        else
-        {
-            all_choices = Sanguosha->getRandomGenerals(0, existed);
-            QString kingdomBR;
-            const QString kingdomsBR[4] = {"wei", "shu", "wu", "qun"};
-            foreach (ServerPlayer *sp, m_players)
-                if ((sp->getSeat())%m_players.length() + 1 == player->getSeat())
-                    for(int i = 0; i < 4; i++)
-                        if (sp->getMark(kingdomsBR[i] + "YearBoss"))
-                            kingdomBR = kingdomsBR[i];
-            foreach (QString a_choice, all_choices)
-                if (Sanguosha->getGeneral(a_choice)->getKingdom() != kingdomBR && Sanguosha->getGeneral(a_choice)->getKingdom() != "god")
-                    all_choices.removeOne(a_choice);
-        }
+        if (!player->getGeneral())
+            switch (sclass)
+            {
+            case 0:
+                if (Config.value("year/Mode", "2018").toString() == "2018")
+                    all_choices << "bosszishu" << "bosschouniu" << "bossyinhu" << "bossmaotu"
+                                << "bosschenlong" << "bosssishe" << "bosswuma" << "bossweiyang"
+                                << "bossshenshou" << "bossyouji" << "bossxugou" << "bosshaizhu";
+                else if (Config.value("year/Mode", "2018").toString().contains("2019"))
+                    all_choices << "boss19zishu" << "boss19chouniu" << "boss19yinhu" << "boss19maotu"
+                                << "boss19chenlong" << "boss19sishe" << "boss19wuma" << "boss19weiyang"
+                                << "boss19shenshou" << "boss19youji" << "boss19xugou" << "boss19haizhu";
+                choice_count = qrand()%4 + 1;
+                break;
+            case 1:
+                all_choices = Sanguosha->getRandomGenerals(0, existed);
+                if (Config.value("year/Mode", "2018").toString() == "2018")
+                {
+                    QString kingdomBR;
+                    const QString kingdomsBR[4] = {"wei", "shu", "wu", "qun"};
+                    foreach (ServerPlayer *sp, m_players)
+                        if ((sp->getSeat())%m_players.length() + 1 == player->getSeat())
+                            for(int i = 0; i < 4; i++)
+                                if (sp->getMark(kingdomsBR[i] + "YearBoss"))
+                                    kingdomBR = kingdomsBR[i];
+                    foreach (QString a_choice, all_choices)
+                        if (Sanguosha->getGeneral(a_choice)->getKingdom() != kingdomBR && Sanguosha->getGeneral(a_choice)->getKingdom() != "god")
+                            all_choices.removeOne(a_choice);
+                }
+                break;
+            case 2:
+                all_choices << "boss_year_yang" << "boss_year_yin";
+                choice_count = 1;
+                break;
+            case 3:
+                removewill.removeAll("year_pucong");
+                all_choices << "year_pucong";
+                choice_count = 1;
+                break;
+            }
 
         QStringList choices = Sanguosha->getMainGenerals(all_choices);
 
@@ -3638,13 +3665,6 @@ void Room::assignGeneralsForPlayersOfYearBossMode(const QList<ServerPlayer *> &t
             choices.removeOne(aremove);
 
         player->clearSelected();
-
-        int extra = 0;
-
-        int choice_count = max_choice + extra;
-
-        if (player->getRole() == "loyalist")
-            choice_count = qrand()%4 + 1;
 
         QStringList own_choices;
         for (int i = 0; i < choice_count; i++) {
@@ -3678,18 +3698,19 @@ void Room::assignGeneralsForPlayersOfYearBossMode(const QList<ServerPlayer *> &t
             removewill << choice;
         }
 
-        if (player->getRole() == "rebel")
-            foreach (ServerPlayer *p, getOtherPlayers(player))
-                if (p->getRole() == player->getRole())
-                    foreach (QString own_choice, own_choices)
-                    {
-                        LogMessage log;
-                        log.type = "#mate_choices";
-                        log.from = player;
-                        log.arg = own_choice;
-                        log.arg2 = QString::number(player->getSeat());
-                        sendLog(log, p);
-                    }
+        if (sclass == 1)
+            foreach (ServerPlayer *p, to_assign)
+                foreach (QString own_choice, own_choices)
+                {
+                    if (p == player)
+                        break;
+                    LogMessage log;
+                    log.type = "#mate_choices";
+                    log.from = player;
+                    log.arg = own_choice;
+                    log.arg2 = QString::number(player->getSeat());
+                    sendLog(log, p);
+                }
     }
 }
 
@@ -4234,17 +4255,26 @@ void Room::chooseGeneralsOfYearBossMode(QList<ServerPlayer *> players)
 {
     if (players.isEmpty()) players = m_players;
 
-    const QString rankrole[2] = {"loyalist", "rebel"};
+    QList<int> rankseat;
+    if (Config.value("year/Mode", "2018").toString() == "2018")
+        rankseat << 1 << 0 << 1 << 0 << 1 << 0;
+    else if (Config.value("year/Mode", "2018").toString() == "2019G")
+        rankseat << 1 << 1 << 3 << 0 << 2 << 2 << 0 << 3;
+    else
+        rankseat << 2 << 0 << 0 << 2 << 0 << 0;
+    const int rankclass[4] = {2, 3, 0, 1};
 
-    for (int i = 0; i < 2; i++)
+    for (int ii = 0; ii < 4; ii++)
     {
+        int i = rankclass[ii];
         QList<ServerPlayer *> to_assign;
 
         foreach (ServerPlayer *player, getAllPlayers())
-            if (player->getRole() == rankrole[i])
+            if (rankseat.at(player->getSeat() - 1) == i)
                 to_assign << player;
+        if (to_assign.empty()) continue;
 
-        assignGeneralsForPlayersOfYearBossMode(to_assign);
+        assignGeneralsForPlayersOfYearBossMode(to_assign, i);
 
         foreach (ServerPlayer *player, to_assign)
         {
@@ -4262,17 +4292,20 @@ void Room::chooseGeneralsOfYearBossMode(QList<ServerPlayer *> players)
             player->setGeneralName(generalName);
             broadcastProperty(player, "general", generalName);
         }
-        foreach (ServerPlayer *yearbossS, to_assign)
-        {
-            const QString kingdomsM[4] = {"wei", "shu", "wu", "qun"};
-            ServerPlayer *spno = yearbossS;
-            if (i)
-                foreach (ServerPlayer *sp, getAllPlayers(true))
-                    if (sp->getSeat()%6 == yearbossS->getSeat()%6 - 1)
-                        spno = sp;
-            for (int kingdomNum = 0; kingdomNum < 4; kingdomNum++)
-                if (spno->getMark(kingdomsM[kingdomNum] + "YearBoss"))
-                    setPlayerProperty(yearbossS, "kingdom", kingdomsM[kingdomNum]);
+
+        if (Config.value("year/Mode", "2018").toString() == "2018") {
+            foreach (ServerPlayer *yearbossS, to_assign)
+            {
+                const QString kingdomsM[4] = {"wei", "shu", "wu", "qun"};
+                ServerPlayer *spno = yearbossS;
+                if (i)
+                    foreach (ServerPlayer *sp, getAllPlayers(true))
+                        if (sp->getSeat()%6 == yearbossS->getSeat()%6 - 1)
+                            spno = sp;
+                for (int kingdomNum = 0; kingdomNum < 4; kingdomNum++)
+                    if (spno->getMark(kingdomsM[kingdomNum] + "YearBoss"))
+                        setPlayerProperty(yearbossS, "kingdom", kingdomsM[kingdomNum]);
+            }
         }
     }
     if (Config.Enable2ndGeneral) {
@@ -4318,7 +4351,7 @@ void Room::chooseGeneralsOfYearBossMode(QList<ServerPlayer *> players)
 
 void Room::run()
 {
-    Sanguosha->playSystemAudioEffect("prerun");
+    playSystemAudio("prerun");
     //thread->delay(4863);
 
     // initialize random seed for later use
@@ -4546,6 +4579,7 @@ void Room::swapSeat(ServerPlayer *a, ServerPlayer *b)
         } else {
             player->setSeat(0);
         }
+        player->setRealSeat(i + 1);
 
         broadcastProperty(player, "seat");
 
@@ -4572,6 +4606,11 @@ void Room::adjustSeats()
         else if (mode == "04_year")
         {
             if (Config.value("year/Mode", "2018").toString() == "2018" && m_players.at(i)->getRoleEnum() == Player::Rebel)
+                break;
+            if (Config.value("year/Mode", "2018").toString() == "2019Y" && m_players.at(i)->getRoleEnum() == Player::Loyalist)
+                break;
+            int itemp = (i + 1)%m_players.length();
+            if (Config.value("year/Mode", "2018").toString() == "2019G" && m_players.at(i)->getRoleEnum() == Player::Rebel && m_players.at(itemp)->getRoleEnum() == Player::Rebel)
                 break;
         }
         else if (m_players.at(i)->getRoleEnum() == Player::Lord)
@@ -5327,7 +5366,7 @@ void Room::startGame()
         else if (mode == "05_zhfd" && Config.value("zhfd/Mode", "NormalMode").toString() == "BossMode" && player->getRole() == "loyalist")
         {
             player->setMaxHp(player->getGeneralMaxHp() - 1);
-            Sanguosha->playSystemAudioEffect("injure");
+            playSystemAudio("injure");
             setEmotion(player, "damage");
         }
         else
@@ -5376,6 +5415,7 @@ void Room::startGame()
     }
 
     current = m_players.first();
+    normalcurrent = current;
 
     // initialize the place_map and owner_map;
     foreach(int card_id, *m_drawPile)
@@ -6195,6 +6235,22 @@ bool Room::broadcastSkillInvoke(const QString &skillName, const ServerPlayer *pl
 	return true;
 }
 
+void Room::broadcastSkillInvoke(const QString &skill_name, int type)
+{
+    const ServerPlayer *p = NULL;
+    broadcastSkillInvoke(skill_name, p, type);
+}
+
+void Room::broadcastSkillInvoke(const QString &skill_name, bool isMale, int type)
+{
+    JsonArray args;
+    args << QSanProtocol::S_GAME_EVENT_PLAY_EFFECT;
+    args << skill_name;
+    args << isMale;
+    args << type;
+    doBroadcastNotify(QSanProtocol::S_COMMAND_LOG_EVENT, args);
+}
+
 void Room::doLightbox(const QString &lightboxName, int duration, int pixelSize)
 {
     if (Config.AIDelay == 0) return;
@@ -6461,11 +6517,26 @@ void Room::setEmotion(ServerPlayer *target, const QString &emotion)
     doBroadcastNotify(S_COMMAND_SET_EMOTION, arg);
 }
 
-void Room::setFullEmotion(const QString &emotion)
+void Room::setFullEmotion(const QString &emotion, const int &dx, const int &dy)
 {
     JsonArray arg;
-    arg << (emotion.isEmpty() ? QString(".") : emotion);
+    arg << (emotion.isEmpty() ? QString(".") : emotion)
+        << QString::number(dx)
+        << QString::number(dy);
     doBroadcastNotify(S_COMMAND_SET_FULL_EMOTION, arg);
+}
+
+void Room::playRoomAudio(const QString &path, bool superpose)
+{
+    JsonArray arg;
+    arg << (path.isEmpty() ? QString(".") : path)
+        << QString::number(int(superpose));
+    doBroadcastNotify(S_COMMAND_PLAY_ROOM_AUDIO, arg);
+}
+
+void Room::playSystemAudio(const QString &audio, bool superpose)
+{
+    playRoomAudio(QString("audio/system/%1.ogg").arg(audio), superpose);
 }
 
 void Room::setCardEmotion(ServerPlayer *target, const Card *card)
@@ -8719,7 +8790,7 @@ QString Room::appearYearBoss(int difficulty)
     if (mode != "04_year" || Config.value("year/Mode", "2018").toString() != "2018")
         return NULL;
 
-    setFullEmotion("appearyearboss");
+    setFullEmotion("appearyearboss", -100, -197);
     isChanging = true;
     setTurn(0);
 
@@ -8753,7 +8824,7 @@ QString Room::appearYearBoss(int difficulty)
         }
     }
 
-    thread->delay(5000);
+    thread->delay(3000);
     revivePlayer(boss, false, false);
     switch (difficulty)
     {
@@ -8792,19 +8863,19 @@ QString Room::appearYearBoss(int difficulty)
     return NULL;
 }
 
-bool Room::getChangingSituation()
+bool Room::getChangingSituation() const
 {
     return isChanging;
 }
 
+void Room::setChangingSituation(bool sit)
+{
+    isChanging = sit;
+}
+
 void Room::doGanluRevive(ServerPlayer *player, ServerPlayer *lord, bool emotion)
 {
-    player->clearFlags();
-    player->clearHistory();
     player->throwAllCards();
-    player->throwAllMarks();
-
-    clearPlayerCardLimitation(player, false);
 
     setPlayerFlag(player, "-Global_Dying");
     if (emotion)
@@ -8819,4 +8890,62 @@ void Room::doGanluRevive(ServerPlayer *player, ServerPlayer *lord, bool emotion)
 
     if (lord)
         addPlayerMark(lord, "#ganlu", 1);
+}
+
+QString Room::appearNextYear()
+{
+    if (Config.value("year/Mode", "2018").toString() == "2019G")
+        return "loyalist";
+    if (getTag("YearTotalRound").isNull())
+        setTag("YearTotalRound", 1);
+    if (getTag("YearTotalRound").toInt() == Config.value("year/RoundNum", 1).toInt())
+        return "loyalist";
+    else
+        setTag("YearTotalRound", getTag("YearTotalRound").toInt() + 1);
+    isChanging = true;
+    QStringList used, all;
+    all << "boss19zishu" << "boss19chouniu" << "boss19yinhu" << "boss19maotu"
+        << "boss19chenlong" << "boss19sishe" << "boss19wuma" << "boss19weiyang"
+        << "boss19shenshou" << "boss19youji" << "boss19xugou" << "boss19haizhu";
+    if (!getTag("YearTotalUsed").isNull())
+        used = getTag("YearTotalUsed").toStringList();
+    foreach (ServerPlayer *l, getAllPlayers(true))
+        if (l->getRole() == "rebel")
+            used << l->getGeneralName() << l->getGeneral2Name();
+    setTag("YearTotalUsed", used);
+    foreach (ServerPlayer *sp, getAllPlayers(true))
+    {
+        //sp->bury();
+        if (sp->getRole() == "loyalist")
+        {
+            recover(sp, RecoverStruct(NULL, NULL, 2));
+            drawCards(sp, 2);
+            if (!sp->faceUp())
+                sp->turnOver();
+            if (sp->isChained())
+                setPlayerProperty(sp, "chained", false);
+        }
+        else
+        {
+            sp->bury();
+            revivePlayer(sp, false, false);
+            int index;
+            do
+                index = qrand()%12;
+            while (used.contains(all.at(index)));
+            changeHero(sp, all.at(index), true, true, false, false);
+            if (!sp->faceUp())
+                sp->turnOver();
+            if (sp->isChained())
+                setPlayerProperty(sp, "chained", false);
+            drawCards(sp, 4);
+            if (sp->getRealSeat() == m_players.length())
+                setCurrent(sp);
+        }
+    }
+    isChanging = false;
+
+    throw TurnBroken;
+
+    return NULL;
 }

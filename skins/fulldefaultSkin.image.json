@@ -253,6 +253,12 @@
 
 // card relevant
 "handCardBack": "image/system/card-back.png",
+"handCardBack1": "image/fullskin/dashboard/1/card-back.png",
+"handCardBack2": "image/fullskin/dashboard/2/card-back.png",
+"handCardBack3": "image/fullskin/dashboard/3/card-back.png",
+"handCardBack4": "image/fullskin/dashboard/4/card-back.png",
+"handCardBack5": "image/fullskin/dashboard/5/card-back.png",
+"handCardBack6": "image/fullskin/dashboard/6/card-back.png",
 "generalCardBack": "image/system/unknown.png",
 
 // equips

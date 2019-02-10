@@ -1096,6 +1096,8 @@ Indulgence::Indulgence(Suit suit, int number)
     judge.pattern = ".|heart";
     judge.good = true;
     judge.reason = objectName();
+
+    turn_skills << "yearyangshou" << "yearyinshou" << "yearxiongshou";
 }
 
 bool Indulgence::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const

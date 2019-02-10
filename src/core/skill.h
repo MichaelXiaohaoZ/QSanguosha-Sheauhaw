@@ -6,6 +6,7 @@ class Card;
 class ServerPlayer;
 class QDialog;
 class GuhuoBox;
+class GuhuoDialog;
 class SelectBox;
 
 #include "room.h"
@@ -37,7 +38,7 @@ public:
 
     virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const;
 	virtual int getEffectIndex(const ServerPlayer *player, const QString &prompt) const;
-    virtual QDialog *getDialog() const;
+    virtual GuhuoDialog *getDialog() const;
     virtual QString getSelectBox() const;
     virtual bool buttonEnabled(const QString &button_name = QString(), const QList<const Card *> &selected = QList<const Card *>(), const QList<const Player *> &targets = QList<const Player *>()) const;
     void initMediaSource();
@@ -89,12 +90,17 @@ public:
     {
         return guhuo_type;
     }
+    inline QString getGuhuoDialog() const
+    {
+        return guhuo_dialog_type;
+    }
 
 protected:
     QString response_pattern;
     bool response_or_use;
     QString expand_pile;
     QString guhuo_type;
+    QString guhuo_dialog_type;
 };
 
 class ZeroCardViewAsSkill : public ViewAsSkill

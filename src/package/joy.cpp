@@ -48,6 +48,8 @@ public:
             return false;
         if (move.from->objectName() != player->objectName())
             return false;
+        if (move.from->getPhase() == Player::NotActive)
+            return false;
         if (move.to_place == Player::PlaceTable || move.to_place == Player::DiscardPile) {
 
             QList<Card *> shits;

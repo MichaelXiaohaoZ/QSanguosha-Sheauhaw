@@ -403,7 +403,7 @@ public:
     static const char *S_SKIN_KEY_DASHBOARD_KINGDOM_COLOR_MASK;
     static const char *S_SKIN_KEY_VOTES_NUMBER;
     static const char *S_SKIN_KEY_SEAT_NUMBER;
-    static const char *S_SKIN_KEY_HAND_CARD_BACK;
+    static const char *S_SKIN_KEY_HAND_CARD_BACK[7];
     static const char *S_SKIN_KEY_HAND_CARD_SUIT;
     static const char *S_SKIN_KEY_JUDGE_CARD_ICON;
     static const char *S_SKIN_KEY_HAND_CARD_MAIN_PHOTO;

@@ -119,7 +119,7 @@ public:
     void setOuterGlowColor(const QColor &color);
     QColor getOuterGlowColor() const;
 
-    void setEmotion(const QString &emotion, bool permanent = false);
+    bool setEmotion(const QString &emotion, bool permanent = false);
     void hideEmotion();
 
 private slots:

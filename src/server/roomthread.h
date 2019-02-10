@@ -45,7 +45,6 @@ public:
     explicit RoomThread(Room *room);
     void constructTriggerTable();
     bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *target, QVariant &data);
-    bool triggerold(TriggerEvent triggerEvent, Room *room, ServerPlayer *target, QVariant &data);
     bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *target);
 
     void addPlayerSkills(ServerPlayer *player, bool invoke_game_start = false);

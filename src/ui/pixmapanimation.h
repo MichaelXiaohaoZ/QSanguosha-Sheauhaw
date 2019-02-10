@@ -18,11 +18,15 @@ public:
 
     void setPath(const QString &path);
     bool valid();
+    bool isUseful()
+    {
+        return is_useful;
+    }
 
     void start(bool permanent = true, int interval = 50);
     void stop();
 
-    static PixmapAnimation *GetPixmapAnimation(QGraphicsItem *parent, const QString & emotion);
+    static PixmapAnimation *GetPixmapAnimation(QGraphicsItem *parent, const QString & emotion, const int &delay = 0);
     static QPixmap GetFrameFromCache(const QString &filename);
     static int GetFrameCount(const QString &emotion);
 
@@ -40,6 +44,7 @@ private:
     QString path;
     QList<QPixmap> frames;
     int current, off_x, off_y;
+    bool is_useful = true;
 };
 
 #endif

@@ -153,7 +153,7 @@
     "extraSkillArea": [90, 70, 75, 35],
     "extraSkillFont": ["SimHei", [16, 16, 3], 0, [255, 255, 255, 255], 5, 20, [0, 0], [7, 50, 78, 255]],
     "extraSkillTextArea": [90, 70, 75, 35],
-    "seatIconRegion": [4, 1, 23, 16]
+    "seatIconRegion": [67, 183, 23, 16]
 },
 "dashboard":
 {

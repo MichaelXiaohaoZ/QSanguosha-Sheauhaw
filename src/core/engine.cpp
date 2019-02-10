@@ -940,7 +940,7 @@ SkillCard *Engine::cloneSkillCard(const QString &name) const
 #ifndef USE_BUILDBOT
 QString Engine::getVersionNumber() const
 {
-    return "20190128";
+    return "20190209";
 }
 #endif
 
@@ -1108,6 +1108,10 @@ int Engine::getPlayerCount(const QString &mode) const
         return 8;
     if (mode == "04_year" && Config.value("year/Mode", "2018").toString() == "2018")
         return 6;
+    if (mode == "04_year" && Config.value("year/Mode", "2018").toString() == "2019G")
+        return 8;
+    if (mode == "04_year" && Config.value("year/Mode", "2018").toString() == "2019Y")
+        return 6;
     if (modes.contains(mode) || isNormalGameMode(mode)) { // hidden pz settings?
         QRegExp rx("(\\d+)");
         int index = rx.indexIn(mode);
@@ -1134,6 +1138,10 @@ QString Engine::getRoles(const QString &mode) const
     } else if (mode == "04_year") {
         if (Config.value("year/Mode", "2018").toString() == "2018")
             return "FCFCFC";
+        if (Config.value("year/Mode", "2018").toString() == "2019G")
+            return "FFCFCCFC";
+        if (Config.value("year/Mode", "2018").toString() == "2019Y")
+            return "CFFCFF";
     } else if (mode == "05_zhfd") {
         if (Config.value("zhfd/Mode", "NormalMode").toString() == "BossMode")
             return "ZCFCFCFC";
@@ -1525,18 +1533,19 @@ QList<int> Engine::getRandomCards() const
     }
 
     if (Config.GameMode == "04_year")
+    {
         if (Config.value("year/Mode", "2018").toString() == "2018")
         {
             exclude_year_18 = true;
             exclude_disaters = false;
             extra_ban << Config.YearBossBanC["cards"];
         }
-        if (Config.value("year/Mode", "2018").toString() == "2019")
+        if (Config.value("year/Mode", "2018").toString().contains("2019"))
         {
             exclude_year_19 = true;
             exclude_disaters = false;
-            extra_ban << Config.YearBossBanC["cards"];
         }
+    }
 
     if (Config.GameMode == "06_swzs")
     {
@@ -1572,9 +1581,9 @@ QList<int> Engine::getRandomCards() const
             list << card->getId();
         else if (card->getPackage() == "DragonBoatCard" && exclude_dragonboat)
             list << card->getId();
-        else if (card->getPackage() == "YearBoss18Card" && exclude_year_18)
+        else if (card->getPackage() == "YearBoss2018Card" && exclude_year_18)
             list << card->getId();
-        else if (card->getPackage() == "YearBoss19Card" && exclude_year_19)
+        else if (card->getPackage() == "YearBoss2019Card" && exclude_year_19)
             list << card->getId();
         else if (card->getPackage() == "GodsReturnCard" && exclude_swzs)
             list << card->getId();

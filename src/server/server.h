@@ -153,6 +153,9 @@ private:
     QComboBox *official_zdyj_ComboBox;
     QComboBox *mode_choose_zhfd_ComboBox;
     QComboBox *mode_choose_year_ComboBox;
+    QCheckBox *year_using_year_skill_checkbox;
+    QCheckBox *year_using_uniform_kingdom_checkbox;
+    QSpinBox *year_yearmode_round_spinbox;
     QCheckBox *kof_using_extension_checkbox;
     QCheckBox *kof_card_extension_checkbox;
     QComboBox *role_choose_xmode_ComboBox;

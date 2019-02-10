@@ -40,7 +40,7 @@ int GameRule::getPriority(TriggerEvent) const
     return 0;
 }
 
-void GameRule::onPhaseProceed(ServerPlayer *player) const
+void GameRule:: onPhaseProceed(ServerPlayer *player) const
 {
     Room *room = player->getRoom();
     switch (player->getPhase()) {
@@ -168,9 +168,6 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                     }
                 }
             }
-            if (room->getMode() == "04_year" && Config.value("year/Mode", "2018").toString() == "2018")
-                foreach (ServerPlayer *sp, room->getAllPlayers())
-                    room->acquireSkill(sp, "#ganluyear");
             if (room->getMode() == "06_swzs") {
                 ServerPlayer *lord = room->getLord();
                 room->acquireSkill(lord, "#ganluswzs");
@@ -241,6 +238,59 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                     }
                 }
             }
+            if (room->getMode() == "04_year")
+            {
+                if (Config.value("year/Mode", "2018").toString() == "2019G")
+                {
+                    if (Config.value("year/YearSkillStart", false).toBool())
+                    {
+                        QStringList yearlist;
+                        yearlist << "yearzishu" << "yearchouniu" << "yearmaotu_19" << "yearchenlong_19" << "yearsishe" << "yearwuma_19" << "yearxugou";
+                        QList<int> randnums;
+                        foreach (ServerPlayer *sx, room->getAllPlayers())
+                            for (int i = 0; i < 7; i++)
+                                if (sx->hasSkill(yearlist.at(i)))
+                                    randnums << i;
+                        foreach (ServerPlayer *yearbossS, room->getAllPlayers())
+                            if (yearbossS->getRole() == "loyalist")
+                            {
+                                int skill;
+                                do skill = qrand()%7; while (randnums.contains(skill));
+                                randnums << skill;
+                                room->acquireSkill(yearbossS, yearlist.at(skill));
+                            }
+                    }
+                    foreach (ServerPlayer *sp, room->getAllPlayers())
+                        if (sp->getRole() == "rebel")
+                        {
+                            if (sp->getSeat() < 3)
+                            {
+                                room->acquireSkill(sp, "yearbuhuo");
+                                int addmax = 0;
+                                if (Config.GeneralLevel > 2)
+                                    addmax++;
+                                if (Config.GeneralLevel > 4)
+                                    addmax++;
+                                if (Config.GeneralLevel > 5)
+                                    addmax++;
+                                room->setPlayerProperty(sp, "maxhp", sp->getMaxHp() + addmax);
+                                room->setPlayerProperty(sp, "hp", sp->getHp() + addmax);
+                            }
+                            else
+                            {
+                                room->setPlayerProperty(sp, "maxhp", sp->getMaxHp() + 1);
+                                room->setPlayerProperty(sp, "hp", sp->getHp() + 1);
+                            }
+                        }
+                    foreach (ServerPlayer *sp, room->getAllPlayers())
+                        if (Config.value("year/UniformKingdom").toBool() && sp->getSeat() > 2)
+                            room->setPlayerProperty(sp, "kingdom", "qun");
+                }
+                if (Config.value("year/Mode", "2018").toString() == "2019Y")
+                    foreach (ServerPlayer *sp, room->getAllPlayers())
+                        if (Config.value("year/UniformKingdom").toBool())
+                            room->setPlayerProperty(sp, "kingdom", "qun");
+            }
             foreach (ServerPlayer *player, room->getPlayers()) {
                 if (player->getGeneral()->getKingdom() == "god" && player->getGeneralName() != "anjiang"
                     && !player->getGeneralName().startsWith("boss_") && room->getMode() != "06_swzs"
@@ -266,6 +316,15 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                     n = p->getMaxHp();
                 else
                     n = 4;
+                if (room->getMode() == "04_year" && Config.value("year/Mode", "2018").toString() == "2019G" && p->getSeat() < 3)
+                {
+                    if (Config.GeneralLevel > 1)
+                        n++;
+                    if (Config.GeneralLevel > 3)
+                        n++;
+                    if (Config.GeneralLevel > 5)
+                        n++;
+                }
                 QVariant data = n;
                 room->getThread()->trigger(DrawInitialCards, room, p, data);
                 n_list << data.toInt();
@@ -279,9 +338,9 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                 room->getThread()->trigger(AfterDrawInitialCards, room, p, _nlistati);
                 i++;
             }
-            Sanguosha->playSystemAudioEffect("startgame");
-            room->setFullEmotion("startgame");
-            room->getThread()->delay(3000);
+            room->playSystemAudio("startgame");
+            room->setFullEmotion("startgame", -7, 69);
+            room->getThread()->delay(1500);
         }
         return false;
     }
@@ -825,7 +884,8 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                 player->setFlags("Global_DebutFlag");
             room->doLightbox(QString("BossLevelA\\ %1 \\BossLevelB").arg(level + 1), 2000, 100);
             return false;
-        } else if (room->getMode() == "04_year" && Config.value("year/Mode", "2018").toString() == "2018" && player->getRole() == "rebel") {
+        } else if (room->getMode() == "04_year" && Config.value("year/Mode", "2018").toString() == "2018" &&
+                   player->getRole() == "rebel") {
             foreach (ServerPlayer *p, room->getAllPlayers())
                 if (p->getMark("isyearboss"))
                     return false;
@@ -1221,7 +1281,10 @@ void GameRule::rewardAndPunish(ServerPlayer *killer, ServerPlayer *victim) const
     }
     else if (room->getMode() == "04_year")
     {
-
+        if (Config.value("year/Mode", "2018").toString() == "2019G")
+            if (killer->getRole() == "rebel" && victim->getRole() == "loyalist")
+                if (!victim->getMark("buhuodead"))
+                    killer->drawCards(3);
     }
     else if (room->getMode() == "08_zdyj" && Config.value("zdyj/Rule", "2017").toString() == "2017" && victim->getMark("shown_loyalist"))
     {
@@ -1243,6 +1306,8 @@ QString GameRule::getWinner(ServerPlayer *victim) const
     Room *room = victim->getRoom();
     QString winner;
 
+    if (room->getChangingSituation())
+        return winner;
     if (room->getMode() == "06_3v3") {
         switch (victim->getRoleEnum()) {
         case Player::Lord: winner = "renegade+rebel"; break;
@@ -1266,24 +1331,42 @@ QString GameRule::getWinner(ServerPlayer *victim) const
         else if (!alive_roles.contains("rebel"))
             winner = "loyalist";
     } else if (room->getMode() == "08_dragonboat") {
-    } else if (room->getMode() == "04_year" && Config.value("year/Mode", "2018").toString() == "2018") {
-        foreach (ServerPlayer *sp, room->getAllPlayers(true))
-            if (sp->getMark("isyearboss"))
-                goto normalWinnerJudge;
-        if (room->getChangingSituation())
-            return winner;
-        QStringList alive_roles = room->aliveRoles(victim);
-        if (alive_roles.contains("rebel") && !alive_roles.contains("loyalist"))
-        {
-            if (room->getTurn() < 4)
-                return room->appearYearBoss(2);
+    } else if (room->getMode() == "04_year"){
+        if (Config.value("year/Mode", "2018").toString() == "2018") {
             foreach (ServerPlayer *sp, room->getAllPlayers(true))
-                if (sp->getRole() == "rebel" && (sp->isDead() || sp->getHp() < sp->getMaxHp() || sp->getMark("yearbossrevived")))
-                    return room->appearYearBoss(1);
-            return room->appearYearBoss(2);
+                if (sp->getMark("isyearboss"))
+                    goto normalWinnerJudge;
+            QStringList alive_roles = room->aliveRoles(victim);
+            if (alive_roles.contains("rebel") && !alive_roles.contains("loyalist"))
+            {
+                if (room->getTurn() < 4)
+                    return room->appearYearBoss(2);
+                foreach (ServerPlayer *sp, room->getAllPlayers(true))
+                    if (sp->getRole() == "rebel" && (sp->isDead() || sp->getHp() < sp->getMaxHp() || sp->getMark("yearbossrevived")))
+                        return room->appearYearBoss(1);
+                return room->appearYearBoss(2);
+            }
+            if (alive_roles.contains("loyalist") && !alive_roles.contains("rebel"))
+                return room->appearYearBoss(0);
         }
-        if (alive_roles.contains("loyalist") && !alive_roles.contains("rebel"))
-            return room->appearYearBoss(0);
+        else if (Config.value("year/Mode", "2018").toString().contains("2019"))
+        {
+            QStringList alive_roles = room->aliveRoles(victim);
+            switch (victim->getRoleEnum())
+            {
+            case Player::Loyalist:
+                foreach (ServerPlayer *sp, room->getOtherPlayers(victim))
+                    if (sp->getGeneralName().contains("boss_year_yang") || sp->getGeneral2Name().contains("boss_year_yang") ||
+                            sp->getGeneralName().contains("boss_year_yin") || sp->getGeneral2Name().contains("boss_year_yin"))
+                        return NULL;
+                winner = "rebel";
+                break;
+            case Player::Rebel:
+                if (!alive_roles.contains("rebel"))
+                    return room->appearNextYear();
+                break;
+            }
+        }
     } else if (Config.EnableHegemony) {
         bool has_anjiang = false, has_diff_kingdoms = false;
         QString init_kingdom;

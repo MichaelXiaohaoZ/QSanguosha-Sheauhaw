@@ -681,10 +681,9 @@ void Dashboard::showSeat()
         pma->setPos(region.x() + region.width() / 2, region.y() + region.height() / 2);
     }
     _paintPixmap(_m_seatItem, region,
-        _getPixmap(QSanRoomSkin::S_SKIN_KEY_SEAT_NUMBER, QString::number(m_player->getSeat())),
+        _getPixmap(QSanRoomSkin::S_SKIN_KEY_SEAT_NUMBER, QString::number(m_player->getRealSeat())),
         _m_rightFrame);
     //save the seat number for later use
-    m_player->setProperty("UI_Seat", m_player->getSeat());
     _m_seatItem->setZValue(1.1);
 }
 

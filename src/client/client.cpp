@@ -51,6 +51,7 @@ Client::Client(QObject *parent, const QString &filename)
     m_callbacks[S_COMMAND_MOVE_FOCUS] = &Client::moveFocus;
     m_callbacks[S_COMMAND_SET_EMOTION] = &Client::setEmotion;
     m_callbacks[S_COMMAND_SET_FULL_EMOTION] = &Client::setFullEmotion;
+    m_callbacks[S_COMMAND_PLAY_ROOM_AUDIO] = &Client::playRoomAudio;
     m_callbacks[S_COMMAND_INVOKE_SKILL] = &Client::skillInvoked;
     m_callbacks[S_COMMAND_SHOW_ALL_CARDS] = &Client::showAllCards;
     m_callbacks[S_COMMAND_SKILL_GONGXIN] = &Client::askForGongxin;
@@ -2238,12 +2239,26 @@ void Client::setEmotion(const QVariant &set_str)
 void Client::setFullEmotion(const QVariant &set_str)
 {
     JsonArray set = set_str.value<JsonArray>();
-    if (set.size() != 1) return;
-    if (!JsonUtils::isStringArray(set, 0, 0)) return;
+    if (set.size() != 3) return;
+    if (!JsonUtils::isStringArray(set, 0, 2)) return;
 
-    QString emotion = set[0].toString();
+    QString emotion = set[0].toString(),
+            dx = set[1].toString(),
+            dy = set[2].toString();
 
-    emit full_emotion_set(emotion);
+    emit full_emotion_set(emotion, dx.toInt(), dy.toInt());
+}
+
+void Client::playRoomAudio(const QVariant &set_str)
+{
+    JsonArray set = set_str.value<JsonArray>();
+    if (set.size() != 2) return;
+    if (!JsonUtils::isStringArray(set, 0, 1)) return;
+
+    QString path = set[0].toString(),
+            superpose = set[1].toString();
+
+    emit room_audio_play(path, superpose.toInt());
 }
 
 void Client::skillInvoked(const QVariant &arg)

@@ -39,6 +39,7 @@ Photo::Photo() : PlayerCardContainer()
     _m_mainFrame = NULL;
     m_player = NULL;
     _m_focusFrame = NULL;
+    _m_seatItem = NULL;
     _m_onlineStatusItem = NULL;
     _m_layout = &G_PHOTO_LAYOUT;
     _m_frameType = S_FRAME_NO_FRAME;
@@ -350,3 +351,12 @@ QGraphicsItem *Photo::getMouseClickReceiver()
     return this;
 }
 
+void Photo::showSeat()
+{
+    _paintPixmap(_m_seatItem, G_PHOTO_LAYOUT.m_seatIconRegion,
+        _getPixmap(QSanRoomSkin::S_SKIN_KEY_SEAT_NUMBER, QString::number(m_player->getRealSeat())),
+        _m_groupMain);
+    //save the seat number for later use
+    //_m_seatItem->setZValue(1.1);
+    _layUnder(_m_seatItem);
+}

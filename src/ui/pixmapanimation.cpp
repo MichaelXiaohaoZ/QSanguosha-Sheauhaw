@@ -30,6 +30,8 @@ void PixmapAnimation::setPath(const QString &path)
 
     int i = 0;
     QString pic_path = QString("%1%2%3").arg(path).arg(i++).arg(".png");
+    if (!QFile::exists(pic_path))
+        is_useful = false;
     do {
         frames << G_ROOM_SKIN.getPixmapFromFileName(pic_path, true);
         pic_path = QString("%1%2%3").arg(path).arg(i++).arg(".png");
@@ -73,7 +75,7 @@ void PixmapAnimation::preStart()
     this->startTimer(S_DEFAULT_INTERVAL);
 }
 
-PixmapAnimation *PixmapAnimation::GetPixmapAnimation(QGraphicsItem *parent, const QString &emotion)
+PixmapAnimation *PixmapAnimation::GetPixmapAnimation(QGraphicsItem *parent, const QString &emotion, const int &delay)
 {
     PixmapAnimation *pma = new PixmapAnimation();
     pma->setPath(QString("image/system/emotion/%1/").arg(emotion));
@@ -92,6 +94,10 @@ PixmapAnimation *PixmapAnimation::GetPixmapAnimation(QGraphicsItem *parent, cons
             pma->moveBy(0, -20);
         else if (emotion.contains("/spear"))
             pma->moveBy(-20, -20);
+        else if (emotion.contains("appear5"))
+            pma->moveBy(-8, -23);
+        else if (emotion.contains("appear4"))
+            pma->moveBy(-4, -10);
 
 		if (emotion != "destroy")
 			pma->moveBy((parent->boundingRect().width() - pma->boundingRect().width()) / 2,
@@ -99,11 +105,11 @@ PixmapAnimation *PixmapAnimation::GetPixmapAnimation(QGraphicsItem *parent, cons
 
         pma->setParentItem(parent);
         pma->setZValue(20002.0);
-        //if (emotion.contains("weapon")) {
-            //pma->hide();
-            //QTimer::singleShot(600, pma, SLOT(preStart()));
-        //} else
-            pma->startTimer(S_DEFAULT_INTERVAL);
+        if (delay > 0) {
+            pma->hide();
+            QTimer::singleShot(delay, pma, SLOT(preStart()));
+        } else
+        pma->startTimer(S_DEFAULT_INTERVAL);
 
         connect(pma, SIGNAL(finished()), pma, SLOT(deleteLater()));
         return pma;

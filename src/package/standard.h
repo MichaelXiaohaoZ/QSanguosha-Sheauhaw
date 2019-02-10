@@ -221,6 +221,7 @@ public:
 
 protected:
     JudgeStruct judge;
+    QStringList turn_skills = QStringList() << "yearshenyi";
 
 private:
     bool movable;

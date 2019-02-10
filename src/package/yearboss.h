@@ -45,7 +45,6 @@ class YearWeiyangCard : public SkillCard
 public:
     Q_INVOKABLE YearWeiyangCard();
 
-    bool targetFixed() const;
     void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
 };
 
@@ -109,6 +108,52 @@ class YearBoss19CardPackage : public Package
 
 public:
     YearBoss19CardPackage();
+};
+
+class YearNuyanCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE YearNuyanCard();
+
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+};
+
+class YearHuihunCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE YearHuihunCard();
+
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+};
+
+class YearBuhuoCard : public SkillCard
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE YearBuhuoCard();
+
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+};
+
+class FireCracker19 : public SingleTargetTrick
+{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE FireCracker19(Card::Suit suit, int number);
+
+    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+    virtual bool isAvailable(const Player *player) const;
+    virtual bool isCancelable(const CardEffectStruct &effect) const;
+    virtual bool targetsFeasible(const QList<const Player *> &targets, const Player *Self) const;
 };
 
 #endif // YEARBOSS

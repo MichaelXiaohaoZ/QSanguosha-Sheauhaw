@@ -1666,12 +1666,9 @@ public:
             room->broadcastSkillInvoke(objectName());
 
             //dengshizai->gainAnExtraTurn();
-            room->setCurrent(dengshizai);
-            RoomThread *roomthread = room->getThread();
-            roomthread->trigger(TurnStart, room, dengshizai);
 
+            dengshizai->gainAnImmediateTurn(false);
             dengshizai->turnOver();
-            room->setCurrent(player);
             LogMessage log;
             log.type = "$AppendSeparator";
             room->sendLog(log);

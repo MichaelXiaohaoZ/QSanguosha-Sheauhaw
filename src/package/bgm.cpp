@@ -944,8 +944,8 @@ bool YanxiaoCard::targetFilter(const QList<const Player *> &targets, const Playe
     if (!targets.isEmpty())
         return false;
 
-    if (to_select->containsTrick(objectName()))
-        return false;
+    //if (to_select->containsTrick(objectName()))
+        //return false;
 
     return true;
 }
@@ -989,12 +989,6 @@ public:
     {
         return target && target->getPhase() == Player::Judge && target->containsTrick("YanxiaoCard");
     }
-
-    /*
-        int getPriority(TriggerEvent) const{
-        return 3;
-        }
-        */
 
     bool onPhaseChange(ServerPlayer *target) const
     {

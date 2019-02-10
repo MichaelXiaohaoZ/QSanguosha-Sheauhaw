@@ -27,6 +27,7 @@
 #include "cardchoosebox.h"
 #include "pindianbox.h"
 #include "heroskincontainer.h"
+#include "guhuodialog.h"
 
 #include <QPropertyAnimation>
 #include <QParallelAnimationGroup>
@@ -177,7 +178,8 @@ RoomScene::RoomScene(QMainWindow *main_window)
     connect(ClientInstance, SIGNAL(gongxin(QList<int>, bool, QList<int>)), this, SLOT(doGongxin(QList<int>, bool, QList<int>)));
     connect(ClientInstance, SIGNAL(focus_moved(QStringList, QSanProtocol::Countdown)), this, SLOT(moveFocus(QStringList, QSanProtocol::Countdown)));
     connect(ClientInstance, SIGNAL(emotion_set(QString, QString)), this, SLOT(setEmotion(QString, QString)));
-    connect(ClientInstance, SIGNAL(full_emotion_set(QString)), this, SLOT(setFullEmotion(QString)));
+    connect(ClientInstance, SIGNAL(full_emotion_set(QString, int, int)), this, SLOT(setFullEmotion(QString, int, int)));
+    connect(ClientInstance, SIGNAL(room_audio_play(QString, bool)), this, SLOT(playRoomAudio(QString, bool)));
     connect(ClientInstance, SIGNAL(skill_invoked(QString, QString)), this, SLOT(showSkillInvocation(QString, QString)));
     connect(ClientInstance, SIGNAL(skill_acquired(const ClientPlayer *, QString)), this, SLOT(acquireSkill(const ClientPlayer *, QString)));
     connect(ClientInstance, SIGNAL(animated(int, QStringList)), this, SLOT(doAnimation(int, QStringList)));
@@ -1180,6 +1182,9 @@ void RoomScene::arrangeSeats(const QList<const ClientPlayer *> &seats)
     }
 
     dashboard->showSeat();
+
+    foreach (Photo *photo, photos)
+        photo->showSeat();
 }
 
 void RoomScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -2167,12 +2172,14 @@ void RoomScene::addSkillButton(const Skill *skill)
         connect(btn, (void (QSanSkillButton::*)())(&QSanSkillButton::skill_deactivated), dashboard, &Dashboard::skillButtonDeactivated);
         connect(btn, (void (QSanSkillButton::*)())(&QSanSkillButton::skill_deactivated), this, &RoomScene::onSkillDeactivated);
     }
-    QDialog *dialog = skill->getDialog();
+    GuhuoDialog *dialog = skill->getDialog();
     if (dialog && !m_replayControl) {
         dialog->setParent(main_window, Qt::Dialog);
-        connect(btn, (void (QSanSkillButton::*)())(&QSanSkillButton::skill_activated), dialog, &QDialog::exec); //???????????????????????
-        connect(btn, (void (QSanSkillButton::*)())(&QSanSkillButton::skill_deactivated), dialog, &QDialog::reject);
+        connect(btn, (void (QSanSkillButton::*)())(&QSanSkillButton::skill_activated), dialog, &GuhuoDialog::popup); //???????????????????????
+        connect(btn, (void (QSanSkillButton::*)())(&QSanSkillButton::skill_deactivated), dialog, &GuhuoDialog::reject);
         // design for guhuo and qice. now it is just for DIY.
+        disconnect(btn, (void (QSanSkillButton::*)())(&QSanSkillButton::skill_activated), this, &RoomScene::onSkillActivated);
+        connect(dialog, &GuhuoDialog::onButtonClick, this, &RoomScene::onSkillDialogActivated);
     }
 
     QString select_options = skill->getSelectBox();
@@ -2837,6 +2844,49 @@ void RoomScene::onSkillActivated()
         const Card *card = dashboard->pendingCard();
         if (card && card->targetFixed() && card->isAvailable(Self) && vs_skill->inherits("ZeroCardViewAsSkill"))
             useSelectedCard();
+    }
+}
+
+void RoomScene::onSkillDialogActivated()
+{
+    QSanSkillButton *button = qobject_cast<QSanSkillButton *>(sender());
+    const ViewAsSkill *skill = NULL;
+    if (button)
+        skill = button->getViewAsSkill();
+    else {
+        QDialog *dialog = qobject_cast<QDialog *>(sender());
+        if (dialog)
+            skill = Sanguosha->getViewAsSkill(dialog->objectName());
+    }
+
+    if (skill && !skill->inherits("FilterSkill")) {
+        dashboard->startPending(skill);
+        //ok_button->setEnabled(false);
+        cancel_button->setEnabled(true);
+
+        const Card *card = dashboard->pendingCard();
+        if (card && card->targetFixed() && card->isAvailable(Self)) {
+            bool instance_use = skill->inherits("ZeroCardViewAsSkill");
+            if (!instance_use) {
+                QList<const Card *> cards;
+                cards << Self->getHandcards() << Self->getEquips();
+
+                foreach (const QString &name, dashboard->getPileExpanded()) {
+                    QList<int> pile = Self->getPile(name);
+                    foreach(int id, pile)
+                        cards << Sanguosha->getCard(id);
+                }
+
+                foreach (const Card *c, cards) {
+                    if (skill->viewFilter(QList<const Card *>(), c))
+                        return;
+                }
+                instance_use = true;
+            }
+            if (instance_use)
+                useSelectedCard();
+        } else if (skill->inherits("OneCardViewAsSkill") && !skill->getDialog() && Config.EnableIntellectualSelection)
+            dashboard->selectOnlyCard(ClientInstance->getStatus() == Client::Playing);
     }
 }
 
@@ -4078,6 +4128,10 @@ void RoomScene::setEmotion(const QString &who, const QString &emotion)
                 pma->setPos(dashboard->boundingRect().topLeft());
                 pma->moveBy(dashboard->getAvatarArea().center().x(), dashboard->getAvatarArea().center().y());
                 pma->moveBy(-pma->boundingRect().width() / 2, -pma->boundingRect().height() / 2);
+                if (emotion == "appear5")
+                    pma->moveBy(-8, -23);
+                else if (emotion == "appear4")
+                    pma->moveBy(-4, -10);
             }
             //skill animation
             else if (emotion.startsWith("skill/")) {
@@ -4092,12 +4146,18 @@ void RoomScene::setEmotion(const QString &who, const QString &emotion)
     }
 }
 
-void RoomScene::setFullEmotion(const QString &emotion)
+void RoomScene::setFullEmotion(const QString &emotion, const int &dx, const int &dy)
 {
     PixmapAnimation *pma = PixmapAnimation::GetPixmapAnimation(m_fullemotion, QString("full/") + emotion);
-    pma->setPos(tableCenterPos());
+    pma->setPos(tableCenterPos().x(), height() / 2 - dashboard->boundingRect().height() / 2);
     pma->moveBy(-pma->boundingRect().width() / 2, -pma->boundingRect().height() / 2);
+    pma->moveBy(-dx, -dy);
     pma->setZValue(20002.0);
+}
+
+void RoomScene::playRoomAudio(const QString &path, bool superpose)
+{
+    Sanguosha->playAudioEffect(path, superpose);
 }
 
 void RoomScene::showSkillInvocation(const QString &who, const QString &skill_name)

@@ -176,6 +176,14 @@ bool TablePile::_addCardItems(QList<CardItem *> &card_items, const CardsMoveStru
 
     _m_mutex_pileCards.unlock();
     adjustCards();
+    if ((moveInfo.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_USE &&
+            moveInfo.reason.m_skillName.isEmpty() && Config.GeneralLevel > 4 && card_items.length() == 1)
+    {
+        CardItem *card_item = card_items.last();
+        if (card_item->getId() != Card::S_UNKNOWN_CARD_ID)
+            if (card_item->setEmotion(card_item->getCard()->objectName()))
+                card_item->setEmotion("edge");
+    }
     return false;
 }
 

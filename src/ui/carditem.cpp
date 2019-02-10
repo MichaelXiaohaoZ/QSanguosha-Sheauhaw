@@ -437,11 +437,11 @@ void CardItem::setFootnote(const QString &desc)
         (Qt::AlignmentFlag)((int)Qt::AlignHCenter | Qt::AlignBottom | Qt::TextWrapAnywhere), desc);
 }
 
-void CardItem::setEmotion(const QString &emotion, bool permanent)
+bool CardItem::setEmotion(const QString &emotion, bool permanent)
 {
     if (emotion == ".") {
         hideEmotion();
-        return;
+        return false;
     }
 
     QString path = QString("image/system/emotion/goldencard/%1.png").arg(emotion);
@@ -463,9 +463,11 @@ void CardItem::setEmotion(const QString &emotion, bool permanent)
             appear->setDuration(2000);
         }
         appear->start(QAbstractAnimation::DeleteWhenStopped);
+        return true;
     } else {
         QString wholemotion = QString("goldencard/") + emotion;
-        PixmapAnimation::GetPixmapAnimation(this, wholemotion);
+        PixmapAnimation *pma = PixmapAnimation::GetPixmapAnimation(this, wholemotion, 150);
+        return pma->isUseful();
     }
 }
 

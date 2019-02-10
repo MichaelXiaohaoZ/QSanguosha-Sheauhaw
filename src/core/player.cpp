@@ -119,9 +119,21 @@ int Player::getSeat() const
     return seat;
 }
 
+int Player::getRealSeat() const
+{
+    return rseat;
+}
+
 void Player::setSeat(int seat)
 {
+    if (this->seat == 0)
+        this->rseat = seat;
     this->seat = seat;
+}
+
+void Player::setRealSeat(int seat)
+{
+    rseat = seat;
 }
 
 bool Player::isAdjacentTo(const Player *another) const

@@ -308,7 +308,11 @@ void DelayedTrick::onEffect(const CardEffectStruct &effect) const
 
     JudgeStruct judge_struct = judge;
     judge_struct.who = effect.to;
-    judge_struct.good = effect.to->hasSkill("bossshenyi") ? !judge.good : judge.good;
+    bool turn_good = false;
+    foreach (QString str, turn_skills)
+        if (effect.to->hasSkill(str))
+            turn_good = true;
+    judge_struct.good = turn_good ? !judge.good : judge.good;
     room->judge(judge_struct);
 
     if (judge_struct.isBad()) {

@@ -580,14 +580,16 @@ void RoomThread::actionNormal(GameRule *game_rule)
             LogMessage log;
             log.type = "$AppendSeparator";
             room->sendLog(log);
-			if (room->getCurrent()->getSeat() == 1){
+            if (!room->getTag("RoundStart").isNull() && room->getTag("RoundStart").value<ServerPlayer *>() &&
+                    room->getCurrent() == room->getTag("RoundStart").value<ServerPlayer *>()){
                 room->incTurn();
                 QVariant data = room->getTurn();
 				foreach(ServerPlayer *p, room->getAllPlayers())
                     trigger(RoundStart, room, p, data);
                 room->setTag("TurnFirstRound", true);
+                room->setTag("RoundStart", QVariant::fromValue(NULL));
 			}
-			trigger(TurnStart, room, room->getCurrent());
+            trigger(TurnStart, room, room->getCurrent());
             if (room->isFinished()) break;
 			ServerPlayer *last_player = room->getCurrent();
 			while (!room->getTag("ExtraTurnList").isNull()) {
@@ -599,6 +601,7 @@ void RoomThread::actionNormal(GameRule *game_rule)
 					if (next){
 						room->setTag("ExtraTurn", true);
 						room->setCurrent(next);
+                        room->setNormalCurrent(last_player);
 						LogMessage log;
                         log.type = "$AppendSeparator";
                         room->sendLog(log);
@@ -610,7 +613,10 @@ void RoomThread::actionNormal(GameRule *game_rule)
                     room->removeTag("ExtraTurnList");
             }
             if (room->isFinished()) break;
-            room->setCurrent(last_player->getNextAlive());
+            ServerPlayer *nextp = last_player->getNextAlive();
+            if (last_player->getRealSeat() > nextp->getRealSeat())
+                room->setTag("RoundStart", QVariant::fromValue(nextp));
+            room->setCurrent(nextp);
         }
     }
     catch (TriggerEvent triggerEvent) {
@@ -624,15 +630,38 @@ void RoomThread::actionNormal(GameRule *game_rule)
 void RoomThread::_handleTurnBrokenNormal(GameRule *game_rule)
 {
     try {
-        ServerPlayer *player = room->getCurrent();
+        ServerPlayer *player = room->getCurrent(), *nplayer = room->getNormalCurrent();
         trigger(TurnBroken, room, player);
-        ServerPlayer *next = player->getNextAlive();
+        ServerPlayer *next = nplayer->getNextAlive();
         if (player->getPhase() != Player::NotActive) {
             QVariant data = QVariant();
             game_rule->trigger(EventPhaseEnd, room, player, data);
             player->changePhase(player->getPhase(), Player::NotActive);
         }
 
+        while (!room->getTag("ExtraTurnList").isNull()) {
+            QStringList extraTurnList = room->getTag("ExtraTurnList").toStringList();
+            if (!extraTurnList.isEmpty()) {
+                QString extraTurnPlayer = extraTurnList.takeFirst();
+                room->setTag("ExtraTurnList", QVariant::fromValue(extraTurnList));
+                ServerPlayer *next = room->findPlayer(extraTurnPlayer);
+                if (next){
+                    room->setTag("ExtraTurn", true);
+                    room->setCurrent(next);
+                    room->setNormalCurrent(nplayer);
+                    LogMessage log;
+                    log.type = "$AppendSeparator";
+                    room->sendLog(log);
+                    trigger(TurnStart, room, next);
+                    room->removeTag("ExtraTurn");
+                }
+                if (room->isFinished()) break;
+            } else
+                room->removeTag("ExtraTurnList");
+        }
+
+        if (nplayer->getRealSeat() > next->getRealSeat())
+            room->setTag("RoundStart", QVariant::fromValue(next));
         room->setCurrent(next);
         actionNormal(game_rule);
     }
@@ -709,6 +738,7 @@ void RoomThread::run()
                 room->setCurrent(first);
             }
 
+            room->setTag("RoundStart", QVariant::fromValue(room->getCurrent()));
             actionNormal(game_rule);
         }
     }
@@ -721,6 +751,7 @@ void RoomThread::run()
             if (first->getRole() != "renegade")
                 first = room->getPlayers().at(1);
             room->setCurrent(first);
+            room->setTag("RoundStart", QVariant::fromValue(first));
             actionNormal(game_rule);
         } else {
             Q_ASSERT(false);

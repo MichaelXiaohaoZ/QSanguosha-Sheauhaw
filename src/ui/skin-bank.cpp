@@ -32,21 +32,21 @@ const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD = "dashboard";
 const char *QSanRoomSkin::S_SKIN_KEY_BUTTON = "button-%1";
 const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM = "dashboardButtonSetButtom";
 const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG[7] =
-    { "dashboardButtonSetBg", "dashboardButtonSetBg1", "dashboardButtonSetBg2", "dashboardButtonSetBg3",
-                              "dashboardButtonSetBg4", "dashboardButtonSetBg5", "dashboardButtonSetBg6" };
+    {"dashboardButtonSetBg", "dashboardButtonSetBg1", "dashboardButtonSetBg2", "dashboardButtonSetBg3",
+                              "dashboardButtonSetBg4", "dashboardButtonSetBg5", "dashboardButtonSetBg6"};
 const char *QSanRoomSkin::S_SKIN_KEY_BUTTON_SKILL = "skill";
 
 // player container
 const char *QSanRoomSkin::S_SKIN_KEY_EQUIP_ICON = "%1Equip-%2";
 const char *QSanRoomSkin::S_SKIN_KEY_HORSE_ICON = "%1Horse-%2";
 const char *QSanRoomSkin::S_SKIN_KEY_MAINFRAME[7] =
-    { "%1MainFrame", "%1MainFrame1", "%1MainFrame2", "%1MainFrame3", "%1MainFrame4", "%1MainFrame5", "%1MainFrame6" };
+    {"%1MainFrame", "%1MainFrame1", "%1MainFrame2", "%1MainFrame3", "%1MainFrame4", "%1MainFrame5", "%1MainFrame6"};
 const char *QSanRoomSkin::S_SKIN_KEY_LEFTFRAME[7] =
-    { "%1LeftFrame", "%1LeftFrame1", "%1LeftFrame2", "%1LeftFrame3", "%1LeftFrame4", "%1LeftFrame5", "%1LeftFrame6" };
+    { "%1LeftFrame", "%1LeftFrame1", "%1LeftFrame2", "%1LeftFrame3", "%1LeftFrame4", "%1LeftFrame5", "%1LeftFrame6"};
 const char *QSanRoomSkin::S_SKIN_KEY_RIGHTFRAME[7] =
-    { "%1RightFrame", "%1RightFrame1", "%1RightFrame2", "%1RightFrame3", "%1RightFrame4", "%1RightFrame5", "%1RightFrame6" };
+    {"%1RightFrame", "%1RightFrame1", "%1RightFrame2", "%1RightFrame3", "%1RightFrame4", "%1RightFrame5", "%1RightFrame6"};
 const char *QSanRoomSkin::S_SKIN_KEY_MIDDLEFRAME[7] =
-    { "%1MiddleFrame", "%1MiddleFrame1", "%1MiddleFrame2", "%1MiddleFrame3", "%1MiddleFrame4", "%1MiddleFrame5", "%1MiddleFrame6" };
+    {"%1MiddleFrame", "%1MiddleFrame1", "%1MiddleFrame2", "%1MiddleFrame3", "%1MiddleFrame4", "%1MiddleFrame5", "%1MiddleFrame6"};
 const char *QSanRoomSkin::S_SKIN_KEY_FLOWERFRAME = "%1FlowerFrame";
 const char *QSanRoomSkin::S_SKIN_KEY_HANDCARDNUM = "%1HandCardNum-%2";
 const char *QSanRoomSkin::S_SKIN_KEY_FACETURNEDMASK = "%1FaceTurnedMask";
@@ -62,7 +62,8 @@ const char *QSanRoomSkin::S_SKIN_KEY_VOTES_NUMBER = "votesNum-%1";
 const char *QSanRoomSkin::S_SKIN_KEY_SEAT_NUMBER = "%1SeatNum-%2";
 const char *QSanRoomSkin::S_SKIN_KEY_SAVE_ME_ICON = "saveMe";
 const char *QSanRoomSkin::S_SKIN_KEY_ACTIONED_ICON = "playerActioned";
-const char *QSanRoomSkin::S_SKIN_KEY_HAND_CARD_BACK = "handCardBack";
+const char *QSanRoomSkin::S_SKIN_KEY_HAND_CARD_BACK[7] =
+    {"handCardBack", "handCardBack1", "handCardBack2", "handCardBack3", "handCardBack4", "handCardBack5", "handCardBack6"};
 const char *QSanRoomSkin::S_SKIN_KEY_HAND_CARD_SUIT = "handCardSuit-%1";
 const char *QSanRoomSkin::S_SKIN_KEY_JUDGE_CARD_ICON = "judgeCardIcon-%1";
 const char *QSanRoomSkin::S_SKIN_KEY_HAND_CARD_FRAME = "handCardFrame-%1";
@@ -335,7 +336,7 @@ bool QSanRoomSkin::generalHasSkin(const QString &general, const int skinId, cons
 
 QPixmap QSanRoomSkin::getCardMainPixmap(const QString &cardName) const
 {
-    if (cardName == "unknown") return getPixmap("handCardBack");
+    if (cardName == "unknown") return getPixmap(S_SKIN_KEY_HAND_CARD_BACK[Config.GeneralLevel]);
     QString name = cardName;
     if (ServerInfo.GameMode == "06_3v3" && name.startsWith("vs_"))
         name = name.mid(3);
