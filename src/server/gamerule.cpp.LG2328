@@ -1296,7 +1296,7 @@ void GameRule::rewardAndPunish(ServerPlayer *killer, ServerPlayer *victim) const
         if (victim->getRole() == "rebel")
             foreach (ServerPlayer *sp, room->getOtherPlayers(victim))
                 if (sp->getRole() == "rebel")
-                    if (room->askForChoice(sp, NULL, "draw+cancel") == "draw")
+                    if (room->askForChoice(sp, "game_rule", "draw+cancel") == "draw")
                         room->drawCards(sp, 2);
     }
     else if (room->getMode() == "08_zdyj" && Config.value("zdyj/Rule", "2017").toString() == "2017" && victim->getMark("shown_loyalist"))

@@ -18,7 +18,7 @@ Client *ClientInstance = NULL;
 Client::Client(QObject *parent, const QString &filename)
     : QObject(parent), m_isDiscardActionRefusable(true), m_lightUpSkillButton(false), m_bossLevel(0),
     status(NotActive), alive_count(1), swap_pile(0),
-    _m_roomState(true), choose_min_num(0), choose_max_num(0),
+    _m_roomState(true), choose_min_num(0), choose_max_num(0), _m_race(false),
     player_count(1) // Self is not included!! Be care!!!
 {
     ClientInstance = this;
@@ -696,6 +696,7 @@ void Client::arrangeSeats(const QVariant &seats_arr)
         Q_ASSERT(player != NULL);
 
         player->setSeat(i + 1);
+        player->setRealSeat(i + 1);
         players << player;
     }
 

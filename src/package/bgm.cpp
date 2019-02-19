@@ -953,7 +953,30 @@ bool YanxiaoCard::targetFilter(const QList<const Player *> &targets, const Playe
 void YanxiaoCard::onUse(Room *room, const CardUseStruct &card_use) const
 {
     room->broadcastSkillInvoke("yanxiao");
-    DelayedTrick::onUseYanxiao(room, card_use);
+    room->showCard(card_use.from, card_use.card->getSubcards());
+
+    CardUseStruct use = card_use;
+    WrappedCard *wrapped = Sanguosha->getWrappedCard(this->getEffectiveId());
+    use.card = wrapped;
+
+    QVariant data = QVariant::fromValue(use);
+    RoomThread *thread = room->getThread();
+    thread->trigger(PreCardUsed, room, use.from, data);
+    use = data.value<CardUseStruct>();
+
+    LogMessage log;
+    log.from = use.from;
+    log.to = use.to;
+    log.type = "#UseCard";
+    log.card_str = toString();
+    room->sendLog(log);
+
+    CardMoveReason reason(CardMoveReason::S_REASON_USE, use.from->objectName(), use.to.first()->objectName(), this->getSkillName(), QString());
+    room->moveCardTo(this, use.to.first(), Player::PlaceDelayedTrick, reason, true);
+
+    thread->trigger(CardUsed, room, use.from, data);
+    use = data.value<CardUseStruct>();
+    thread->trigger(CardFinished, room, use.from, data);
 }
 
 void YanxiaoCard::takeEffect(ServerPlayer *) const

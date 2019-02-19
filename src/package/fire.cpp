@@ -333,11 +333,6 @@ public:
             index++;
         }
         pangde->tag["Jink_" + use.card->toString()] = QVariant::fromValue(jink_list);
-        LogMessage rslog;
-        rslog.type = "#ruishoulog";
-        rslog.from = pangde;
-        rslog.arg = QString::number(0);
-        room->sendLog(rslog);
         return false;
     }
 };

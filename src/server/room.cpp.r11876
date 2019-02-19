@@ -3625,11 +3625,11 @@ void Room::assignGeneralsForPlayersOfYearBossMode(const QList<ServerPlayer *> &t
                 if (Config.value("year/Mode", "2018").toString() == "2018")
                     all_choices << "bosszishu" << "bosschouniu" << "bossyinhu" << "bossmaotu"
                                 << "bosschenlong" << "bosssishe" << "bosswuma" << "bossweiyang"
-                                << "bossshenhou" << "bossyouji" << "bossxugou" << "bosshaizhu";
+                                << "bossshenshou" << "bossyouji" << "bossxugou" << "bosshaizhu";
                 else if (Config.value("year/Mode", "2018").toString().contains("2019"))
                     all_choices << "boss19zishu" << "boss19chouniu" << "boss19yinhu" << "boss19maotu"
                                 << "boss19chenlong" << "boss19sishe" << "boss19wuma" << "boss19weiyang"
-                                << "boss19shenhou" << "boss19youji" << "boss19xugou" << "boss19haizhu";
+                                << "boss19shenshou" << "boss19youji" << "boss19xugou" << "boss19haizhu";
                 choice_count = qrand()%4 + 1;
                 break;
             case 1:
@@ -4546,7 +4546,7 @@ void Room::assignRoles()
             } else
                 notifyProperty(player, player, "role");
         }
-        else if (mode == "08_dragonboat" || mode == "06_swzs" || mode == "05_zhfd" || mode == "04_year" || mode == "03_1v2")
+        else if (mode == "08_dragonboat" || mode == "06_swzs" || mode == "05_zhfd" || mode == "04_year")
             broadcastProperty(player, "role", player->getRole());
         else {
             if ((role == "lord" && !ServerInfo.EnableHegemony)
@@ -5366,8 +5366,6 @@ void Room::startGame()
         Q_ASSERT(player->getGeneral());
         if ((mode == "06_swzs" || mode == "05_zhfd") && player->isLord())
             player->setMaxHp(player->getGeneralMaxHp() - 1);
-        if (mode == "03_1v2" && player->isLord())
-            player->setMaxHp(player->getGeneralMaxHp() + 1);
         else if (mode == "05_zhfd" && Config.value("zhfd/Mode", "NormalMode").toString() == "BossMode" && player->getRole() == "loyalist")
         {
             player->setMaxHp(player->getGeneralMaxHp() - 1);
@@ -8916,9 +8914,10 @@ QString Room::appearNextYear()
     QStringList used, all;
     all << "boss19zishu" << "boss19chouniu" << "boss19yinhu" << "boss19maotu"
         << "boss19chenlong" << "boss19sishe" << "boss19wuma" << "boss19weiyang"
-        << "boss19shenhou" << "boss19youji" << "boss19xugou" << "boss19haizhu";
+        << "boss19shenshou" << "boss19youji" << "boss19xugou" << "boss19haizhu";
     if (!getTag("YearTotalUsed").isNull())
-        used = getTag("YearTotalUsed").toStringList();
+        foreach (QString usehis, getTag("YearTotalUsed").toStringList())
+            used << usehis;
 
     foreach (ServerPlayer *sp, getAllPlayers(true))
         if (sp->getRole() == "rebel")
@@ -8947,18 +8946,24 @@ QString Room::appearNextYear()
         if (sp->getRole() == "rebel")
         {
             revivePlayer(sp, false, false);
+            thread->delay(5000);
             qShuffle(all);
+            thread->delay(5000);
             QString gname = all.takeFirst();
+            thread->delay(5000);
             used << gname;
-            changeHero(sp, gname, true, false, false, false);
+            thread->delay(5000);
+            changeHero(sp, gname, true, true, false, false);
+            thread->delay(5000);
             if (Config.value("year/UniformKingdom").toBool())
                 setPlayerProperty(sp, "kingdom", "qun");
-            if (gname == "boss19chouniu")
-                setPlayerProperty(sp, "hp", 1);
+            thread->delay(5000);
             if (!sp->faceUp())
                 sp->turnOver();
+            thread->delay(5000);
             if (sp->isChained())
                 setPlayerProperty(sp, "chained", false);
+            thread->delay(5000);
         }
 
     foreach (ServerPlayer *sp, getAllPlayers(true))

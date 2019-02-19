@@ -287,7 +287,7 @@ private:
     QString role;
     bool role_shown;
     QString state;
-    int seat = 0, rseat = 0;
+    int seat, rseat;
     bool alive;
 
     Phase phase;

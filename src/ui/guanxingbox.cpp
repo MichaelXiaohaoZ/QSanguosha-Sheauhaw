@@ -86,7 +86,7 @@ void GuanxingBox::doGuanxing(const QList<int> &cardIds, bool up_only)
         cardItem->setOuterGlowEffectEnabled(true);
         cardItem->setPos(25, 45);
         cardItem->setHomePos(pos);
-        cardItem->goBack(true, true, CardItem::Normal, 400);
+        cardItem->goBack(true, true, -1, 400);
     }
 }
 
@@ -231,7 +231,7 @@ void GuanxingBox::adjust()
             pos.setY(45 + card_height + cardInterval);
         }
         upItems.at(i)->setHomePos(pos);
-        upItems.at(i)->goBack(true, true, CardItem::Normal, 400);
+        upItems.at(i)->goBack(true, true, -1, 400);
     }
 
     for (int i = 0; i < downItems.length(); i++) {
@@ -248,7 +248,7 @@ void GuanxingBox::adjust()
             pos.setY(45 + card_height * 3 + cardInterval * 3);
         }
         downItems.at(i)->setHomePos(pos);
-        downItems.at(i)->goBack(true, true, CardItem::Normal, 400);
+        downItems.at(i)->goBack(true, true, -1, 400);
     }
 }
 

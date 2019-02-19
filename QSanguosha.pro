@@ -151,7 +151,6 @@ SOURCES += \
     src/package/godsreturn.cpp \
     src/package/attackdong.cpp \
     src/package/yearboss.cpp \
-    src/package/dialogtest.cpp \
     src/ui/guhuodialog.cpp
 
 HEADERS += \
@@ -296,7 +295,6 @@ HEADERS += \
     src/package/godsreturn.h \
     src/package/attackdong.h \
     src/package/yearboss.h \
-    src/package/dialogtest.h \
     src/ui/guhuodialog.h
 
 FORMS += \

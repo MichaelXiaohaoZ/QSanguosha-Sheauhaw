@@ -215,16 +215,6 @@ public:
         return !player->hasFlag("YinhuDying");
     }
 
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const
-    {
-        return false;
-    }
-
-    virtual bool isEnabledAtNullification(const ServerPlayer *player) const
-    {
-        return false;
-    }
-
     virtual bool viewFilter(const Card *to_select) const
     {
         return !Self->isJilei(to_select) && !Self->hasFlag("YinhuUsed"+to_select->getType());
@@ -396,7 +386,7 @@ public:
         DeathStruct death = data.value<DeathStruct>();
         if (player->hasSkill(objectName()) && death.who == player && death.damage && death.damage->from)
         {
-            foreach (const Skill* askill, death.damage->from->getSkillList())
+            foreach (const Skill* askill, death.damage->from->getSkillList(false, false))
                 if (death.damage->from->getMark("chuanchenged" + askill->objectName()))
                 {
                     room->detachSkillFromPlayer(death.damage->from, askill->objectName());
@@ -405,7 +395,7 @@ public:
             room->broadcastSkillInvoke(objectName());
             room->sendCompulsoryTriggerLog(player, objectName());
             room->doAnimate(QSanProtocol::S_ANIMATE_INDICATE, player->objectName(), death.damage->from->objectName());
-            foreach (const Skill* askill, death.damage->to->getSkillList())
+            foreach (const Skill* askill, death.damage->to->getSkillList(false, false))
                 if (!death.damage->from->getMark("chuanchenged" + askill->objectName()) && !askill->getInheritSkill().empty())
                     foreach (QString inherit_skill, askill->getInheritSkill())
                     {
@@ -545,35 +535,36 @@ class YearShenhou : public TriggerSkill
 public:
     YearShenhou() : TriggerSkill("yearshenhou")
     {
-        events << TargetConfirmed;
+        events << SlashEffected;
         frequency = Frequent;
         inherit_skills << objectName();
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
     {
-        CardUseStruct use = data.value<CardUseStruct>();
-        if (use.card && use.card->isKindOf("Slash"))
-            if (room->askForSkillInvoke(player, objectName()))
+        SlashEffectStruct effect = data.value<SlashEffectStruct>();
+        if (room->askForSkillInvoke(player, objectName()))
+        {
+            room->broadcastSkillInvoke(objectName(), player);
+            room->sendCompulsoryTriggerLog(player, objectName());
+            JudgeStruct judge;
+            judge.pattern = ".|red";
+            judge.good = true;
+            judge.reason = objectName();
+            judge.who = player;
+            room->judge(judge);
+            if (judge.isGood())
             {
-                room->broadcastSkillInvoke(objectName(), player);
                 room->sendCompulsoryTriggerLog(player, objectName());
-                JudgeStruct judge;
-                judge.pattern = ".|red";
-                judge.good = true;
-                judge.reason = objectName();
-                judge.who = player;
-                room->judge(judge);
-                if (judge.isGood())
-                {
-                    room->sendCompulsoryTriggerLog(player, objectName());
-                    LogMessage log;
-                    log.type = "#shenhoueffectlog";
-                    log.from = player;
-                    room->sendLog(log);
-                    return true;
-                }
+                LogMessage log;
+                log.type = "#shenhoueffectlog";
+                log.from = player;
+                room->sendLog(log);
+                effect.to->setFlags("Global_NonSkillNullify");
+
+                return true;
             }
+        }
         return false;
     }
 };
@@ -625,6 +616,8 @@ public:
                 log.arg = objectName();
                 log.arg2 = effect.slash->objectName();
                 room->sendLog(log);
+
+                effect.to->setFlags("Global_NonSkillNullify");
 
                 return true;
             }
@@ -1366,8 +1359,8 @@ public:
     virtual int getDrawNum(ServerPlayer *player, int n) const
     {
         Room *room = player->getRoom();
-        room->broadcastSkillInvoke(objectName());
-        room->sendCompulsoryTriggerLog(player, objectName());
+        room->broadcastSkillInvoke("yearjinzhu");
+        room->sendCompulsoryTriggerLog(player, "yearjinzhu");
         return n + 1;
     }
 };
@@ -1537,21 +1530,6 @@ public:
     virtual bool isEnabledAtPlay(const Player *player) const
     {
         return !player->getMark("#yearnuyan");
-    }
-
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const
-    {
-        return false;
-    }
-
-    virtual bool isEnabledAtNullification(const ServerPlayer *player) const
-    {
-        return false;
-    }
-
-    virtual bool viewFilter(const Card *to_select) const
-    {
-        return !Self->isJilei(to_select);
     }
 
     virtual const Card *viewAs(const Card *originalCard) const
@@ -1742,21 +1720,6 @@ public:
     virtual bool isEnabledAtPlay(const Player *player) const
     {
         return !player->hasFlag("yearhuihun");
-    }
-
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const
-    {
-        return false;
-    }
-
-    virtual bool isEnabledAtNullification(const ServerPlayer *player) const
-    {
-        return false;
-    }
-
-    virtual bool viewFilter(const Card *to_select) const
-    {
-        return !Self->isJilei(to_select);
     }
 
     virtual const Card *viewAs(const Card *originalCard) const
@@ -2104,16 +2067,6 @@ public:
     virtual bool isEnabledAtPlay(const Player *player) const
     {
         return !player->hasFlag("YinhuDying");
-    }
-
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const
-    {
-        return false;
-    }
-
-    virtual bool isEnabledAtNullification(const ServerPlayer *player) const
-    {
-        return false;
     }
 
     virtual bool viewFilter(const Card *to_select) const

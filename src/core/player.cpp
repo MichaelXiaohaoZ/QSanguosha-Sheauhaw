@@ -7,7 +7,7 @@
 
 Player::Player(QObject *parent)
     : QObject(parent), owner(false), general(NULL), general2(NULL), headSkinId(0), deputySkinId(0),
-    m_gender(General::Sexless), hp(-1), max_hp(-1), state("online"), seat(0), alive(true),
+    m_gender(General::Sexless), hp(-1), max_hp(-1), state("online"), seat(0), rseat(0), alive(true),
     phase(NotActive),
     weapon(NULL), armor(NULL), defensive_horse(NULL), offensive_horse(NULL), treasure(NULL),
     face_up(true), chained(false),
@@ -126,8 +126,6 @@ int Player::getRealSeat() const
 
 void Player::setSeat(int seat)
 {
-    if (this->seat == 0)
-        this->rseat = seat;
     this->seat = seat;
 }
 

@@ -125,7 +125,7 @@ void GenericCardContainer::_playMoveCardsAnimation(QList<CardItem *> &cards, boo
     foreach (CardItem *card_item, cards) {
         if (destroyCards)
             connect(card_item, SIGNAL(movement_animation_finished()), this, SLOT(_destroyCard()));
-        animation->addAnimation(card_item->getGoBackAnimation(true, CardItem::Normal, smoothTransition, duration));
+        animation->addAnimation(card_item->getGoBackAnimation(true, -1, smoothTransition, duration));
     }
 
     connect(animation, SIGNAL(finished()), this, SLOT(_doUpdate()));

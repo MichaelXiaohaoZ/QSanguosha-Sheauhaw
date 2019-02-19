@@ -4608,7 +4608,7 @@ void RoomScene::takeGeneral(const QString &who, const QString &name, const QStri
     x = x + G_COMMON_LAYOUT.m_cardNormalWidth / 2;
     y = y + G_COMMON_LAYOUT.m_cardNormalHeight / 2;
     general_item->setHomePos(QPointF(x, y));
-    general_item->goBack(true, true, CardItem::Normal, 400);
+    general_item->goBack(true, true, -1, 400);
 
     if (((ServerInfo.GameMode == "06_3v3" && Self->getRole() != "lord" && Self->getRole() != "renegade")
         || (ServerInfo.GameMode == "02_1v1" && rule == "2013"))
@@ -4777,7 +4777,7 @@ void RoomScene::toggleArrange()
         QPointF pos = arrange_rects.at(i)->pos();
         CardItem *item = arrange_items.at(i);
         item->setHomePos(pos);
-        item->goBack(true, true, CardItem::Normal, 400);
+        item->goBack(true, true, -1, 400);
     }
 
     while (arrange_items.length() > 3) {
@@ -4795,7 +4795,7 @@ void RoomScene::toggleArrange()
             60 + G_COMMON_LAYOUT.m_cardNormalHeight / 2 + 3 * 120);
         CardItem *item = down_generals.at(i);
         item->setHomePos(pos);
-        item->goBack(true, true, CardItem::Normal, 400);
+        item->goBack(true, true, -1, 400);
     }
 }
 

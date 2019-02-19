@@ -419,7 +419,7 @@ void ChooseGeneralBox::chooseGeneral(const QStringList &_generals, bool view_onl
         if (!single_result && !view_only)
             lord_item->setData(S_DATA_INITIAL_HOME_POS, pos);
         lord_item->setHomePos(pos);
-        lord_item->goBack(true, true, CardItem::Normal, 400);
+        lord_item->goBack(true, true, -1, 400);
 	}
 
     for (int i = 0; i < items.length(); ++i) {
@@ -444,7 +444,7 @@ void ChooseGeneralBox::chooseGeneral(const QStringList &_generals, bool view_onl
         if (!single_result && !view_only)
             card_item->setData(S_DATA_INITIAL_HOME_POS, pos);
         card_item->setHomePos(pos);
-        card_item->goBack(true, true, CardItem::Normal, 400);
+        card_item->goBack(true, true, -1, 400);
 		if (single_result)
             connect(card_item, SIGNAL(clicked()), this, SLOT(reply()));
 		card_item->setExpandType(GeneralCardItem::ExpandNone);
@@ -495,7 +495,7 @@ void ChooseGeneralBox::_adjust()
         selected.removeOne(item);
         items << item;
         item->setHomePos(item->data(S_DATA_INITIAL_HOME_POS).toPointF());
-        item->goBack(true, true, CardItem::Normal, 400);
+        item->goBack(true, true, -1, 400);
         //the item is on the way
     } else if (selected.length() == 2
         && ((!Sanguosha->getGeneral(selected.first()->objectName())->isLord()
@@ -525,12 +525,12 @@ void ChooseGeneralBox::adjustItems()
         selected.first()->setHomePos(QPointF(boundingRect().center().x()
             - card_to_center_line - card_width / 2 - 2,
             dest_seat_y));
-        selected.first()->goBack(true, true, CardItem::Normal, 400);
+        selected.first()->goBack(true, true, -1, 400);
         if (selected.length() == 2) {
             selected.last()->setHomePos(QPointF(boundingRect().center().x()
                 + card_to_center_line + card_width / 2
                 - 1, dest_seat_y));
-            selected.last()->goBack(true, true, CardItem::Normal, 400);
+            selected.last()->goBack(true, true, -1, 400);
         }
     }
 
@@ -694,7 +694,7 @@ void ChooseGeneralBox::_onItemClicked()
         selected.removeOne(item);
         items << item;
         item->setHomePos(item->data(S_DATA_INITIAL_HOME_POS).toPointF());
-        item->goBack(true, true, CardItem::Normal, 400);
+        item->goBack(true, true, -1, 400);
     } else if (items.contains(item)) {
         if (selected.length() > 1) return;
         items.removeOne(item);

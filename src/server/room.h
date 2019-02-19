@@ -448,6 +448,7 @@ public:
     void setChangingSituation(bool sit);
     void doGanluRevive(ServerPlayer *player, ServerPlayer *recorder = NULL, bool emotion = true);
     QString appearNextYear();
+    void breakAndNewTurn(ServerPlayer *player);
 
 protected:
     virtual void run();
@@ -644,7 +645,7 @@ private:
 	static bool isSkillValidForPlayer(const ServerPlayer *player, const Skill *skill);
     int m_turn;
 
-    bool isChanging = false;
+    bool isChanging;
 
 
 private slots:

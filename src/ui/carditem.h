@@ -42,9 +42,9 @@ public:
     // For move card animation
     void setHomePos(QPointF home_pos);
     QPointF homePos() const;
-    QAbstractAnimation *getGoBackAnimation(bool doFadeEffect, AnimationType animation_type = Normal, bool smoothTransition = false,
+    QAbstractAnimation *getGoBackAnimation(bool doFadeEffect, int animation_type = -1, bool smoothTransition = false,
         int duration = Config.S_MOVE_CARD_ANIMATION_DURATION);
-    void goBack(bool playAnimation, bool doFade = true, AnimationType animation_type = Normal, int duration = Config.S_MOVE_CARD_ANIMATION_DURATION);
+    void goBack(bool playAnimation, bool doFade = true, int animation_type = -1, int duration = Config.S_MOVE_CARD_ANIMATION_DURATION);
     inline QAbstractAnimation *getCurrentAnimation(bool)
     {
         return m_currentAnimation;

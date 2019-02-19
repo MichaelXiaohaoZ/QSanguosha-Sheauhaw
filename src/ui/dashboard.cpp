@@ -355,14 +355,14 @@ bool Dashboard::_addCardItems(QList<CardItem *> &card_items, const CardsMoveStru
     else if (place == Player::PlaceHand)
         addHandCards(card_items);
 
-    CardItem::AnimationType animation_type = CardItem::Normal;
+    int animation_type = -1;
 
     if (place == Player::PlaceHand) {
         if (from_place == Player::DrawPile || from_place == Player::DrawPileBottom || from_place == Player::DiscardPile
                 || from_place == Player::PlaceUnknown || from_place == Player::PlaceWuGu)
-            animation_type = CardItem::FromRight;
+            animation_type = width() - _m_rightFrame->boundingRect().width() - _m_leftFrame->boundingRect().width();
         else if (from_place == Player::PlaceSpecial && moveInfo.from == moveInfo.to)
-            animation_type = CardItem::FromCenter;
+            animation_type = (width() - _m_rightFrame->boundingRect().width() - _m_leftFrame->boundingRect().width()) / 2;
     }
     if (place == Player::PlaceSpecial) {//just for huashen
         QPointF center = mapFromItem(_getDeathIconParent(), _getDeathIconParent()->boundingRect().center());
@@ -907,14 +907,14 @@ void Dashboard::adjustCards(bool playAnimation)
 {
     _adjustCards();
     foreach(CardItem *card, m_handCards)
-        card->goBack(playAnimation, true, CardItem::Normal, 500);
+        card->goBack(playAnimation, true, -1, 500);
 }
 
-void Dashboard::adjustCards(QList<CardItem *> &cards, bool playAnimation, CardItem::AnimationType animation_type)
+void Dashboard::adjustCards(QList<CardItem *> &cards, bool playAnimation, int animation_type)
 {
     _adjustCards();
 	foreach(CardItem *card, m_handCards)
-        card->goBack(playAnimation, true, cards.contains(card) ? animation_type : CardItem::Normal, 500);
+        card->goBack(playAnimation, true, cards.contains(card) ? animation_type : -1, 500);
 }
 
 void Dashboard::_adjustCards()

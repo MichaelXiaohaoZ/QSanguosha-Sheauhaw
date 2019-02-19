@@ -89,7 +89,7 @@ void TablePile::_fadeOutCardsLocked(const QList<CardItem *> &cards)
         toRemove->setHomeOpacity(0.0);
         toRemove->setHomePos(QPointF(toRemove->homePos().x(), toRemove->homePos().y()));
         toRemove->deleteLater();
-        group->addAnimation(toRemove->getGoBackAnimation(true, CardItem::Normal, false, 1000));
+        group->addAnimation(toRemove->getGoBackAnimation(true, -1, false, 1000));
     }
     group->start(QAbstractAnimation::DeleteWhenStopped);
 }
@@ -193,7 +193,7 @@ void TablePile::adjustCards()
     _disperseCards(m_visibleCards, m_cardsDisplayRegion, Qt::AlignCenter, true, true);
     QParallelAnimationGroup *animation = new QParallelAnimationGroup;
     foreach(CardItem *card_item, m_visibleCards)
-        animation->addAnimation(card_item->getGoBackAnimation(true, CardItem::Normal, true, 500));
+        animation->addAnimation(card_item->getGoBackAnimation(true, -1, true, 500));
     connect(animation, SIGNAL(finished()), this, SLOT(onAnimationFinished()));
     animation->start();
 }

@@ -1661,7 +1661,7 @@ StandardmsPackage::StandardmsPackage()
     addMetaObject<LesbianLianliSlashCard>();
 
     skills << new LesbianLijian << new LesbianJieyin << new LesbianJiaojin
-           << new LesbianYanyu << new LesbianFuzhu << new LesbianLihun
+           << new LesbianYanyu << new LesbianFuzhu << new LesbianLihun << new NosLesbianLijian
            << new LesbianXingwu << new LesbianLuoyan << new LesbianLianli
            << new LesbianLianliClear << new LesbianLianliJink << new LesbianLianliSlash
            << new LesbianLianliSlashViewAsSkill << new LesbianTongxin << new LesbianFuhan;

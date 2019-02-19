@@ -120,7 +120,7 @@ void CardChooseBox::doCardChoose(const QList<int> &upcards, const QList<int> &do
         cardItem->setOuterGlowEffectEnabled(true);
         cardItem->setPos(45 + up_app1, 45);
         cardItem->setHomePos(pos);
-        cardItem->goBack(true, true, CardItem::Normal, 400);
+        cardItem->goBack(true, true, -1, 400);
     }
 
     for (int i = 0; i < downItems.length(); i++) {
@@ -141,7 +141,7 @@ void CardChooseBox::doCardChoose(const QList<int> &upcards, const QList<int> &do
         cardItem->setOuterGlowEffectEnabled(true);
         cardItem->setPos(45 + down_app1, 45 + (cardHeight + cardInterval) * (isOneRow(true) ? 1 : 2));
         cardItem->setHomePos(pos);
-        cardItem->goBack(true, true, CardItem::Normal, 400);
+        cardItem->goBack(true, true, -1, 400);
     }
     if (this->moverestricted && !noneoperator) {
         foreach (CardItem *card, upItems)
@@ -374,7 +374,7 @@ void CardChooseBox::adjust()
             pos.setY(45 + card_height + cardInterval);
         }
         upItems.at(i)->setHomePos(pos);
-        upItems.at(i)->goBack(true, true, CardItem::Normal, 400);
+        upItems.at(i)->goBack(true, true, -1, 400);
 
         if (moverestricted && !noneoperator) {
             QList<int> down_cards;
@@ -395,7 +395,7 @@ void CardChooseBox::adjust()
             pos.setY(45 + card_height * 3 + cardInterval * 3);
         }
         downItems.at(i)->setHomePos(pos);
-        downItems.at(i)->goBack(true, true, CardItem::Normal, 400);
+        downItems.at(i)->goBack(true, true, -1, 400);
     }
 }
 

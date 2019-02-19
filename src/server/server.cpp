@@ -35,7 +35,7 @@
 
 using namespace QSanProtocol;
 
-const int lrSp = 13;
+const int lrSp = 14;
 
 static QLayout *HLay(QWidget *left, QWidget *right)
 {

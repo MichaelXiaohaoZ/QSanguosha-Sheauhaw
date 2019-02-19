@@ -154,7 +154,7 @@ QPointF CardItem::homePos() const
     return home_pos;
 }
 
-void CardItem::goBack(bool playAnimation, bool doFade, AnimationType animation_type, int duration)
+void CardItem::goBack(bool playAnimation, bool doFade, int animation_type, int duration)
 {
     if (playAnimation) {
         getGoBackAnimation(doFade, animation_type, true, duration);
@@ -172,7 +172,7 @@ void CardItem::goBack(bool playAnimation, bool doFade, AnimationType animation_t
     }
 }
 
-QAbstractAnimation *CardItem::getGoBackAnimation(bool doFade, AnimationType animation_type, bool smoothTransition, int duration)
+QAbstractAnimation *CardItem::getGoBackAnimation(bool doFade, int animation_type, bool smoothTransition, int duration)
 {
     m_animationMutex.lock();
     if (m_currentAnimation != NULL) {
@@ -182,14 +182,9 @@ QAbstractAnimation *CardItem::getGoBackAnimation(bool doFade, AnimationType anim
     }
     QPropertyAnimation *goback = new QPropertyAnimation(this, "pos");
 
-    if (animation_type != Normal){
-		QPointF newPos = home_pos;
-		switch (animation_type) {
-        case FromRight: newPos.setX(1060); break;
-        case FromCenter: newPos.setX(600); break;
-	    default:
-			break;
-        }
+    if (animation_type != -1){
+        QPointF newPos = home_pos;
+        newPos.setX(animation_type);
 		goback->setStartValue(newPos);
 	}
 

@@ -1385,6 +1385,72 @@ public:
     }
 };
 
+class Feiyang : public TriggerSkill
+{
+public:
+    Feiyang() : TriggerSkill("feiyang")
+    {
+        events << EventPhaseStart;
+        frequency = Frequent;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target, Room *room) const
+    {
+        return target && target->hasSkill(objectName()) && !target->getJudgingArea().isEmpty() &&
+                target->getHandcardNum() > 1 && target->getPhase() == Player::Judge && !target->hasFlag("FeiyangUsed");
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        if (room->askForDiscard(player, objectName(), 2, 2, true))
+        {
+            player->broadcastSkillInvoke(objectName());
+            room->notifySkillInvoked(player, objectName());
+            int card_id = room->askForCardChosen(player, player, "j", objectName());
+            room->throwCard(card_id, player, player);
+            room->setPlayerFlag(player, "FeiyangUsed");
+        }
+    }
+};
+
+class Bahu : public TriggerSkill
+{
+public:
+    Bahu() : TriggerSkill("bahu")
+    {
+        events << EventPhaseStart;
+        frequency = Compulsory;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target, Room *room) const
+    {
+        return target && target->hasSkill(objectName()) && target->getPhase() == Player::Start;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const
+    {
+        player->broadcastSkillInvoke(objectName());
+        room->sendCompulsoryTriggerLog(player, objectName());
+        room->drawCards(player, 1, objectName());
+    }
+};
+
+class BahuTargetMod : public TargetModSkill
+{
+public:
+    BahuTargetMod() : TargetModSkill("#bahu-target")
+    {
+
+    }
+
+    virtual int getResidueNum(const Player *from, const Card *card, const Player *to) const
+    {
+        if (from->hasSkill("bahu"))
+            return 1;
+        else
+            return 0;
+    }
+};
 
 MOLPackage::MOLPackage()
 : Package("MOL")
@@ -1452,6 +1518,8 @@ MOLPackage::MOLPackage()
     addMetaObject<PingcaiMoveCard>();
 	
     skills << new ShanjiaDiscard << new ShanjiaSlash << new ShanjiaRecord << new ChoulveUse << new ChoulveRecord << new PingcaiMove;
+
+    skills << new Feiyang << new Bahu << new BahuTargetMod;
 }
 
 ADD_PACKAGE(MOL)

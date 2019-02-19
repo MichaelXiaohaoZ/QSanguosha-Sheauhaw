@@ -660,10 +660,19 @@ void RoomThread::_handleTurnBrokenNormal(GameRule *game_rule)
                 room->removeTag("ExtraTurnList");
         }
 
-        if (nplayer->getRealSeat() > next->getRealSeat())
-            room->setTag("RoundStart", QVariant::fromValue(next));
-        room->setCurrent(next);
-        actionNormal(game_rule);
+        if (!room->getTag("break&NewTurn").isNull() && room->getTag("break&NewTurn").toBool())
+        {
+            room->setTag("RoundStart", QVariant::fromValue(nplayer));
+            room->removeTag("break&NewTurn");
+            actionNormal(game_rule);
+        }
+        else
+        {
+            if (nplayer->getRealSeat() > next->getRealSeat())
+                room->setTag("RoundStart", QVariant::fromValue(next));
+            room->setCurrent(next);
+            actionNormal(game_rule);
+        }
     }
     catch (TriggerEvent triggerEvent) {
         if (triggerEvent == TurnBroken)

@@ -79,7 +79,7 @@ public:
     void enableAllCards();
 
     void adjustCards(bool playAnimation = true);
-    void adjustCards(QList<CardItem *> &cards, bool playAnimation = true, CardItem::AnimationType animation_type = CardItem::Normal);
+    void adjustCards(QList<CardItem *> &cards, bool playAnimation = true, int animation_type = -1);
 
     virtual QGraphicsItem *getMouseClickReceiver();
 

@@ -317,6 +317,7 @@ Engine::Engine(bool isManualMode)
     //modes["02pbb"] = tr("2 players (using blance beam)");
     modes["02_1v1"] = tr("2 players (KOF style)");
     modes["03p"] = tr("3 players");
+    modes["03_1v2"] = tr("3 players (Dou Di Zhu)");
     modes["04p"] = tr("4 players");
     modes["04_1v3"] = tr("4 players (Hulao Pass)");
     modes["04_boss"] = tr("4 players(Boss)");
@@ -1133,6 +1134,8 @@ QString Engine::getRoles(const QString &mode) const
 
     if (mode == "02_1v1") {
         return "ZN";
+    } else if (mode == "03_1v2") {
+        return "ZFF";
     } else if (mode == "04_1v3" || mode == "04_boss") {
         return "ZFFF";
     } else if (mode == "04_year") {
@@ -1219,8 +1222,8 @@ QString Engine::getRoles(const QString &mode) const
 QStringList Engine::getRoleList(const QString &mode) const
 {
     QString roles = getRoles(mode);
+
     QStringList role_list;
-    QStringList dragon_list;
     for (int i = 0; roles[i] != '\0'; i++) {
         QString role;
         switch (roles[i].toLatin1()) {
@@ -1229,10 +1232,8 @@ QStringList Engine::getRoleList(const QString &mode) const
         case 'N': role = "renegade"; break;
         case 'F': role = "rebel"; break;
         default:
-            dragon_list << "dragon_shu" << "dragon_shu" << "dragon_wei" << "dragon_wei"
-                      << "dragon_wu" << "dragon_wu" << "dragon_qun" << "dragon_qun";
-            return dragon_list;
-            break;
+            return QStringList() << "dragon_shu" << "dragon_shu" << "dragon_wei" << "dragon_wei"
+                                 << "dragon_wu" << "dragon_wu" << "dragon_qun" << "dragon_qun";
         }
         role_list << role;
     }
