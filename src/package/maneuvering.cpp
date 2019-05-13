@@ -478,8 +478,7 @@ bool SupplyShortage::targetFilter(const QList<const Player *> &targets, const Pl
 void SupplyShortage::takeEffect(ServerPlayer *target) const
 {
     target->broadcastSkillInvoke(QString("@%1").arg(objectName()));
-    Room *room = target->getRoom();
-    room->setEmotion(target, QString("@%1").arg(objectName()));
+    target->getRoom()->setEmotion(target, QString("@%1").arg(objectName()));
     target->skip(Player::Draw);
 }
 

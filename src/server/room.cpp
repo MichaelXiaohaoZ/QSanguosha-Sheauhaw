@@ -381,17 +381,6 @@ void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason)
         if (p->isAlive() || p == victim)
             thread->trigger(Death, this, p, data);
 
-    bool isnotYearBoss = true;
-    foreach (ServerPlayer *sp, getAllPlayers())
-        if (sp->getMark("isyearboss"))
-        {
-            isnotYearBoss = false;
-            break;
-        }
-
-    if (mode != "04_year" || Config.value("year/Mode", "2018").toString() != "2018" || isnotYearBoss)
-        victim->detachAllSkills();
-
     thread->trigger(BuryVictim, this, victim, data);
 
     if (!victim->isAlive() && Config.EnableAI) {
@@ -1922,11 +1911,13 @@ void Room::setPlayerProperty(ServerPlayer *player, const char *property_name, co
 void Room::setPlayerMark(ServerPlayer *player, const QString &mark, int value, bool trigger)
 {
     int gain = player->getMark(mark) - value;
+
     MarkStruct markst;
     markst.who = player;
     markst.name = mark;
     markst.count = value;
     markst.gain = gain;
+
     QVariant data = QVariant::fromValue(markst);
     if (gain != 0 && trigger)
         thread->trigger(MarkChange, this, player, data);
@@ -1938,6 +1929,7 @@ void Room::setPlayerMark(ServerPlayer *player, const QString &mark, int value, b
     arg << mark;
     arg << value;
     doBroadcastNotify(S_COMMAND_SET_MARK, arg);
+
     if (gain != 0 && trigger)
         thread->trigger(MarkChanged, this, player, data);
 }
@@ -1949,13 +1941,13 @@ void Room::addPlayerMark(ServerPlayer *player, const QString &mark, int add_num,
     setPlayerMark(player, mark, value, trigger);
 }
 
-void Room::removePlayerMark(ServerPlayer *player, const QString &mark, int remove_num)
+void Room::removePlayerMark(ServerPlayer *player, const QString &mark, int remove_num, bool trigger)
 {
     int value = player->getMark(mark);
     if (value == 0) return;
     value -= remove_num;
     value = qMax(0, value);
-    setPlayerMark(player, mark, value);
+    setPlayerMark(player, mark, value, trigger);
 }
 
 void Room::addPlayerTip(ServerPlayer *player, const QString &mark)
@@ -2395,13 +2387,19 @@ void Room::prepareForStart()
         Config.EnableSame = false;
         Config.Enable2ndGeneral = false;
         Config.setValue("FreeAssign", false);
-    } 
+    }
 
-    if (mode == "08_dragonboat")
+    if (mode == "08_dragonboat" || mode == "05_zhfd" || mode == "06_swzs" || mode == "04_year")
     {
         Config.EnableHegemony = false;
         Config.EnableSame = false;
         Config.setValue("FreeAssign", false);
+    }
+
+    if (mode == "03_1v2")
+    {
+        Config.EnableHegemony = false;
+        Config.EnableSame = false;
     }
 
     if (scenario) {
@@ -4352,7 +4350,6 @@ void Room::chooseGeneralsOfYearBossMode(QList<ServerPlayer *> players)
 void Room::run()
 {
     playSystemAudio("prerun");
-    //thread->delay(4863);
 
     // initialize random seed for later use
     qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
@@ -4526,10 +4523,8 @@ void Room::assignRoles()
     else
         roles = Sanguosha->getRoleList(mode);
 
-
     if (mode != "08_defense" && mode != "08_dragonboat" && mode != "06_swzs" && mode != "05_zhfd" && mode != "04_year")
         qShuffle(roles);
-
 
     bool first_role_showed = false;
     for (int i = 0; i < n; i++) {
@@ -8637,7 +8632,7 @@ void Room::changeLesbianSkill()
     }
 }
 
-int Room::getBoatTreasure(const QString &kingdom)
+int Room::getBoatTreasure(const QString &kingdom) const
 {
     if (mode != "08_dragonboat")
         return 0;
@@ -8716,7 +8711,7 @@ void Room::speakRanks(bool over)
         }
 }
 
-int Room::getTreasureRank(const QString &kingdom_ask)
+int Room::getTreasureRank(const QString &kingdom_ask) const
 {
     if (mode != "08_dragonboat")
         return 0;
@@ -8753,7 +8748,7 @@ int Room::getTreasureRank(const QString &kingdom_ask)
         return 5;
 }
 
-QString Room::getRankKingdom(int rank_ask)
+QString Room::getRankKingdom(int rank_ask) const
 {
     if (mode != "08_dragonboat")
         return NULL;
@@ -8796,7 +8791,7 @@ QString Room::appearYearBoss(int difficulty)
         return NULL;
 
     setFullEmotion("appearyearboss", -100, -197);
-    isChanging = true;
+    setChangingSituation(true);
     setTurn(0);
 
     ServerPlayer *boss;
@@ -8852,7 +8847,7 @@ QString Room::appearYearBoss(int difficulty)
     if (boss->isChained())
         setPlayerProperty(boss, "chained", false);
 
-    isChanging = false;
+    setChangingSituation(false);
     LogMessage msl;
     msl.type = "#yearbosschange";
     msl.to.append(boss);
@@ -8875,6 +8870,8 @@ bool Room::getChangingSituation() const
 void Room::setChangingSituation(bool sit)
 {
     isChanging = sit;
+    foreach (ServerPlayer *sp, getAllPlayers(true))
+        setPlayerMark(sp, "changingSit", sit, false);
 }
 
 void Room::doGanluRevive(ServerPlayer *player, ServerPlayer *lord, bool emotion)
@@ -8909,7 +8906,7 @@ QString Room::appearNextYear()
     else
         setTag("YearTotalRound", getTag("YearTotalRound").toInt() + 1);
 
-    isChanging = true;
+    setChangingSituation(true);
 
     setTurn(0);
 
@@ -8968,7 +8965,7 @@ QString Room::appearNextYear()
 
     setTag("YearTotalUsed", used);
 
-    isChanging = false;
+    setChangingSituation(false);
 
     foreach (ServerPlayer *sp, getAlivePlayers())
         if (sp->getSeat() == 1)

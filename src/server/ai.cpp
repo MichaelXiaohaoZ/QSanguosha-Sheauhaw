@@ -84,15 +84,6 @@ AI::Relation AI::GetRelation(const ServerPlayer *a, const ServerPlayer *b)
         map.set("renegade", "rebel", Neutrality);
         map.set("renegade", "renegade", Neutrality);
 
-        map_good = map;
-        map_good.set("renegade", "loyalist", Enemy, false);
-        map_good.set("renegade", "lord", Neutrality, true);
-        map_good.set("renegade", "rebel", Friend, false);
-
-        map_bad = map;
-        map_bad.set("renegade", "loyalist", Neutrality, true);
-        map_bad.set("renegade", "rebel", Enemy, true);
-
         map.set("dragon_wei", "dragon_wei", Friend);
         map.set("dragon_wei", "dragon_shu", Enemy);
         map.set("dragon_wei", "dragon_wu", Enemy);
@@ -112,6 +103,15 @@ AI::Relation AI::GetRelation(const ServerPlayer *a, const ServerPlayer *b)
         map.set("dragon_qun", "dragon_shu", Enemy);
         map.set("dragon_qun", "dragon_wu", Enemy);
         map.set("dragon_qun", "dragon_qun", Friend);
+
+        map_good = map;
+        map_good.set("renegade", "loyalist", Enemy, false);
+        map_good.set("renegade", "lord", Neutrality, true);
+        map_good.set("renegade", "rebel", Friend, false);
+
+        map_bad = map;
+        map_bad.set("renegade", "loyalist", Neutrality, true);
+        map_bad.set("renegade", "rebel", Enemy, true);
 
     }
 

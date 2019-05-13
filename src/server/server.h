@@ -150,16 +150,16 @@ private:
     QComboBox *role_choose_ComboBox;
     QCheckBox *exclude_disaster_checkbox;
     QComboBox *official_1v1_ComboBox;
+    QCheckBox *kof_using_extension_checkbox;
+    QCheckBox *kof_card_extension_checkbox;
+    QComboBox *role_choose_xmode_ComboBox;
+    QCheckBox *disable_lua_checkbox;
     QComboBox *official_zdyj_ComboBox;
     QComboBox *mode_choose_zhfd_ComboBox;
     QComboBox *mode_choose_year_ComboBox;
     QCheckBox *year_using_year_skill_checkbox;
     QCheckBox *year_using_uniform_kingdom_checkbox;
     QSpinBox *year_yearmode_round_spinbox;
-    QCheckBox *kof_using_extension_checkbox;
-    QCheckBox *kof_card_extension_checkbox;
-    QComboBox *role_choose_xmode_ComboBox;
-    QCheckBox *disable_lua_checkbox;
 
     QButtonGroup *extension_group;
     QButtonGroup *mode_group;

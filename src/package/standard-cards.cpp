@@ -1109,8 +1109,7 @@ void Indulgence::takeEffect(ServerPlayer *target) const
 {
     target->clearHistory();
     target->broadcastSkillInvoke(QString("@%1").arg(objectName()));
-    Room *room = target->getRoom();
-    room->setEmotion(target, QString("@%1").arg(objectName()));
+    target->getRoom()->setEmotion(target, QString("@%1").arg(objectName()));
     target->skip(Player::Play);
 }
 
@@ -1120,14 +1119,17 @@ Disaster::Disaster(Card::Suit suit, int number)
     target_fixed = true;
 }
 
+void Disaster::onUse(Room *room, const CardUseStruct &card_use) const
+{
+    CardUseStruct use = card_use;
+    if (use.to.isEmpty())
+        use.to << use.from;
+    DelayedTrick::onUse(room, use);
+}
+
 bool Disaster::isAvailable(const Player *player) const
 {
     return !player->isProhibited(player, this) && DelayedTrick::isAvailable(player);
-}
-
-QList<ServerPlayer *> Disaster::defaultTargets(Room *room, ServerPlayer *source) const
-{
-    return QList<ServerPlayer *>() << source;
 }
 
 Lightning::Lightning(Suit suit, int number) :Disaster(suit, number)
@@ -1142,8 +1144,7 @@ Lightning::Lightning(Suit suit, int number) :Disaster(suit, number)
 void Lightning::takeEffect(ServerPlayer *target) const
 {
     target->broadcastSkillInvoke(QString("@%1").arg(objectName()));
-    Room *room = target->getRoom();
-    room->setEmotion(target, QString("@%1").arg(objectName()));
+    target->getRoom()->setEmotion(target, QString("@%1").arg(objectName()));
     target->getRoom()->damage(DamageStruct(this, NULL, target, 3, DamageStruct::Thunder));
 }
 

@@ -83,7 +83,7 @@ public:
     void setPlayerProperty(ServerPlayer *player, const char *property_name, const QVariant &value);
     void setPlayerMark(ServerPlayer *player, const QString &mark, int value, bool trigger = false);
     void addPlayerMark(ServerPlayer *player, const QString &mark, int add_num = 1, bool trigger = false);
-    void removePlayerMark(ServerPlayer *player, const QString &mark, int remove_num = 1);
+    void removePlayerMark(ServerPlayer *player, const QString &mark, int remove_num = 1, bool trigger = false);
     void addPlayerTip(ServerPlayer *player, const QString &mark);
     void removePlayerTip(ServerPlayer *player, const QString &mark);
     void setPlayerCardLimitation(ServerPlayer *player, const QString &limit_list,
@@ -439,10 +439,10 @@ public:
     void setPlayerShownRole(ServerPlayer *player, bool show);
 
     void changeLesbianSkill();
-    int getBoatTreasure(const QString &kingdom);
+    int getBoatTreasure(const QString &kingdom) const;
     void speakRanks(bool over = false);
-    int getTreasureRank(const QString &kingdom);
-    QString getRankKingdom(int rank);
+    int getTreasureRank(const QString &kingdom) const;
+    QString getRankKingdom(int rank) const;
     QString appearYearBoss(int difficulty);
     bool getChangingSituation() const;
     void setChangingSituation(bool sit);
@@ -644,9 +644,7 @@ private:
 	
 	static bool isSkillValidForPlayer(const ServerPlayer *player, const Skill *skill);
     int m_turn;
-
     bool isChanging;
-
 
 private slots:
     void endaskfornull();

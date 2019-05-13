@@ -131,10 +131,9 @@ void ServerPlayer::throwAllMarks(bool visible_only)
     // throw all marks
     foreach (QString mark_name, marks.keys()) {
         if (mark_name == "@bossExp" || mark_name == "@boattreasure" ||
-                mark_name == "#ganlu" || (visible_only && !mark_name.startsWith("@")) || (mark_name == "@waked" && visible_only))
-        {
+            mark_name == "#ganlu" || (visible_only && !mark_name.startsWith("@")) || (mark_name == "@waked" && visible_only))
             continue;
-        }
+
         int n = marks.value(mark_name, 0);
         if (n != 0)
             room->setPlayerMark(this, mark_name, 0);
@@ -328,25 +327,9 @@ void ServerPlayer::addToSelected(const QString &general)
     selected.append(general);
 }
 
-void ServerPlayer::addToMateSelected(const QString &general)
-{
-    mateselected.append(general);
-}
-
-void ServerPlayer::addToMateSelected(const QStringList &generallist)
-{
-    foreach (QString general, generallist)
-        mateselected.append(general);
-}
-
 QStringList ServerPlayer::getSelected() const
 {
     return selected;
-}
-
-QStringList ServerPlayer::getMateSelected() const
-{
-    return mateselected;
 }
 
 QString ServerPlayer::findReasonable(const QStringList &generals, bool no_unreasonable)
@@ -1433,7 +1416,6 @@ void ServerPlayer::gainAnImmediateTurn(bool broken)
         room->setCurrent(ori);
         room->setNormalCurrent(current);
     }
-
 }
 
 void ServerPlayer::copyFrom(ServerPlayer *sp)
@@ -1469,13 +1451,10 @@ void ServerPlayer::changeLesbianSkill(const QString &skill, bool hidden)
             if (hidden)
             {
                 QString realskill = skill.mid(2);
-                //player->addSkill(QString("#lesbian")+realskill);
                 room->acquireSkill(player, QString("#lesbian")+realskill);
             }
             else
             {
-                //player->loseSkill(skill);
-                //player->addSkill(QString("lesbian")+skill);
                 room->detachSkillFromPlayer(player, skill);
                 room->acquireSkill(player, QString("lesbian")+skill);
             }

@@ -588,6 +588,7 @@ enum TriggerEvent
 
     MarkChange, // new
     MarkChanged, // new
+
     ChoiceMade,
 
     StageChange, // For hulao pass only
@@ -597,9 +598,9 @@ enum TriggerEvent
 
     TurnBroken, // For the skill 'DanShou'. Do not use it to trigger events
 
-    Nothing, // For me
-    AskforPindianCard, // For me
-    NullificationCardResponded, // for jiang seven
+    Nothing, // For ZY
+    AskforPindianCard, // For ZY
+    NullificationCardResponded, // for jiang seven FOR ZY
 
     NumOfEvents
 };

@@ -15,7 +15,6 @@ struct PindianStruct;
 
 #include <QSemaphore>
 #include <QDateTime>
-#include <QButtonGroup>
 
 class ServerPlayer : public Player
 {
@@ -107,10 +106,7 @@ public:
 
     // 3v3 methods
     void addToSelected(const QString &general);
-    void addToMateSelected(const QString &general);
-    void addToMateSelected(const QStringList &generallist);
     QStringList getSelected() const;
-    QStringList getMateSelected() const;
     QString findReasonable(const QStringList &generals, bool no_unreasonable = false);
     void clearSelected();
 
@@ -214,7 +210,6 @@ private:
     QList<PhaseStruct> _m_phases_state;
     ServerPlayer *next;
     QStringList selected; // 3v3 mode use only
-    QStringList mateselected;
     QDateTime test_time;
     QString m_clientResponseString;
     QVariant _m_clientResponse;

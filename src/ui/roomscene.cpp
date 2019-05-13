@@ -680,24 +680,49 @@ void RoomScene::handleGameEvent(const QVariant &args)
 
 QGraphicsPixmapItem *RoomScene::createDashboardButtons()
 {
-    QGraphicsPixmapItem *widget = new QGraphicsPixmapItem(G_ROOM_SKIN.getPixmap(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM)
-        .scaled(G_DASHBOARD_LAYOUT.m_buttonSetSize));
-    ok_button = new QSanButton("platter", "confirm", widget);
-    ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonArea);
-    cancel_button = new QSanButton("platter", "cancel", widget);
-    cancel_button->setRect(G_DASHBOARD_LAYOUT.m_cancelButtonArea);
-    discard_button = new QSanButton("platter", "discard", widget);
-    discard_button->setRect(G_DASHBOARD_LAYOUT.m_discardButtonArea);
-    connect(ok_button, SIGNAL(clicked()), this, SLOT(doOkButton()));
-    connect(cancel_button, SIGNAL(clicked()), this, SLOT(doCancelButton()));
-    connect(discard_button, SIGNAL(clicked()), this, SLOT(doDiscardButton()));
+    if (!Config.value("UseOldButtons", false).toBool())
+    {
+        QGraphicsPixmapItem *widget = new QGraphicsPixmapItem(G_ROOM_SKIN.getPixmap(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM)
+            .scaled(G_DASHBOARD_LAYOUT.m_buttonSetSize));
+        ok_button = new QSanButton("platter", "confirm", widget);
+        ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonArea);
+        cancel_button = new QSanButton("platter", "cancel", widget);
+        cancel_button->setRect(G_DASHBOARD_LAYOUT.m_cancelButtonArea);
+        discard_button = new QSanButton("platter", "discard", widget);
+        discard_button->setRect(G_DASHBOARD_LAYOUT.m_discardButtonArea);
+        connect(ok_button, SIGNAL(clicked()), this, SLOT(doOkButton()));
+        connect(cancel_button, SIGNAL(clicked()), this, SLOT(doCancelButton()));
+        connect(discard_button, SIGNAL(clicked()), this, SLOT(doDiscardButton()));
 
-    // set them all disabled
-    ok_button->setEnabled(false);
-    cancel_button->setEnabled(false);
-    discard_button->setEnabled(false);
+        // set them all disabled
+        ok_button->setEnabled(false);
+        cancel_button->setEnabled(false);
+        discard_button->setEnabled(false);
 
-    return widget;
+        return widget;
+    }
+    else
+    {
+        QGraphicsPixmapItem *widget = new QGraphicsPixmapItem(G_ROOM_SKIN.getPixmap(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM_OLD)
+                .scaled(G_DASHBOARD_LAYOUT.m_buttonSetSizeOld));
+
+        ok_button = new QSanButton("platterold", "confirm", widget);
+        ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonAreaOld);
+        cancel_button = new QSanButton("platterold", "cancel", widget);
+        cancel_button->setRect(G_DASHBOARD_LAYOUT.m_cancelButtonAreaOld);
+        discard_button = new QSanButton("platterold", "discard", widget);
+        discard_button->setRect(G_DASHBOARD_LAYOUT.m_discardButtonAreaOld);
+        connect(ok_button, SIGNAL(clicked()), this, SLOT(doOkButton()));
+        connect(cancel_button, SIGNAL(clicked()), this, SLOT(doCancelButton()));
+        connect(discard_button, SIGNAL(clicked()), this, SLOT(doDiscardButton()));
+
+        // set them all disabled
+        ok_button->setEnabled(false);
+        cancel_button->setEnabled(false);
+        discard_button->setEnabled(false);
+
+        return widget;
+    }
 }
 
 QRectF ReplayerControlBar::boundingRect() const
@@ -4999,14 +5024,28 @@ void RoomScene::updateVolumeConfig()
 
 void RoomScene::redrawDashboardButtons()
 {
-    ok_button->redraw();
-    ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonArea);
+    if (!Config.value("UseOldButtons", false).toBool())
+    {
+        ok_button->redraw();
+        ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonArea);
 
-    cancel_button->redraw();
-    cancel_button->setRect(G_DASHBOARD_LAYOUT.m_cancelButtonArea);
+        cancel_button->redraw();
+        cancel_button->setRect(G_DASHBOARD_LAYOUT.m_cancelButtonArea);
 
-    discard_button->redraw();
-    discard_button->setRect(G_DASHBOARD_LAYOUT.m_discardButtonArea);
+        discard_button->redraw();
+        discard_button->setRect(G_DASHBOARD_LAYOUT.m_discardButtonArea);
+    }
+    else
+    {
+        ok_button->redraw();
+        ok_button->setRect(G_DASHBOARD_LAYOUT.m_confirmButtonAreaOld);
+
+        cancel_button->redraw();
+        cancel_button->setRect(G_DASHBOARD_LAYOUT.m_cancelButtonAreaOld);
+
+        discard_button->redraw();
+        discard_button->setRect(G_DASHBOARD_LAYOUT.m_discardButtonAreaOld);
+    }
 }
 
 void RoomScene::deletePromptInfoItem()

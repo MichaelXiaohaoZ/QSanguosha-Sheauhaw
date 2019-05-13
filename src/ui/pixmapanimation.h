@@ -26,7 +26,7 @@ public:
     void start(bool permanent = true, int interval = 50);
     void stop();
 
-    static PixmapAnimation *GetPixmapAnimation(QGraphicsItem *parent, const QString & emotion, const int &delay = 0);
+    static PixmapAnimation *GetPixmapAnimation(QGraphicsItem *parent, const QString &emotion, const int &delaymsec = 0);
     static QPixmap GetFrameFromCache(const QString &filename);
     static int GetFrameCount(const QString &emotion);
 
@@ -44,7 +44,7 @@ private:
     QString path;
     QList<QPixmap> frames;
     int current, off_x, off_y;
-    bool is_useful = true;
+    bool is_useful;
 };
 
 #endif

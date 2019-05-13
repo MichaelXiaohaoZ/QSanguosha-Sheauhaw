@@ -257,10 +257,7 @@ public:
         log.to << lord;
         foreach (ServerPlayer *loyalist, room->getOtherPlayers(lord, true))
             if (loyalist->getMark("shown_loyalist"))
-            {
                 log.from = loyalist;
-                break;
-            }
         room->sendLog(log);
         QStringList skill_names;
         const General *general = lord->getGeneral();

@@ -133,16 +133,13 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                 room->changeLesbianSkill();
             }
             if (room->getMode() == "08_dragonboat")
-            {
                 foreach (ServerPlayer *aplayer, room->getAllPlayers())
                 {
                     room->setPlayerMark(aplayer, "@aiye", 1);
                     room->acquireSkill(aplayer, "#aiyeneverdie");
                     room->acquireSkill(aplayer, "#aiyegainmark");
                 }
-            }
             if (room->getMode() == "08_zdyj" && Config.value("zdyj/Rule", "2017").toString() == "2017")
-            {
                 foreach (ServerPlayer *aplayer, room->getAllPlayers())
                     if (aplayer->getMark("shown_loyalist"))
                     {
@@ -154,7 +151,6 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
                             room->acquireSkill(aplayer, "#bl_dongcha-see");
                         }
                     }
-            }
             if (room->getMode() == "04_boss") {
                 int difficulty = Config.value("BossModeDifficulty", 0).toInt();
                 if ((difficulty & (1 << GameRule::BMDIncMaxHp)) > 0) {
@@ -1321,6 +1317,7 @@ QString GameRule::getWinner(ServerPlayer *victim) const
 
     if (room->getChangingSituation())
         return winner;
+
     if (room->getMode() == "06_3v3") {
         switch (victim->getRoleEnum()) {
         case Player::Lord: winner = "renegade+rebel"; break;

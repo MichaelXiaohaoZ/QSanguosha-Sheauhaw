@@ -43,7 +43,7 @@ public:
     virtual bool triggerable(const ServerPlayer *target, Room *room) const;
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const;
     virtual QString getSelectBox() const;
-    GuhuoDialog *getDialog() const;
+    virtual GuhuoDialog *getDialog() const;
     virtual Frequency getFrequency(const Player *target) const;
 
     LuaFunction on_trigger;
@@ -54,8 +54,7 @@ public:
 
 protected:
     QMap<TriggerEvent, int> priority_table;
-    QString guhuo_type;
-    QString guhuo_dialog_type;
+    QString guhuo_type, guhuo_dialog_type;
 };
 
 class LuaProhibitSkill : public ProhibitSkill
@@ -105,10 +104,9 @@ public:
     virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const;
     virtual bool isEnabledAtNullification(const ServerPlayer *player) const;
     virtual QString getSelectBox() const;
-    GuhuoDialog *getDialog() const;
+    virtual GuhuoDialog *getDialog() const;
 private:
-    QString guhuo_type;
-    QString guhuo_dialog_type;
+    QString guhuo_type, guhuo_dialog_type;
 };
 
 class LuaFilterSkill : public FilterSkill

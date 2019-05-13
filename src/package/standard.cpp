@@ -245,7 +245,7 @@ bool SingleTargetTrick::targetFilter(const QList<const Player *> &, const Player
 }
 
 DelayedTrick::DelayedTrick(Suit suit, int number, bool movable)
-    : TrickCard(suit, number), movable(movable)
+    : TrickCard(suit, number), movable(movable), turn_skills(QStringList() << "yearshenyi")
 {
     judge.negative = true;
 }

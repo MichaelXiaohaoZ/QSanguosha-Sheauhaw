@@ -2111,6 +2111,19 @@ public:
     }
 };
 
+class RoomChangingInvalidity : public InvaliditySkill
+{
+public:
+    RoomChangingInvalidity() : InvaliditySkill("#room-inv")
+    {
+    }
+
+    bool isSkillValid(const Player *player, const Skill *skill) const
+    {
+        return player->getMark("changingSit") == 0;
+    }
+};
+
 YearBoss18Package::YearBoss18Package()
     : Package("YearBoss2018")
 {
@@ -2224,7 +2237,7 @@ YearBoss18CardPackage::YearBoss18CardPackage()
     foreach (Card *card, cards)
         card->setParent(this);
 
-    skills << new GanluYear;
+    skills << new GanluYear << new RoomChangingInvalidity;
 
     skills << new FireCrackerProhibit << new FireCrackerSkill << new YearBossRevive << new YearBossChange;
 }

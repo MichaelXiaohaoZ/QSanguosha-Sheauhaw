@@ -90,3 +90,4 @@ fmod.log
 src/bot_version.cpp
 *.lastcodeanalysissucceeded
 *.ipch
+src/package/standard.h.BW5764

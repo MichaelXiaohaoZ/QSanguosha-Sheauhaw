@@ -31,9 +31,13 @@ const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD = "dashboard";
 // buttons
 const char *QSanRoomSkin::S_SKIN_KEY_BUTTON = "button-%1";
 const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM = "dashboardButtonSetButtom";
+const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM_OLD = "dashboardButtonSetButtomOld";
 const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG[7] =
     {"dashboardButtonSetBg", "dashboardButtonSetBg1", "dashboardButtonSetBg2", "dashboardButtonSetBg3",
                               "dashboardButtonSetBg4", "dashboardButtonSetBg5", "dashboardButtonSetBg6"};
+const char *QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG_OLD[7] =
+    {"dashboardButtonSetBgOld", "dashboardButtonSetBgOld1", "dashboardButtonSetBgOld2", "dashboardButtonSetBgOld3",
+                              "dashboardButtonSetBgOld4", "dashboardButtonSetBgOld5", "dashboardButtonSetBgOld6"};
 const char *QSanRoomSkin::S_SKIN_KEY_BUTTON_SKILL = "skill";
 
 // player container
@@ -1126,10 +1130,14 @@ bool QSanRoomSkin::_loadLayoutConfig(const QVariant &layout)
     tryParse(config["floatingAreaHeight"], _m_dashboardLayout.m_floatingAreaHeight);
     tryParse(config["focusFrameArea"], _m_dashboardLayout.m_focusFrameArea);
     tryParse(config["buttonSetSize"], _m_dashboardLayout.m_buttonSetSize);
+    tryParse(config["buttonSetSizeOld"], _m_dashboardLayout.m_buttonSetSizeOld);
     tryParse(config["confirmButtonArea"], _m_dashboardLayout.m_confirmButtonArea);
     tryParse(config["cancelButtonArea"], _m_dashboardLayout.m_cancelButtonArea);
     tryParse(config["discardButtonArea"], _m_dashboardLayout.m_discardButtonArea);
     tryParse(config["trustButtonArea"], _m_dashboardLayout.m_trustButtonArea);
+    tryParse(config["confirmButtonAreaOld"], _m_dashboardLayout.m_confirmButtonAreaOld);
+    tryParse(config["cancelButtonAreaOld"], _m_dashboardLayout.m_cancelButtonAreaOld);
+    tryParse(config["discardButtonAreaOld"], _m_dashboardLayout.m_discardButtonAreaOld);
     tryParse(config["equipBorderPos"], _m_dashboardLayout.m_equipBorderPos);
     tryParse(config["equipSelectedOffset"], _m_dashboardLayout.m_equipSelectedOffset);
     tryParse(config["equipEnabledOffset"], _m_dashboardLayout.m_equipEnabledOffset);

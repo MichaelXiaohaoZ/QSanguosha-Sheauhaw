@@ -587,7 +587,7 @@ void RoomThread::actionNormal(GameRule *game_rule)
 				foreach(ServerPlayer *p, room->getAllPlayers())
                     trigger(RoundStart, room, p, data);
                 room->setTag("TurnFirstRound", true);
-                room->setTag("RoundStart", QVariant::fromValue(NULL));
+                room->removeTag("RoundStart");
 			}
             trigger(TurnStart, room, room->getCurrent());
             if (room->isFinished()) break;

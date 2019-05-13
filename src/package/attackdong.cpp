@@ -508,6 +508,7 @@ public:
         foreach (ServerPlayer *mate, room->getAlivePlayers())
             if (mate->getRole() == "loyalist" && mate->getHp() > 1)
                 room->loseHp(mate, 1);
+        return false;
     }
 };
 

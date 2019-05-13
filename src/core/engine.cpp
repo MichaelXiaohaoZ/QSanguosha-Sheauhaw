@@ -1231,9 +1231,10 @@ QStringList Engine::getRoleList(const QString &mode) const
         case 'C': role = "loyalist"; break;
         case 'N': role = "renegade"; break;
         case 'F': role = "rebel"; break;
-        default:
-            return QStringList() << "dragon_shu" << "dragon_shu" << "dragon_wei" << "dragon_wei"
-                                 << "dragon_wu" << "dragon_wu" << "dragon_qun" << "dragon_qun";
+        case 'E': role = "dragon_wei"; break;
+        case 'S': role = "dragon_shu"; break;
+        case 'U': role = "dragon_wu"; break;
+        case 'Q': role = "dragon_qun"; break;
         }
         role_list << role;
     }

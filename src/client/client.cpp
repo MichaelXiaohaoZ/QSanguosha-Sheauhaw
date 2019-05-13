@@ -1432,22 +1432,6 @@ void Client::killPlayer(const QVariant &player_name)
     alive_count--;
     ClientPlayer *player = getPlayer(name);
 
-    bool isnotYearBoss = true;
-    foreach (const ClientPlayer *cp, players)
-        if (cp->getMark("isyearboss"))
-        {
-            isnotYearBoss = false;
-            break;
-        }
-
-    if (ServerInfo.GameMode != "04_year" || Config.value("year/Mode", "2018").toString() != "2018" || isnotYearBoss)
-    {
-        if (player == Self) {
-            foreach (const Skill *skill, Self->getVisibleSkills())
-                emit skill_detached(skill->objectName());
-        }
-        player->detachAllSkills();
-    }
     if (!Self->hasFlag("marshalling")) {
         QString general_name = player->getGeneralName();
         QString last_word = Sanguosha->translate(QString("~%1").arg(general_name));

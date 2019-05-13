@@ -220,7 +220,7 @@ public:
 
 protected:
     JudgeStruct judge;
-    QStringList turn_skills = QStringList() << "yearshenyi";
+    QStringList turn_skills;
 
 private:
     bool movable;
@@ -243,8 +243,8 @@ class Disaster : public DelayedTrick
 
 public:
     Disaster(Card::Suit suit, int number);
+    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
     virtual bool isAvailable(const Player *player) const;
-    virtual QList<ServerPlayer *> defaultTargets(Room *room, ServerPlayer *source) const;
 };
 
 class Lightning : public Disaster

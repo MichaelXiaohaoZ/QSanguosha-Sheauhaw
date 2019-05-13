@@ -74,8 +74,6 @@
     <addaction name="actionAcknowledgement_2"/>
     <addaction name="separator"/>
     <addaction name="actionRole_assign_table"/>
-    <addaction name="separator"/>
-    <addaction name="actionAbout_New_Button"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -425,17 +423,6 @@
   <action name="actionManage_Ban_IP">
    <property name="text">
     <string>Manage Ban IP</string>
-   </property>
-  </action>
-  <action name="actionAbout_New_Button">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>About New Button</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
    </property>
   </action>
  </widget>

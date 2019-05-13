@@ -154,13 +154,24 @@ void Dashboard::_adjustComponentZValues(bool killed)
     // make sure right frame is on top because we have a lot of stuffs
     // attached to it, such as the rolecomboBox, which should not be under
     // middle frame
-    _layUnder(_m_rightFrame);
-    _layUnder(_m_leftFrame);
-    _layUnder(_m_flowerFrame);
-    _layUnder(_m_middleFrame);
-    _layBetween(button_widget, _m_middleFrame, _m_roleComboBox);
-    _layUnder(_m_treeFrame);
-    _layUnder(_m_middleFrame);
+    if (!Config.value("UseOldButtons", false).toBool())
+    {
+        _layUnder(_m_rightFrame);
+        _layUnder(_m_leftFrame);
+        _layUnder(_m_flowerFrame);
+        _layUnder(_m_middleFrame);
+        _layBetween(button_widget, _m_middleFrame, _m_roleComboBox);
+        _layUnder(_m_treeFrame);
+        _layUnder(_m_middleFrame);
+    }
+    else
+    {
+        _layUnder(_m_rightFrame);
+        _layUnder(_m_leftFrame);
+        _layUnder(_m_flowerFrame);
+        _layUnder(_m_middleFrame);
+        _layBetween(button_widget, _m_middleFrame, _m_roleComboBox);
+    }
     //_layBetween(_m_rightFrameBg, _m_faceTurnedIcon, _m_equipRegions[4]);
 }
 
@@ -171,9 +182,15 @@ int Dashboard::width()
 
 void Dashboard::repaintAll()
 {
-    button_widget->setPixmap(G_ROOM_SKIN.getPixmap
+    if (!Config.value("UseOldButtons", false).toBool())
+        button_widget->setPixmap(G_ROOM_SKIN.getPixmap
                              (QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM)
                              .scaled(G_DASHBOARD_LAYOUT.m_buttonSetSize));
+    else
+        button_widget->setPixmap(G_ROOM_SKIN.getPixmap
+                             (QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM_OLD)
+                             .scaled(G_DASHBOARD_LAYOUT.m_buttonSetSizeOld));
+
     RoomSceneInstance->redrawDashboardButtons();
 
     _paintLeftFrame();
@@ -223,7 +240,10 @@ void Dashboard::_updateFrames()
 
     const int treewidth = 106, treeheight = 168;
     QRect treerect = QRect(G_DASHBOARD_LAYOUT.m_leftWidth + rect.width() - treewidth, 1, treewidth, treeheight);
-    _paintPixmap(_m_treeFrame, treerect, _getPixmap(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG[Config.GeneralLevel]), _m_groupMain);
+    if (!Config.value("UseOldButtons", false).toBool())
+        _paintPixmap(_m_treeFrame, treerect, _getPixmap(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG[Config.GeneralLevel]), _m_groupMain);
+    else
+        _paintPixmap(_m_treeFrame, treerect, _getPixmap(QSanRoomSkin::S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG_OLD[Config.GeneralLevel]), _m_groupMain);
 
     _m_groupDeath->setPos(rect.x(), rect.y());
     _m_groupDeath->setPixmap(QPixmap(rect.size()));
@@ -234,14 +254,26 @@ void Dashboard::_updateFrames()
                           (rect2.height() - Config.BigFont.pixelSize()) / 2);
 
     Q_ASSERT(button_widget);
-    const double btnLoc = 0.58328327703595;
-    double btnMove = btnLoc * double(this->width());
-    button_widget->setX(rect.width() - btnMove);
-    button_widget->setY(-24);
+    if (!Config.value("UseOldButtons", false).toBool())
+    {
+        const double btnLoc = 0.58328327703595;
+        double btnMove = btnLoc * double(this->width());
+        button_widget->setX(rect.width() - btnMove);
+        button_widget->setY(-24);
 
-    QRectF btnWidgetRect = button_widget->mapRectToItem(this, button_widget->boundingRect());
-    m_btnNoNullification->setPos(btnWidgetRect.x() + btnWidgetRect.width() + 75,
-                                 btnWidgetRect.y() - m_btnNoNullification->boundingRect().height());
+        QRectF btnWidgetRect = button_widget->mapRectToItem(this, button_widget->boundingRect());
+        m_btnNoNullification->setPos(btnWidgetRect.x() + btnWidgetRect.width() + 75,
+                                     btnWidgetRect.y() - m_btnNoNullification->boundingRect().height());
+    }
+    else
+    {
+        button_widget->setX(rect.width() - getButtonWidgetWidth());
+        button_widget->setY(1);
+
+        QRectF btnWidgetRect = button_widget->mapRectToItem(this, button_widget->boundingRect());
+        m_btnNoNullification->setPos(btnWidgetRect.left() - m_btnNoNullification->boundingRect().width(),
+                                     btnWidgetRect.y() - m_btnNoNullification->boundingRect().height());
+    }
 
     _paintRightFrame();
     _m_rightFrame->setX(_m_width - G_DASHBOARD_LAYOUT.m_rightWidth);

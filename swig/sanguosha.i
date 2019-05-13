@@ -112,7 +112,9 @@ public:
     QString getState() const;
 
     int getSeat() const;
+	int getRealSeat() const;
     void setSeat(int seat);
+	void setRealSeat(int seat);
     bool isAdjacentTo(const Player *another) const;
     QString getPhaseString() const;
     void setPhaseString(const char *phase_str);
@@ -337,10 +339,7 @@ public:
 
     // 3v3 methods
     void addToSelected(const char *general);
-    void addToMateSelected(const char *general);
-    void addToMateSelected(const QStringList &generallist);
     QStringList getSelected() const;
-	QStringList getMateSelected() const;
     QString findReasonable(QStringList generals, bool no_unreasonable = false);
     void clearSelected();
 
@@ -357,6 +356,7 @@ public:
     void addToPile(const char *pile_name, QList<int> card_ids, bool open, QList<ServerPlayer *> open_players, CardMoveReason reason);
     void exchangeFreelyFromPrivatePile(const char *skill_name, const char *pile_name, int upperlimit = 1000, bool include_equip = false);
     void gainAnExtraTurn();
+	void gainAnImmediateTurn(bool broken = true);
 	
 	void changeLesbianSkill(const char *skill, bool hidden = true);
 };
@@ -996,7 +996,7 @@ public:
     bool isVisible() const;
 
     virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const;
-    virtual QDialog *getDialog() const;
+    virtual GuhuoDialog *getDialog() const;
 
     virtual QString getSelectBox() const;
 
@@ -1097,7 +1097,7 @@ public:
     void setPlayerProperty(ServerPlayer *player, const char *property_name, const QVariant &value);
     void setPlayerMark(ServerPlayer *player, const char *mark, int value, bool trigger = false);
     void addPlayerMark(ServerPlayer *player, const char *mark, int add_num = 1, bool trigger = false);
-    void removePlayerMark(ServerPlayer *player, const char *mark, int remove_num = 1);
+    void removePlayerMark(ServerPlayer *player, const char *mark, int remove_num = 1, bool trigger = false);
 	void addPlayerTip(ServerPlayer *player, const char *mark);
     void removePlayerTip(ServerPlayer *player, const char *mark);
     void setPlayerCardLimitation(ServerPlayer *player, const char *limit_list, const char *pattern, bool single_turn);
@@ -1267,14 +1267,15 @@ public:
 
     int getTurn() const;
 	
-    int getBoatTreasure(const char *kingdom);
+    int getBoatTreasure(const char *kingdom) const;
     void speakRanks(bool over = false);
-    int getTreasureRank(const char *kingdom);
-    QString getRankKingdom(int rank);
+    int getTreasureRank(const char *kingdom) const;
+    QString getRankKingdom(int rank) const;
 	
 	bool getChangingSituation() const;
 	void setChangingSituation(bool sit);
 	void doGanluRevive(ServerPlayer *player, ServerPlayer *recorder = NULL, bool emotion = true);
+	void breakAndNewTurn(ServerPlayer *player);
 };
 
 %extend Room {

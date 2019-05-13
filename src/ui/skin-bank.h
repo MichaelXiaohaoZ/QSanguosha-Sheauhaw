@@ -232,10 +232,14 @@ public:
         int m_leftWidth, m_rightWidth;
         int m_floatingAreaHeight;
         QSize m_buttonSetSize;
+        QSize m_buttonSetSizeOld;
         QRect m_confirmButtonArea;
         QRect m_cancelButtonArea;
         QRect m_discardButtonArea;
         QRect m_trustButtonArea;
+        QRect m_confirmButtonAreaOld;
+        QRect m_cancelButtonAreaOld;
+        QRect m_discardButtonAreaOld;
         QSize m_skillButtonsSize[3];
         QRect m_skillTextArea[3];
         QRect m_skillTextAreaDown[3];
@@ -375,7 +379,9 @@ public:
     // button
     static const char *S_SKIN_KEY_BUTTON;
     static const char *S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM;
+    static const char *S_SKIN_KEY_DASHBOARD_BUTTON_BUTTOM_OLD;
     static const char *S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG[7];
+    static const char *S_SKIN_KEY_DASHBOARD_BUTTON_SET_BG_OLD[7];
     static const char *S_SKIN_KEY_BUTTON_DASHBOARD_CONFIRM;
     static const char *S_SKIN_KEY_BUTTON_DASHBOARD_CANCEL;
     static const char *S_SKIN_KEY_BUTTON_DASHBOARD_DISCARD;
